@@ -104,7 +104,9 @@ body {
 .toast.show { opacity: 1; }
 
 /* ===== Modos ===== */
-.modes { flex: 0 0 auto; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.modes { flex: 0 0 auto; display: flex; gap: 8px; align-items: center; }
+.modes-scroll { position: relative; flex: 1 1 auto; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.modes-scroll::-webkit-scrollbar { display: none; }
 .modes::-webkit-scrollbar { display: none; }
 .chip {
   flex: 0 0 auto; font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 999px;
@@ -113,7 +115,7 @@ body {
 }
 .chip:active { transform: translateY(1px) scale(.98); }
 .chip.on { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
-.chip.param { margin-left: auto; border-style: dashed; }
+.chip.param { flex: 0 0 auto; margin-left: 0; border-style: dashed; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip.param:disabled { opacity: .35; }
 
 /* ===== Looper ===== */
@@ -324,8 +326,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Modos</h4>
       <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo.</p>
       <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
-      <h4>Biblioteca de sonidos</h4>
-      <p>En Ajustes → Sonido, el grupo "Biblioteca" contiene 50 presets construidos como los de fábrica de la app oficial: cada voz con su propio motor, y su envolvente y efectos, que se aplican al elegirlos. Puedes importar un archivo .json exportado desde la app oficial y sus presets aparecerán en "Importados".</p>
+      <h4>Instrumentos y biblioteca</h4>
+      <p>El desplegable de Ajustes → Sonido reúne tres tipos de sonido. Instrumentos son los sonidos base (saw, piano, cuerdas, órgano…). Biblioteca son 50 presets de la app oficial, agrupados por tipo (Analog, FM, Sample, Texture, Hybrid): cada uno combina varias capas y trae su envolvente y sus efectos, que se aplican al elegirlo. Vienen incluidos y no se pueden quitar. Importados aparece solo si cargas un archivo .json en Ajustes → Presets; ahí mismo se ve cuántos hay y se pueden quitar.</p>
       <h4>Mic (sampler)</h4>
       <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
       <h4>Afinador</h4>
@@ -341,7 +343,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Si el micrófono no funciona</h4>
       <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
       <h4>Looper</h4>
-      <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 arrancan al inicio del loop y se paran solas.</p>
+      <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 esperan al inicio del siguiente loop para empezar (su botón parpadea; tócalo para cancelar) y se paran solas al terminar la vuelta.</p>
       <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
       <h4>Presets y azar</h4>
       <p>En Ajustes → Presets hay cuatro ranuras (P1 a P4). Guardar escribe en la ranura el instrumento, los efectos, la tonalidad, la escala, el modo, el tempo, las octavas, las inversiones y los acordes fijados; Cargar lo restaura. Los loops, el tema y los volúmenes no se guardan.</p>
@@ -975,10 +977,14 @@ function setMode(id) {
   state.mode = id; saveState();
   renderModes(); renderScreen(false); renderPads(); syncSettings();
   $('screen').classList.toggle('tuner', id === 'tuner');
-  renderLooper();
+  renderLooper(); scrollModeIntoView();
   if (id === 'tuner') { const cn = $('chordName'); cn.textContent = '—'; cn.classList.add('idle'); onActivation(tunerStart); }
   if (id === 'mic') onActivation(() => micStart('sampler'));
   if (held.length) refresh();
+}
+function scrollModeIntoView() {   // centra el modo activo en la franja
+  const act = document.querySelector('#modes .chip.on'), sc = $('modeScroll');
+  if (act && sc && sc.scrollTo) sc.scrollTo({ left:Math.max(0, act.offsetLeft - sc.clientWidth / 2 + act.offsetWidth / 2), behavior:'smooth' });
 }
 function renderModes() {
   document.querySelectorAll('#modes .chip:not(.param)').forEach(el => {
@@ -990,10 +996,11 @@ function renderModes() {
   el.disabled = !p; el.textContent = p ? p.names[state[p.key]] : 'ajuste';
 }
 function buildModes() {
-  const wrap = $('modes');
+  const wrap = $('modes'), scroll = document.createElement('div');
+  scroll.className = 'modes-scroll'; scroll.id = 'modeScroll'; wrap.appendChild(scroll);
   for (const m of MODES) {
     const b = document.createElement('button'); b.className = 'chip'; b.dataset.m = m.id; b.textContent = m.name;
-    onTap(b, () => setMode(m.id)); wrap.appendChild(b);
+    onTap(b, () => setMode(m.id)); scroll.appendChild(b);
   }
   const p = document.createElement('button'); p.className = 'chip param'; p.id = 'modeParam';
   onTap(p, cycleModeParam); wrap.appendChild(p);
@@ -1658,42 +1665,58 @@ function looperClick() {
   if (t.state === 'rec') { if (t.free) stopRecording(t, ctx.currentTime + 0.08); return; }
   
 }
-function disarm(t) { if (t.state === 'armed') { t.state = 'off'; renderLooper(); } }
+// Cada grabación tiene su «trabajo» (job): si se cancela, los temporizadores antiguos ya no pueden tocar la pista
+function cancelJob(t) {
+  clearTimeout(t.autoStop); clearTimeout(t.startTimer);
+  t.job = null; t.countdown = false;
+}
+function disarm(t) {
+  if (t.state !== 'armed') return;
+  const waiting = t.countdown; cancelJob(t);
+  if (waiting) metroCancel();
+  t.state = 'off'; renderLooper(); renderScreen(held.length > 0);
+}
 
 function startRecording(t) {
-  const now = ctx.currentTime, idx = tracks.indexOf(t);
-  const first = !loop.len;
-  t.isMaster = first;
+  cancelJob(t);
+  const now = ctx.currentTime, first = !loop.len, job = t.job = {};
+  t.isMaster = first; t.free = false;
+  const beginAt = t0 => {   // pasa de «esperando» a «grabando» cuando llega t0
+    t.startTimer = setTimeout(() => {
+      if (t.job === job && t.state === 'armed') { t.state = 'rec'; t.countdown = false; renderLooper(); renderScreen(held.length > 0); }
+    }, Math.max(0, (t0 - ctx.currentTime) * 1000));
+  };
   if (first) {
     if (loop.bars > 0) {
       const b = beatSec(), t0 = now + 0.1 + 4 * b, t1 = t0 + loop.bars * 4 * b;
       metroRange(now + 0.1, t1);
-      t.state = 'armed'; t.countdown = true; t.f0 = frameAt(t0); t.free = false;
-      setTimeout(() => { if (t.state === 'armed') { t.state = 'rec'; t.countdown = false; renderLooper(); } }, (t0 - now) * 1000);
-      scheduleStop(t, t1, true);
+      t.state = 'armed'; t.countdown = true; t.f0 = frameAt(t0);
+      beginAt(t0); scheduleStop(t, t1, job);
     } else {
       const t0 = now + 0.05; t.f0 = frameAt(t0); t.state = 'rec'; t.free = true; t.t0 = t0;
       loop.start = t0;
       metroRange(t0, t0 + MAX_LOOP);
-      t.autoStop = setTimeout(() => { if (t.state === 'rec') stopRecording(t, t0 + MAX_LOOP); }, MAX_LOOP * 1000 + 50);
+      t.autoStop = setTimeout(() => { if (t.job === job && t.state === 'rec') stopRecording(t, t0 + MAX_LOOP); }, MAX_LOOP * 1000 + 50);
     }
   } else {
     const t0 = nextLoopPoint(now + 0.05), t1 = t0 + loop.len;
-    t.f0 = frameAt(t0); t.free = false; t.state = 'armed'; t.countdown = true;
-    setTimeout(() => { if (t.state === 'armed') { t.state = 'rec'; t.countdown = false; renderLooper(); } }, (t0 - now) * 1000);
-    scheduleStop(t, t1, false);
+    t.f0 = frameAt(t0); t.state = 'armed'; t.countdown = true;
+    beginAt(t0); scheduleStop(t, t1, job);
     if (loop.metro) metroRange(t0, t1);
   }
   haptic(true); renderLooper(); renderScreen(held.length > 0);
 }
-function scheduleStop(t, t1, isMaster) {
+function scheduleStop(t, t1, job) {
   t.t1 = t1;
-  t.autoStop = setTimeout(() => { if (t.state === 'rec' || t.state === 'armed') stopRecording(t, t1); }, (t1 - ctx.currentTime) * 1000);
+  t.autoStop = setTimeout(() => {
+    if (t.job === job && (t.state === 'rec' || t.state === 'armed')) stopRecording(t, t1);
+  }, Math.max(0, (t1 - ctx.currentTime) * 1000));
 }
 function stopRecording(t, t1) {
-  clearTimeout(t.autoStop);
+  const waiting = t.state === 'armed' && t.countdown;
+  cancelJob(t);
   if (t.free) metroCancel();
-  if (t.state === 'armed' && t.countdown) { t.state = 'off'; renderLooper(); return; }
+  if (waiting) { t.state = 'off'; renderLooper(); return; }
   if (t.isMaster && t.free) {
     if (t1 - t.t0 < 0.25) { t.state = 'off'; toast('Loop demasiado corto'); renderLooper(); return; }
     loop.len = Math.min(MAX_LOOP, t1 - t.t0); loop.start = t.t0;
@@ -1718,7 +1741,8 @@ function finalizeTrack(p) {
 function wipeTrack(t) {
   if (t.state === 'rec' || t.state === 'armed') metroCancel();
   if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; }
-  clearTimeout(t.autoStop);
+  cancelJob(t); t.free = false;
+  for (let k = pendingFinal.length - 1; k >= 0; k--) if (pendingFinal[k].t === t) pendingFinal.splice(k, 1);   // una pista borrada no puede «resucitar»
   t.buffer = null; t.len = 0; t.state = 'off'; t.isMaster = false; t.mute = false; t.solo = false; t.countdown = false;
 }
 function clearTrack(i) {
@@ -1753,7 +1777,7 @@ function togglePause() {
 }
 function looperSuspend() {   // al ir a segundo plano
   metroCancel();
-  for (const t of tracks) { if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; } if (t.state === 'rec' || t.state === 'armed' || t.state === 'finishing') { clearTimeout(t.autoStop); t.state = 'off'; } }
+  for (const t of tracks) { if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; } if (t.state === 'rec' || t.state === 'armed' || t.state === 'finishing') { cancelJob(t); t.state = 'off'; } }
   pendingFinal.length = 0;
   if (loopHasAudio()) loop.paused = true;
 }
@@ -1771,6 +1795,7 @@ function buildLooper() {
       e.preventDefault(); haptic(false);
       const t = tracks[i];
       if (t.state === 'armed' && loop.cur === i) { disarm(t); return; }
+      for (const x of tracks) if (x !== t && x.state === 'armed' && !x.countdown) x.state = 'off';   // solo una pista armada a la vez
       loop.cur = i; renderLooper();
       if (t.buffer || t.state === 'rec') {
         c.classList.add('hold');
@@ -1864,11 +1889,12 @@ function seqBounce() {
   const t0 = loop.len ? nextLoopPoint(now + 0.05) : seq.next - Math.floor((seq.next - now) / dur) * dur;
   // reinicia la secuencia justo en t0 para que el loop empiece por el primer paso
   seq.pos = 0; seq.next = t0;
+  cancelJob(free); const job = free.job = {};
   free.isMaster = !loop.len; free.free = false; free.f0 = frameAt(t0); free.state = 'armed'; free.countdown = true;
   loop.cur = tracks.indexOf(free);
-  setTimeout(() => { if (free.state === 'armed') { free.state = 'rec'; free.countdown = false; renderLooper(); } }, (t0 - now) * 1000);
+  free.startTimer = setTimeout(() => { if (free.job === job && free.state === 'armed') { free.state = 'rec'; free.countdown = false; renderLooper(); } }, (t0 - now) * 1000);
   const t1 = t0 + (loop.len || dur);
-  scheduleStop(free, t1, free.isMaster);
+  scheduleStop(free, t1, job);
   setTimeout(() => seqStop(), (t1 - now) * 1000 + 30);
   toast('Grabando la secuencia en la pista ' + (loop.cur + 1));
   renderLooper();
@@ -2694,13 +2720,14 @@ const SETTINGS = [
   { id:'bpm', label:'Tempo', type:'range', min:40, max:300, to:v => v, from:v => Math.round(v), fmt:v => Math.round(v) + ' BPM' },
   { id:'tap', label:'Marcar tempo', type:'tap' },
   { section:'Sonido' },
-  { id:'sound', label:'Instrumento', type:'select', groups:true, options:() => [
-      ['Instrumentos', SOUNDS.map(s => [s.id, s.name])],
-      ['Biblioteca', LIB.filter(s => s.id.startsWith('lib:')).map(s => [s.id, s.name + ' · ' + s.cat])],
-      ...(LIB.some(s => s.id.startsWith('usr:')) ? [['Importados', LIB.filter(s => s.id.startsWith('usr:')).map(s => [s.id, s.name])]] : []),
-    ] },
-  { id:'lib_clear', label:'Quitar los presets importados', type:'button', text:'Quitar', run:() => {
-      state.library = []; if (state.sound.startsWith('usr:')) state.sound = 'saw'; saveState(); buildLib(); rebuildSoundOptions(); toast('Importados eliminados'); } },
+  { id:'sound', label:'Instrumento', type:'select', groups:true, options:() => {
+      const lib = LIB.filter(s => s.id.startsWith('lib:')), cats = [...new Set(lib.map(s => s.cat))], usr = LIB.filter(s => s.id.startsWith('usr:'));
+      return [
+        ['Instrumentos', SOUNDS.map(s => [s.id, s.name])],
+        ...cats.map(c => ['Biblioteca · ' + c, lib.filter(s => s.cat === c).map(s => [s.id, s.name])]),
+        ...(usr.length ? [['Importados', usr.map(s => [s.id, s.name])]] : []),
+      ];
+    } },
   { id:'adsr', label:'Envolvente', type:'select', options:() => Object.keys(ADSR).map(k => [k, k.charAt(0) + k.slice(1).toLowerCase()]) },
   { id:'attack', label:'Ataque', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
   { id:'release', label:'Release', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
@@ -2764,6 +2791,10 @@ const SETTINGS = [
   { id:'rnd_all', label:'Azar: todo', type:'button', text:'Sortear', run:() => randomize('all') },
   { id:'bk_export', label:'Exportar ajustes', type:'button', text:'Exportar', run:() => onActivation(exportBackup) },
   { id:'bk_import', label:'Importar copia o presets', type:'file', run:text => importFile(text) },
+  { id:'lib_clear', label:'Presets importados', type:'button', text:'Quitar', run:() => {
+      if (!(state.library || []).length) return;
+      state.library = []; if (state.sound.startsWith('usr:')) state.sound = 'saw';
+      saveState(); buildLib(); rebuildSoundOptions(); refreshPresetRows(); toast('Importados eliminados'); } },
   { section:'Manual', manual:true },
 ];
 let settingsTab = 'Aspecto';
@@ -2965,7 +2996,13 @@ function presetSummary(p) {
   return (sn ? sn.name : '—') + ' · ' + NOTE_NAMES[p.snap.key] + ' ' + SCALES[p.snap.scale].name.toLowerCase() + ' · ' + md.name;
 }
 function refreshPresetRows() {
-  for (const s of SETTINGS) if (s.type === 'preset' && s.el) { const p = presets[s.slot]; s.el._info.textContent = p ? presetSummary(p) : 'vacío'; s.el._ld.disabled = !p; }
+  for (const s of SETTINGS) {
+    if (s.type === 'preset' && s.el) { const p = presets[s.slot]; s.el._info.textContent = p ? presetSummary(p) : 'vacío'; s.el._ld.disabled = !p; }
+    if (s.id === 'lib_clear' && s.el) {
+      const n = (state.library || []).length;
+      s.el.disabled = n === 0; s.el.closest('.row').querySelector('label').textContent = 'Presets importados: ' + n;
+    }
+  }
 }
 function presetSave(i) {
   const snap = {}; for (const k of PRESET_KEYS) snap[k] = structuredClone(state[k]);
@@ -3063,13 +3100,13 @@ function importFile(text) {
   try {
     const d = JSON.parse(text);
     if (d && d.app === 'notes-backup') { restoreBackup(d); toast('Copia restaurada'); return; }
-    const n = importLibrary(d); rebuildSoundOptions();
+    const n = importLibrary(d); rebuildSoundOptions(); refreshPresetRows();
     toast(n ? n + ' preset' + (n === 1 ? '' : 's') + ' importado' + (n === 1 ? '' : 's') : 'El archivo no contiene presets');
   } catch (e) { toast('No se pudo leer el archivo'); }
 }
 
 // ===== ARRANQUE =====
-buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); renderModes();
+buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); renderModes(); scrollModeIntoView();
 $('oscBtn').addEventListener('click', () => setOsc(!state.osc));
 applyTheme();
 if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
