@@ -391,6 +391,13 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .knob::after { content: ""; position: absolute; left: 50%; top: 8px; width: 3px; height: 13px; margin-left: -1.5px; border-radius: 2px; background: color-mix(in srgb, var(--key2-ink) 75%, transparent); }
 .joy.active .knob { background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--accent) 62%, #fff) 0%, var(--accent) 48%, color-mix(in srgb, var(--accent) 72%, #000) 100%); }
 
+/* Perilla: se hunde al apoyar el dedo y destella al confirmar el clic */
+.knob { transition: scale .06s ease-out, box-shadow .06s ease-out; }
+.knob.press, .knob.click { scale: .93; box-shadow: 0 1px 3px rgba(0,0,0,.55), inset 0 3px 6px rgba(0,0,0,.30); }
+.knob.click::before { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 4px color-mix(in srgb, var(--key2) 55%, transparent); animation: clickring .13s ease-out forwards; }
+@keyframes clickring { from { opacity: 1; } to { opacity: 0; transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .knob.click::before { animation: none; opacity: 0; } }
+
 /* Herramientas: teclas de color secundario */
 .tools button { --k: var(--key2); color: var(--key2-ink); font: 700 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; border-radius: 12px; padding: 10px 4px 8px; }
 .tools button:active:not(:disabled) { background: var(--key2); transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0,0,0,.35); color: var(--key2-ink); }
@@ -487,6 +494,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Entrenador de oído</h4>
       <p>La app toca algo y tú lo repites. Elige nivel con el chip de la derecha y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
+      <h4>Clic del joystick</h4>
+      <p>Toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Lo que hace depende de dónde estés: normalmente avanza el looper (grabar y parar, igual que el botón REC); en Seq inicia o para la secuencia; en Mixer pausa o reanuda todo; y si mantienes la tonalidad, el sonido o el modo de la pantalla, aleatoriza ese menú (tonalidad: sonido, efectos, tonalidad y patrón de arpegio; sonido: solo la forma de onda; modo: patrón de arpegio y de secuenciador). No cuenta si hay un acorde pulsado ni en Juego y Oído. En el teclado, la barra espaciadora hace lo mismo.</p>
       <h4>Selección rápida</h4>
       <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). Con el joystick hacia arriba o la derecha pasas a la página siguiente; hacia abajo o la izquierda, a la anterior. La tonalidad reúne las notas naturales, las alteradas y las escalas. En el teclado: J (sonido), K (tonalidad y escala) y L (modo), mantenidas. Sonido y tonalidad no responden en Juego ni en Oído.</p>
       <h4>Fill</h4>
@@ -875,11 +884,27 @@ let state = loadState();
 buildLib();
 if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
 
+function coerceShape(saved, def) {   // un valor guardado con el tipo equivocado (versiones antiguas, datos dañados) se sustituye por el de fábrica
+  const out = structuredClone(def);
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return out;
+  for (const k of Object.keys(saved)) {
+    const v = saved[k];
+    if (!(k in def)) { out[k] = v; continue; }
+    const d = def[k];
+    if (Array.isArray(d)) { if (Array.isArray(v)) out[k] = v; }
+    else if (d !== null && typeof d === 'object') { if (v && typeof v === 'object' && !Array.isArray(v)) out[k] = v; }
+    else if (typeof d === 'number') { const n = typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN); if (Number.isFinite(n)) out[k] = n; }
+    else if (typeof d === 'boolean') { if (typeof v === 'boolean') out[k] = v; }
+    else if (typeof d === 'string') { if (typeof v === 'string') out[k] = v; }
+    else out[k] = v;
+  }
+  return out;
+}
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
-      const s = Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(raw));
+      const s = coerceShape(JSON.parse(raw), DEFAULT_STATE);
       return s;
     }
   } catch (e) {}
@@ -2885,19 +2910,68 @@ function buildJoy() {
     $('knob').style.transform = 'translate(' + dx * k + 'px,' + dy * k + 'px)';
     setJoyDir('pad', vecToDir(dx, dy, r.width * 0.16));
   };
+  // Clic del joystick (como empujarlo hacia abajo en el aparato): toque corto sobre la perilla, sin moverla.
+  // Si el dedo cae sobre la perilla, la dirección espera a que se mueva ≥10 px; si cae fuera, funciona como siempre.
+  // Zona de clic = toda la perilla visible + 12 px de margen (un dedo no es preciso); se tolera el temblor y un toque algo largo.
+  // Con un acorde pulsado el clic no cuenta, así que la dirección responde al instante como siempre.
+  const KNOB_MARGIN = 12, TAP_MS = 400, TAP_PX = 16;
+  let tap = null;
   joy.addEventListener('pointerdown', e => {
-    e.preventDefault(); ensureAudio();
+    e.preventDefault(); try { ensureAudio(); } catch (err) { logErr('audio', err); }
     joyPointer = e.pointerId;
     try { joy.setPointerCapture(e.pointerId); } catch (err) {}
+    const r = joy.getBoundingClientRect();
+    const knobR = $('knob').getBoundingClientRect().width / 2 + KNOB_MARGIN;
+    const onKnob = !held.length && Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) <= knobR;
+    tap = onKnob ? { t:performance.now(), x:e.clientX, y:e.clientY, moved:false } : null;
+    $('knob').classList.toggle('press', onKnob);
+    if (!onKnob) move(e);
+  });
+  joy.addEventListener('pointermove', e => {
+    if (e.pointerId !== joyPointer) return;
+    if (tap && !tap.moved) {
+      if (!held.length && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < TAP_PX) return;   // si entra un acorde, la dirección manda
+      tap.moved = true; $('knob').classList.remove('press');
+    }
     move(e);
   });
-  joy.addEventListener('pointermove', e => { if (e.pointerId === joyPointer) move(e); });
   const end = e => {
     if (e.pointerId !== joyPointer) return;
-    joyPointer = null; $('knob').style.transform = ''; setJoyDir('pad', null);
+    const isTap = !!tap && !tap.moved && e.type === 'pointerup' && performance.now() - tap.t <= TAP_MS;
+    joyPointer = null; tap = null; $('knob').classList.remove('press'); $('knob').style.transform = ''; setJoyDir('pad', null);
+    if (isTap) joyClick();
   };
   joy.addEventListener('pointerup', end);
   joy.addEventListener('pointercancel', end);
+}
+function randomWaveOnly() {   // «Sonido»: solo cambia la forma de onda; los efectos se quedan
+  const snd = rnd(SOUNDS.filter(x => x.id !== 'micsample' || sampleBuf.mic));
+  quickSet('sound', snd.id); toast(snd.name);
+}
+function randomArpSeq() {       // «Modo»: patrón de arpegio y de secuenciador; el sonido se queda
+  state.arpPattern = rnd(ARP_PATTERNS)[0]; state.arpRate = rnd(['1/4', '1/8', '1/8', '1/16', '1/16T', 'sw8', 'sw16']); state.arpLayer = rnd(ARP_LAYERS)[0];
+  if (state.mode === 'seq' && !seq.playing) seq.steps = Array.from({ length:4 }, () => ({ btn:Math.floor(Math.random() * 7), dir:null }));
+  saveState(); syncSettings(); renderModes(); renderScreen(false); renderPads();
+  toast(ARP_PATTERNS.find(a => a[0] === state.arpPattern)[1] + ' · ' + RATE_NAMES[state.arpRate]);
+}
+function randomEverything() {   // «Tonalidad»: sonido, efectos, tonalidad y patrón de arpegio
+  state.arpPattern = rnd(ARP_PATTERNS)[0];
+  randomize('all');
+}
+function joyClick() {
+  if (held.length) return;                                  // con un acorde pulsado no cuenta
+  if (state.mode === 'hiro' || state.mode === 'ear') return; // los juegos no usan el clic
+  const knob = $('knob'); knob.classList.add('click'); setTimeout(() => knob.classList.remove('click'), 130);
+  haptic(true);
+  try {
+    if (quick) {                                            // con una etiqueta mantenida = aleatorizar ese menú
+      if (quick.group === 'sound') randomWaveOnly(); else if (quick.group === 'mode') randomArpSeq(); else randomEverything();
+      renderPads(); return;
+    }
+    if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
+    if (state.mode === 'mixer') { togglePause(); return; }
+    looperClick();
+  } catch (e) { logErr('clic', e); errToast(e); }
 }
 function renderJoy() {
   const d = padDir || keyDir;
@@ -2919,11 +2993,12 @@ function keyboardDir() {
 window.addEventListener('keydown', e => {
   if (!$('sheet').hidden || e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key.toLowerCase();
-  if (e.repeat) { if ('1234567wasdqezc'.includes(k)) e.preventDefault(); return; }
+  if (e.repeat) { if ('1234567wasdqezc '.includes(k)) e.preventDefault(); return; }
   if (k >= '1' && k <= '7') { e.preventDefault(); press(+k - 1); }
   else if ('wasdqezc'.includes(k) && k.length === 1) { dirKeys.add(k); setJoyDir('key', keyboardDir()); }
   else if (k === 'm') setMode(MODES[(MODES.findIndex(m => m.id === state.mode) + 1) % MODES.length].id);
   else if (k === 'j' || k === 'k' || k === 'l') quickOpen(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode');
+  else if (k === ' ') { e.preventDefault(); joyClick(); }
   else if (k === 'i') toolInversion();
   else if (k === 'f') toolLock();
   else if (k === ',') toolOct(-1);
@@ -3298,6 +3373,30 @@ function tapTempo() {
   }
 }
 
+const START_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat', 'drum', 'beat'];
+function sanitizeState() {
+  // Valores de listas desplegables que ya no existen (o que están fuera de rango) vuelven al de fábrica
+  for (const st of SETTINGS) {
+    if (st.type !== 'select' || !st.id || !(st.id in DEFAULT_STATE) || st.id === 'sound') continue;
+    let opts; try { opts = st.options(); } catch (e) { continue; }
+    if (!Array.isArray(opts) || !opts.length || !opts.every(o => Array.isArray(o))) continue;
+    if (!opts.some(o => String(o[0]) === String(state[st.id]))) state[st.id] = structuredClone(DEFAULT_STATE[st.id]);
+    else if (st.numeric) state[st.id] = Number(state[st.id]);
+  }
+  // Como el aparato, siempre se arranca en un modo normal: Afinador, Mic, Juego, Oído, Mixer o Seq dependen de algo que no se guarda
+  if (!START_MODES.includes(state.mode)) state.mode = 'play';
+  const fix7 = (k, def, lo, hi) => { const a = Array.isArray(state[k]) ? state[k].slice(0, 7) : []; while (a.length < 7) a.push(def); state[k] = a.map(v => (lo == null ? v : (Number.isFinite(+v) ? Math.max(lo, Math.min(hi, Math.round(+v))) : def))); };
+  fix7('btnOct', 0, -3, 3); fix7('inv', 0, 0, 5); fix7('locks', null);
+  const a = ADSR[state.adsr] || ADSR.TOUCH;
+  if (!Number.isFinite(state.attack)) state.attack = a.a;
+  if (!Number.isFinite(state.release)) state.release = a.r;
+  state.bpm = Math.max(40, Math.min(300, Math.round(state.bpm) || 120));
+  state.globalOct = Math.max(-3, Math.min(3, Math.round(state.globalOct) || 0));
+  if (!state.tweaks || typeof state.tweaks !== 'object' || Array.isArray(state.tweaks)) state.tweaks = {};
+  for (const k of Object.keys(state.tweaks)) if (!state.tweaks[k] || typeof state.tweaks[k] !== 'object') delete state.tweaks[k];
+  if (!Array.isArray(state.library)) state.library = [];
+  saveState();
+}
 function buildSettings() {
   const wrap = $('settingsRows'); wrap.innerHTML = ''; let sec = null;
   const nav = $('sheetNav'); nav.setAttribute('role', 'tablist'); nav.setAttribute('aria-label', 'Secciones de ajustes');
@@ -3545,7 +3644,7 @@ async function exportBackup() {
 }
 function restoreBackup(d) {
   setMode('play');
-  state = Object.assign(structuredClone(DEFAULT_STATE), d.state || {});
+  state = coerceShape(d.state || {}, DEFAULT_STATE); sanitizeState();
   presets = Array.isArray(d.presets) && d.presets.length === 4 ? d.presets : [null, null, null, null]; savePresets();
   if (d.mic) { try { localStorage.setItem('notes-mic-v1', JSON.stringify(d.mic)); } catch (e) {} delete sampleBuf.mic; if (ctx) loadMicSample(); }
   buildLib(); if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
@@ -3926,7 +4025,7 @@ function gameTexts() {
 }
 
 // ===== ARRANQUE =====
-buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); fadeEdges($('sheetNav')); renderModes(); scrollModeIntoView();
+sanitizeState(); buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); fadeEdges($('sheetNav')); renderModes(); scrollModeIntoView();
 $('oscBtn').addEventListener('click', () => setOsc(!state.osc));
 applyTheme();
 if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
