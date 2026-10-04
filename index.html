@@ -1,31 +1,51 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#d9dee3">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" id="themeColor" content="#E2DAC7">
 <title>notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
+/* ===== Paletas ===== */
+:root, [data-theme="light"] {           /* Atari Future */
+  --body: #E2DAC7; --panel: #252525; --panel-ink: #E2DAC7; --panel-dim: #9a9484;
+  --accent: #E76527; --accent2: #D9A832; --accent3: #6F8F82;
+  --ink: #252525; --muted: #6b6659; --line: #252525;
+  --btn: #E2DAC7; --btn-ink: #252525; --btn-line: #252525;
+  --ctl: #E2DAC7; --ctl-ink: #252525; --ctl-line: #252525;
+  --scope: #6F8F82; --sheet: #E2DAC7; --field: #ebe4d3;
+}
+[data-theme="dark"] {                   /* Atari Night */
+  --body: #171717; --panel: #292A28; --panel-ink: #E5DDC9; --panel-dim: #8f8a7c;
+  --accent: #E05B22; --accent2: #C2A343; --accent3: #536C70;
+  --ink: #E5DDC9; --muted: #9b958a; --line: #3a3b38;
+  --btn: #171717; --btn-ink: #E5DDC9; --btn-line: #3a3b38;
+  --ctl: #292A28; --ctl-ink: #E5DDC9; --ctl-line: #3a3b38;
+  --scope: #8fb3b8; --sheet: #1d1d1d; --field: #292A28;
+}
+[data-theme="alt"] {                    /* Petrol 78 */
+  --body: #174B4B; --panel: #D8CBA8; --panel-ink: #292B29; --panel-dim: #7a7461;
+  --accent: #D95B28; --accent2: #A83D2A; --accent3: #292B29;
+  --ink: #D8CBA8; --muted: #a9b9b4; --line: #292B29;
+  --btn: #292B29; --btn-ink: #D8CBA8; --btn-line: #292B29;
+  --ctl: #D8CBA8; --ctl-ink: #292B29; --ctl-line: #292B29;
+  --scope: #292B29; --sheet: #D8CBA8; --field: #e3d9bd;
+}
+
+/* ===== Base ===== */
 :root {
-  --bg: #d9dee3;
-  --panel: #eef1f4;
-  --ink: #17212b;
-  --muted: #5a6672;
-  --lcd: #22313a;
-  --lcd-ink: #bfe3cf;
-  --lcd-dim: #7fa293;
-  --maj: #f6e7c1;
-  --min: #cfe0f5;
-  --dim: #e3dcec;
-  --hold: #2e64d8;
-  --line: #b9c2ca;
-  font-family: "Avenir Next", "Segoe UI", Roboto, system-ui, sans-serif;
-  color: var(--ink);
+  --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: -apple-system, "Helvetica Neue", "Segoe UI", Roboto, system-ui, sans-serif;
+  font-family: var(--sans); color: var(--ink);
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); overscroll-behavior: none; }
+html, body { margin: 0; height: 100%; background: var(--body); overscroll-behavior: none; }
 body {
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
@@ -33,116 +53,135 @@ body {
            env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 .app {
-  height: 100%; max-width: 560px; margin: 0 auto; padding: 12px;
-  display: flex; flex-direction: column; gap: 12px;
+  height: 100%; max-width: 560px; margin: 0 auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 14px;
 }
 
-/* Pantalla */
+/* ===== Pantalla ===== */
 .screen {
-  position: relative; background: var(--lcd); color: var(--lcd-ink);
-  border-radius: 12px; padding: 10px 14px 12px; flex: 0 0 auto; cursor: pointer;
+  position: relative; background: var(--panel); color: var(--panel-ink);
+  border-radius: 10px; padding: 10px 14px 10px; flex: 0 0 auto; overflow: hidden;
 }
-.screen-top, .screen-bottom { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--lcd-dim); }
+.screen-top, .screen-bottom {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--panel-dim); letter-spacing: .01em;
+}
+.screen-top { padding-right: 64px; }
 .chord {
-  font-size: clamp(42px, 13vw, 64px); font-weight: 600; line-height: 1.1;
-  letter-spacing: -0.01em; margin: 4px 0 2px; min-height: 1.1em;
-  font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--serif); font-size: clamp(54px, 17vw, 84px); line-height: 1; letter-spacing: -0.01em;
+  margin: 6px 0 2px; min-height: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  position: relative; z-index: 1;
 }
-.chord.idle { color: var(--lcd-dim); }
-.dir { font-size: 20px; color: var(--lcd-ink); min-width: 1.2em; text-align: right; }
+.chord.idle { color: var(--panel-dim); }
+.screen.osc .chord { font-size: 26px; margin: 2px 0; min-height: 1em; }
+.scope { display: none; width: 100%; height: 64px; margin: 2px 0 4px; }
+.screen.osc .scope { display: block; }
+.dir { font-size: 18px; color: var(--panel-ink); min-width: 1.2em; text-align: right; }
+.gear, .oscbtn {
+  font: inherit; font-size: 12px; background: none; border: 1px solid var(--panel-dim); color: var(--panel-dim);
+  border-radius: 6px; padding: 3px 8px; cursor: pointer; line-height: 1.2;
+}
+.gear { position: absolute; top: 8px; right: 10px; }
+.oscbtn.on { border-color: var(--panel-ink); color: var(--panel-ink); }
 .toast {
-  position: absolute; left: 14px; right: 14px; bottom: 10px; background: var(--lcd);
-  color: var(--lcd-ink); font-size: 14px; opacity: 0; transition: opacity .15s; pointer-events: none;
+  position: absolute; left: 14px; right: 14px; bottom: 10px; background: var(--panel);
+  color: var(--panel-ink); font-size: 13px; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 2;
 }
 .toast.show { opacity: 1; }
 
-/* Botones de acorde */
+/* ===== Botones de acorde ===== */
 .pads {
   flex: 1 1 auto; display: grid; grid-template-columns: repeat(12, 1fr);
   grid-template-rows: 1fr 1fr; gap: 10px; min-height: 180px;
 }
 .cb {
-  border: 1px solid var(--line); border-radius: 16px; background: var(--maj); color: var(--ink);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  grid-column: span 3; border: 1.5px solid var(--btn-line); border-radius: 12px;
+  background: var(--btn); color: var(--btn-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
   font: inherit; touch-action: none; padding: 4px; position: relative;
 }
-.cb.q-min { background: var(--min); }
-.cb.q-dim { background: var(--dim); }
-.cb .num { font-size: 30px; font-weight: 600; line-height: 1; }
-.cb .cn { font-size: 14px; color: var(--muted); }
-.cb .badge { font-size: 11px; color: var(--muted); min-height: 1.2em; }
-.cb.held { background: var(--hold); border-color: var(--hold); color: #fff; transform: scale(.97); }
-.cb.held .cn, .cb.held .badge { color: #dbe6ff; }
-.cb.target { outline: 2px solid var(--ink); outline-offset: 2px; }
-.cb { grid-column: span 3; }
 .cb:nth-child(n+5) { grid-column: span 4; }
-.gear {
-  position: absolute; top: 4px; right: 6px; font: inherit; font-size: 22px; line-height: 1;
-  background: none; border: 0; color: var(--lcd-dim); padding: 6px; cursor: pointer;
+.cb .num { font-family: var(--serif); font-size: 40px; line-height: 1; }
+.cb .cn { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.cb .badge { font-size: 10px; color: var(--muted); min-height: 1.2em; }
+.cb.held { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cb.held .cn, .cb.held .badge { color: rgba(255,255,255,.85); }
+.cb.target::after {
+  content: ""; position: absolute; top: 7px; right: 8px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent2);
 }
-.screen-top { padding-right: 34px; }
 
-/* Joystick y herramientas */
+/* ===== Joystick y herramientas ===== */
 .controls { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; }
 .joy {
-  flex: 0 0 auto; width: 150px; height: 150px; border-radius: 50%; background: var(--panel);
-  border: 1px solid var(--line); position: relative; touch-action: none;
+  flex: 0 0 auto; width: 150px; height: 150px; border-radius: 50%; background: var(--ctl);
+  border: 1.5px solid var(--ctl-line); position: relative; touch-action: none;
 }
-.joy .dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--line); transform: translate(-50%, -50%); }
-.joy .dot.on { background: var(--hold); width: 10px; height: 10px; }
+.joy .dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--ctl-line); opacity: .5; transform: translate(-50%, -50%); }
+.joy .dot.on { background: var(--accent); opacity: 1; width: 9px; height: 9px; }
 .knob {
-  position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px;
-  border-radius: 50%; background: #fff; border: 1px solid var(--line); pointer-events: none;
+  position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+  border-radius: 50%; background: var(--ctl); border: 1.5px solid var(--ctl-line); pointer-events: none;
 }
+.joy.active .knob { background: var(--accent); border-color: var(--accent); }
 .tools { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tools .target-lbl { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.tools .target-lbl { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
 .tools button {
-  font: inherit; font-size: 15px; padding: 12px 6px; border-radius: 10px; border: 1px solid var(--line);
-  background: var(--panel); color: var(--ink); touch-action: manipulation;
+  font: inherit; font-size: 14px; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--ctl-line);
+  background: var(--ctl); color: var(--ctl-ink); touch-action: manipulation;
 }
-.tools button:active { background: #dfe5ea; }
+.tools button:active { background: var(--accent2); border-color: var(--accent2); color: #1a1a1a; }
 
-/* Ajustes */
+/* ===== Ajustes ===== */
 .sheet {
-  position: fixed; inset: 0; background: rgba(23,33,43,.35); display: flex; align-items: flex-end;
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end;
   justify-content: center; z-index: 10;
 }
 .sheet[hidden] { display: none; }
 .sheet-body {
-  background: var(--panel); width: 100%; max-width: 560px; max-height: 88%; overflow-y: auto;
-  border-radius: 16px 16px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-  -webkit-user-select: text; user-select: text;
+  background: var(--sheet); color: var(--ink); width: 100%; max-width: 560px; max-height: 88%; overflow-y: auto;
+  border-radius: 14px 14px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  border-top: 1.5px solid var(--line); -webkit-user-select: text; user-select: text;
 }
-.sheet h2 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
-.sheet h3 { font-size: 15px; font-weight: 600; margin: 18px 0 2px; color: var(--muted); }
-.row .tap { font: inherit; font-size: 15px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff; touch-action: manipulation; }
-.row .tap:active { background: var(--hold); color: #fff; }
-.row .code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; max-width: 60%; text-align: left; }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #dde3e8; }
-.row label { font-size: 15px; }
-.row select, .row input[type=range] { font: inherit; font-size: 15px; max-width: 58%; }
-.row select { padding: 6px; border-radius: 8px; border: 1px solid var(--line); background: #fff; }
-.row output { font-size: 13px; color: var(--muted); min-width: 64px; text-align: right; }
+.sheet h2 { font-family: var(--serif); font-size: 30px; font-weight: 400; margin: 0 0 4px; }
+.sheet h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin: 20px 0 2px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.row label { font-size: 14px; }
+.row select, .row input[type=range] { font: inherit; font-size: 14px; max-width: 58%; }
+.row select { padding: 6px 8px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--field); color: var(--ink); }
+.row input[type=range] { accent-color: var(--accent2); }
+.row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); }
+.row output { font-size: 12px; color: var(--muted); min-width: 64px; text-align: right; }
 .range-wrap { display: flex; align-items: center; gap: 8px; flex: 0 1 62%; }
 .range-wrap input { flex: 1; max-width: none; }
+.row .tap { font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--field); color: var(--ink); touch-action: manipulation; }
+.row .tap:active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.row .code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; max-width: 60%; text-align: left; }
 .sheet .help { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 14px 0; }
 .sheet .actions { display: flex; gap: 8px; margin-top: 12px; }
 .sheet .actions button {
-  flex: 1; font: inherit; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+  flex: 1; font: inherit; padding: 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--field); color: var(--ink);
 }
-.sheet .actions .primary { background: var(--ink); color: #fff; border-color: var(--ink); }
-button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--hold); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .toast { transition: none; } .cb.held { transform: none; } }
-@media (max-height: 640px) { .joy { width: 124px; height: 124px; } .chord { font-size: 40px; } }
+.sheet .actions .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+@media (max-height: 640px) { .joy { width: 124px; height: 124px; } .chord { font-size: 48px; } .scope { height: 48px; } }
 </style>
 </head>
 <body>
 <main class="app">
-  <section class="screen" id="screen" aria-label="Pantalla. Toca para abrir los ajustes">
+  <section class="screen" id="screen" aria-label="Pantalla">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
-    <button class="gear" id="gear" aria-label="Ajustes">&#9881;&#xFE0E;</button>
+    <button class="gear" id="gear" aria-label="Ajustes">ajustes</button>
     <div class="chord idle" id="chordName">—</div>
-    <div class="screen-bottom"><span id="sNotes">Pulsa un botón</span><span class="dir" id="sDir"></span></div>
+    <canvas class="scope" id="scope" aria-hidden="true"></canvas>
+    <div class="screen-bottom">
+      <span id="sNotes">Pulsa un botón</span>
+      <span style="display:flex;gap:8px;align-items:center">
+        <button class="oscbtn" id="oscBtn" aria-label="Osciloscopio">osc</button>
+        <span class="dir" id="sDir"></span>
+      </span>
+    </div>
     <div class="toast" id="toast"></div>
   </section>
 
@@ -165,9 +204,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <h2>Ajustes</h2>
     <div id="settingsRows"></div>
     <p class="help">
-      Para fijar un acorde: mantén el botón, desliza hacia la variación y pulsa Fijar acorde (con el botón aún pulsado o justo después de soltarlo).<br>
-      Mantén un botón y desliza el dedo en cualquier dirección para cambiar el acorde, o usa el joystick con la otra mano.
-      Los botones de la derecha del joystick actúan sobre el último botón que has tocado.<br>
+      Mantén un botón y mueve el joystick con la otra mano para cambiar el acorde. Si prefieres deslizar el dedo sobre el propio botón, actívalo en "Deslizar sobre los botones".<br>
+      Para fijar un acorde: mantén el botón, mueve el joystick y pulsa Fijar acorde (con el botón aún pulsado o justo después de soltarlo).<br>
       Teclado del ordenador: 1–7 tocan los acordes; W, A, S, D (y Q, E, Z, C en diagonal) mueven el joystick;
       I cambia la inversión, F fija el acorde, coma y punto cambian la octava del botón.
     </p>
@@ -459,6 +497,7 @@ const DEFAULT_STATE = {
   cutoff:1000, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
+  theme:'auto', swipe:false, osc:false,
   btnOct:[0,0,0,0,0,0,0], inv:[0,0,0,0,0,0,0], locks:[null,null,null,null,null,null,null],
 };
 const STORE_KEY = 'notes-state-v1';
@@ -480,7 +519,7 @@ function saveState() {
 }
 
 // ===== AUDIO =====
-let ctx = null, master, filterNode, comp, outGain, vibLfo, vibGain, noiseBuf, crackleBuf;
+let ctx = null, master, filterNode, comp, outGain, vibLfo, vibGain, noiseBuf, crackleBuf, analyser, scopeData;
 let waveCache = {}, irCache = {}, fxSlots = {};
 // En iPhone, al salir de la app el audio se congela y a veces vuelve "mudo".
 // Por eso, tras volver, se reconstruye el motor de audio en el siguiente toque.
@@ -508,6 +547,8 @@ function ensureAudio() {
     master.connect(filterNode);
     buildFxChain();
     comp.connect(outGain); outGain.connect(ctx.destination);
+    analyser = ctx.createAnalyser(); analyser.fftSize = 2048; outGain.connect(analyser);
+    scopeData = new Uint8Array(analyser.fftSize);
     // Vibrato compartido por todas las voces
     vibLfo = ctx.createOscillator(); vibLfo.frequency.value = 5.5;
     vibGain = ctx.createGain(); vibGain.gain.value = VIB_DEPTH[state.lfo] || 0;
@@ -1073,6 +1114,7 @@ function buildPads() {
       press(b);
     });
     el.addEventListener('pointermove', e => {
+      if (!state.swipe) return;
       const p = pointers.get(e.pointerId); if (!p) return;
       const d = vecToDir(e.clientX - p.x0, e.clientY - p.y0, p.dir ? 14 : 24);
       if (d !== p.dir) { p.dir = d; refresh(); }
@@ -1189,7 +1231,52 @@ const pct = { to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.roun
 const opts = list => () => list;
 const DIV_OPTS = [['off','Apagado'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16 tresillo'],['1/32','1/32']];
 
+const THEMES = [['auto','Automático'],['light','Claro (Atari Future)'],['dark','Oscuro (Atari Night)'],['alt','Alternativo (Petrol 78)']];
+const THEME_COLOR = { light:'#E2DAC7', dark:'#171717', alt:'#174B4B' };
+function applyTheme() {
+  let t = state.theme;
+  if (t === 'auto') t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+  $('themeColor').content = THEME_COLOR[t];
+}
+
+// ===== OSCILOSCOPIO =====
+let scopeRaf = null;
+function drawScope() {
+  scopeRaf = null;
+  if (!state.osc || document.hidden) return;
+  const c = $('scope'), g = c.getContext && c.getContext('2d');
+  if (!g) return;
+  const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  g.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--scope').trim() || '#888';
+  g.lineWidth = 1.5; g.lineJoin = 'round'; g.beginPath();
+  if (analyser && ctx && ctx.state === 'running') {
+    analyser.getByteTimeDomainData(scopeData);
+    // Disparo en un cruce por cero ascendente para que la onda no "corra"
+    let start = 0;
+    for (let i = 1; i < scopeData.length / 2; i++) { if (scopeData[i - 1] <= 128 && scopeData[i] > 128) { start = i; break; } }
+    const N = Math.min(1024, scopeData.length - start);
+    for (let i = 0; i < N; i++) {
+      const x = i / (N - 1) * W, y = H / 2 - ((scopeData[start + i] - 128) / 128) * H * 0.46;
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
+    }
+  } else { g.moveTo(0, H / 2); g.lineTo(W, H / 2); }
+  g.stroke();
+  scopeRaf = requestAnimationFrame(drawScope);
+}
+function setOsc(on) {
+  state.osc = !!on; saveState();
+  $('screen').classList.toggle('osc', state.osc); $('oscBtn').classList.toggle('on', state.osc);
+  if (state.osc && !scopeRaf) drawScope();
+}
+
 const SETTINGS = [
+  { section:'Aspecto' },
+  { id:'theme', label:'Tema', type:'select', options:opts(THEMES) },
+  { id:'osc', label:'Osciloscopio', type:'check' },
+  { id:'swipe', label:'Deslizar sobre los botones', type:'check' },
   { section:'Tono' },
   { id:'key', label:'Tonalidad', type:'select', numeric:true, options:() => NOTE_NAMES.map((n, i) => [i, n]) },
   { id:'scale', label:'Escala', type:'select', numeric:true, options:() => SCALES.map((s, i) => [i, s.name]) },
@@ -1233,7 +1320,9 @@ const SETTINGS = [
 ];
 
 function onSettingChanged(id) {
-  if (FX_ORDER.includes(id)) updateFx(id);
+  if (id === 'theme') applyTheme();
+  else if (id === 'osc') setOsc(state.osc);
+  else if (FX_ORDER.includes(id)) updateFx(id);
   else if (id === 'lfo') applyVibrato();
   else if (id === 'bpm') { updateFx('delay'); updateFx('tremolo'); }
   else if (id === 'cutoff') applyFilter();
@@ -1311,7 +1400,7 @@ function buildSettings() {
       row.appendChild(input);
     } else {
       input = document.createElement('input'); input.type = 'checkbox';
-      input.addEventListener('change', () => { state[s.id] = input.checked; afterSettingChange(); });
+      input.addEventListener('change', () => { state[s.id] = input.checked; onSettingChanged(s.id); afterSettingChange(); });
       row.appendChild(input);
     }
     input.id = id; s.el = input;
@@ -1349,7 +1438,11 @@ function closeSettings() { $('sheet').hidden = true; }
 
 // ===== ARRANQUE =====
 buildPads(); buildJoy(); buildSettings();
-$('screen').addEventListener('click', openSettings);
+$('oscBtn').addEventListener('click', () => setOsc(!state.osc));
+applyTheme();
+if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
+setOsc(state.osc);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.osc && !scopeRaf) drawScope(); });
 $('closeSheet').addEventListener('click', closeSettings);
 $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSettings(); });
 $('resetTweak').addEventListener('click', () => {
@@ -1368,7 +1461,7 @@ onTap($('tInv'), toolInversion);
 onTap($('tLock'), toolLock);
 onTap($('tOctDn'), () => toolOct(-1));
 onTap($('tOctUp'), () => toolOct(1));
-$('gear').addEventListener('click', e => { e.stopPropagation(); openSettings(); });
+$('gear').addEventListener('click', openSettings);
 function goneToBackground() {
   held.length = 0; pointers.clear(); padDir = null; dirKeys.clear(); keyDir = null;
   if (ctx) refresh(); else renderPads();
