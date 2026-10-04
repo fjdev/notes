@@ -263,7 +263,6 @@ body {
   display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1.5px solid var(--sheet-line);
   touch-action: pan-x;
 }
-.sheet-head::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--sheet-line); }
 .sheet h2 { font-family: var(--serif); font-size: 30px; font-weight: 400; margin: 6px 0 0; }
 .sheet-close {
   font: inherit; font-size: 22px; line-height: 1; width: 38px; height: 38px; border-radius: 50%; margin-top: 6px;
@@ -482,6 +481,35 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
    TECLAS LIMPIAS Y BOTONES DE ABAJO (fase 18; diseño elegido por el usuario: «balancín»), con la referencia del OP-1 de Teenage Engineering:
    grupos pequeños y separados, una luz por función y etiquetas diminutas impresas FUERA de la tecla.
    ========================================================================================== */
+
+/* ==========================================================================================
+   TAMAÑO FIJO DEL APARATO (fase 21): la pantalla, la franja de modos y los botones miden lo mismo en todos los modos.
+   ========================================================================================== */
+.display .screen { height: 140px; display: flex; flex-direction: column; overflow: hidden; }
+.display .screen .chord { flex: 0 0 auto; }
+.display .screen .scope { flex: 1 1 auto; min-height: 0; height: auto; margin: 2px 0 4px; }
+.display .screen.osc .chord, .display .screen.hiro .chord, .display .screen.ear .chord { font-size: 22px; margin: 0 0 2px; }
+.display .screen.tuner .chord { font-size: 30px; margin: 0; }
+.display .screen .screen-bottom { margin-top: auto; }
+@media (max-height: 640px) { .display .screen { height: 122px; } }
+/* Franja de modos: siempre una sola fila; con el dedo se desliza en horizontal (sin bambolearse en vertical) y se detiene en cada chip */
+.modes-scroll { overflow-y: hidden; touch-action: pan-x; overscroll-behavior-x: contain; scroll-snap-type: x proximity; }
+.modes-scroll .chip { scroll-snap-align: start; }
+.modes-arrow { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .modes-scroll { flex-wrap: nowrap !important; overflow-x: auto !important; overflow-y: hidden; }
+  .modes-scroll.fade-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent) !important; mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent) !important; }
+  .modes-scroll.fade-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent) !important; mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent) !important; }
+  .modes-scroll.fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent) !important; mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent) !important; }
+  .modes-arrow { display: grid; place-items: center; flex: 0 0 auto; width: 26px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: var(--panel-dim); cursor: pointer; }
+  .modes-arrow:hover { color: var(--panel-ink); }
+  .modes-arrow svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+}
+/* Ventana de Ajustes: altura fija (no cambia con la pestaña); cabecera y pestañas siempre a la vista; solo el contenido se desplaza */
+.sheet-body { height: min(86dvh, 780px); max-height: none; overscroll-behavior: contain; }
+.sheet-head { flex-wrap: wrap; row-gap: 0; }
+.sheet-head .sheet-nav { flex: 0 0 100%; order: 3; }
+
 .pads.bare .cb .num, .pads.bare .cb .cn, .pads.bare .cb .badge { display: none; }
 .tools .target-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }   /* solo para lectores de pantalla */
 
@@ -562,37 +590,38 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <div class="sheet-head" id="sheetHead">
       <h2>Ajustes</h2>
       <button class="sheet-close" id="closeSheetTop" aria-label="Cerrar">&times;</button>
+      <div class="sheet-nav" id="sheetNav"></div>
     </div>
-    <div class="sheet-nav" id="sheetNav"></div>
     <div id="settingsRows"></div>
     <div class="sec manual" id="manualSec" hidden>
       <h3 class="grp">Tocar</h3>
       <h4>Acordes</h4>
       <p>Los siete botones tocan los acordes de la tonalidad: 1, 4 y 5 mayores; 2, 3 y 6 menores; 7 disminuido. Nunca suenan mal entre sí. Prueba 1 → 5 → 6 → 4.</p>
       <p>Mantén un botón y mueve el joystick: cada dirección cambia el color del acorde. Suelta y vuelve al acorde normal. En Ajustes → Acordes eliges entre cinco mapas del joystick.</p>
-      <p>La pantalla muestra el nombre del acorde que suena; si prefieres verlo también en las teclas, activa «Notas y números en las teclas» en Ajustes → Aspecto. En Ajustes → Acordes, «Bajo» añade la raíz en grave (Raíz) o te deja mantener un botón para el bajo y pulsar otro para el acorde (Slash), y «Conducción de voces» elige las inversiones por ti (entonces la tecla INV queda atenuada).</p>
+      <p>La pantalla muestra el nombre del acorde que suena; si prefieres verlo también en las teclas, activa «Notas y números en las teclas» en Ajustes → Aspecto. En Ajustes → Acordes, «Bass» añade la raíz en grave (Root) o te deja mantener un botón para el bajo y pulsar otro para el acorde (Slash), y «V.Lead» (Voice Leading) elige las inversiones por ti (entonces la tecla INV queda atenuada).</p>
       <h4>Herramientas</h4>
       <p>Actúan sobre el último botón tocado, que se reconoce por su luz verde. INV cambia la inversión. FIJAR deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. Las dos teclas de abajo, unidas como un balancín, suben o bajan una octava solo ese botón.</p>
-      <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Seq, Mixer, Juego y Oído las cuatro teclas cambian de función y llevan su etiqueta debajo; en Drums, Ritmos, Mic y Afinador no se usan y desaparecen.</p>
+      <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Sequencer, Mixer, Juego y Ear Trainer las cuatro teclas cambian de función y llevan su etiqueta debajo; en Drum, Drum Loop, Mic Sample y Tuner no se usan y desaparecen.</p>
       <h4>Controles atenuados</h4>
       <p>Un botón o una herramienta atenuados no tienen función en el modo actual (por ejemplo, las pistas vacías en el Mixer) y no responden al toque.</p>
       <h3 class="grp">Pantalla y atajos</h3>
       <h4>Selección rápida</h4>
-      <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). Con el joystick hacia arriba o la derecha pasas a la página siguiente; hacia abajo o la izquierda, a la anterior. La tonalidad reúne las notas naturales, las alteradas y las escalas. En el teclado: J (sonido), K (tonalidad y escala) y L (modo), mantenidas. Sonido y tonalidad no responden en Juego ni en Oído.</p>
+      <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). La primera página es la misma que en el aparato. Sonido: 1 Saw, 2 Sine, 3 FM EPiano, 4 HX7 Piano, 5 Strings, 6 Clarinet, 7 FM Wow; en Drum y Drum Loop elige el kit (1 Tight Kit, 2 x0x Box, 3 x9x Box, 4 Lynn Kit, 5 KR-78, 6 Trap Box, 7 Tight Kit). Modo: 1 Play, 2 Strum, 3 Lead, 4 Drone, 5 Arp, 6 Repeat, 7 Mic Sample. Tonalidad: en Arp elige el patrón (1 Up, 2 Down, 3 Up/Down, 4 Down/Up, 5 Random, 6 Fingerpick) y el 7 cambia las capas (Arp Only, Chord+Arp, Rhythm+Arp); en los demás modos, las notas y las escalas.</p>
+      <p>Con el joystick hacia arriba o la derecha pasas a la página siguiente, con el resto de sonidos o de modos; hacia abajo o la izquierda, a la anterior. En el teclado: J (sonido), K (tonalidad) y L (modo), mantenidas. Sonido y tonalidad no responden en Juego ni en Ear Trainer.</p>
       <h4>Aleatorizar con la perilla</h4>
-      <p>Mantén la tonalidad, el sonido o el modo de la pantalla y, con el otro dedo, toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Tonalidad: cambia el sonido, los efectos, la tonalidad y el patrón de arpegio. Sonido: cambia solo la forma de onda y los efectos se quedan. Modo: cambia el patrón de arpegio y el de secuenciador, y el sonido se queda. No cuenta si hay un acorde pulsado ni en Juego y Oído.</p>
+      <p>Mantén la tonalidad, el sonido o el modo de la pantalla y, con el otro dedo, toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Tonalidad: cambia todo, es decir, el sonido, los efectos, la tonalidad y el tempo. Sonido: un sonido nuevo (forma de onda y efectos); la tonalidad, el tempo y las inversiones se quedan. Modo: un patrón nuevo (arpegio, ritmo o secuencia, y la disposición de octavas); el sonido se queda. Es lo mismo que hace el aparato en su versión 3.0. No cuenta si hay un acorde pulsado ni en Juego y Ear Trainer.</p>
       <p>En el ordenador, mantén J (sonido), K (tonalidad) o L (modo) y pulsa la barra espaciadora. Para elegir con más control, Ajustes → Presets tiene el azar con más opciones (ver «Presets y azar»).</p>
       <h4>Teclado del ordenador</h4>
       <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> y <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> siguiente modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> (mantenidas) selección rápida de sonido, tonalidad y modo · <span class="k">Espacio</span> con J, K o L mantenidas aleatoriza</p>
       <h3 class="grp">Modos y ritmos</h3>
       <h4>Modos</h4>
-      <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo.</p>
-      <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
-      <p>En Seq, las teclas de abajo son play y stop, quitar el último paso, borrar y la duración del paso. En Mixer, con una pista seleccionada, son solo, vol −, vol + y borrar.</p>
+      <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo. En el ordenador, las flechas a los lados de la franja de modos, o la rueda del ratón sobre ella, la desplazan.</p>
+      <p><b>Drum</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Drum Loop</b> cada botón arranca un ritmo (y lo para). <b>Sequencer</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
+      <p>En Sequencer, las teclas de abajo son play y stop, quitar el último paso, borrar y la duración del paso. En Mixer, con una pista seleccionada, son solo, vol −, vol + y borrar.</p>
       <h4>Repeat: trance gate</h4>
       <p>En Repeat, mantén un acorde y se abre y se cierra al ritmo del tempo siguiendo un patrón fijo de 32 pasos, con silencios y notas ligadas, como un sintetizador de trance. El chip de la derecha cambia la velocidad del pulso (las mismas velocidades que el arpegio). El release se limita a 200 ms para que los cortes queden limpios.</p>
       <h4>Fill</h4>
-      <p>En Beats, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
+      <p>En Drum Loop, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
       <h3 class="grp">Sonido</h3>
       <h4>Instrumentos y biblioteca</h4>
       <p>El desplegable de Ajustes → Sonido reúne tres tipos de sonido. Instrumentos son los sonidos base (saw, piano, cuerdas, órgano…). Biblioteca son 50 presets de la app oficial, agrupados por tipo (Analog, FM, Sample, Texture, Hybrid): cada uno combina varias capas y trae su envolvente y sus efectos, que se aplican al elegirlo. Vienen incluidos y no se pueden quitar. Importados aparece solo si cargas un archivo .json en Ajustes → Presets; ahí mismo se ve cuántos hay y se pueden quitar.</p>
@@ -601,18 +630,18 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>El azar propone cosas nuevas. Sonido elige otro instrumento con efectos; Patrón cambia el patrón del modo actual (arpegio, ritmo o secuencia) y la disposición de octavas; Todo cambia además la tonalidad y el tempo.</p>
       <p>Con la tonalidad, el sonido o el modo mantenidos, tocar la perilla del joystick aleatoriza al instante (ver «Aleatorizar con la perilla»).</p>
       <h4>Vocoder</h4>
-      <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Micrófono (tu voz) o Pista 1 del looper (lo que grabaste en ella, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formante cambia el carácter de la voz (más aguda o más grave) y Consonantes añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
+      <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Mic (tu voz) o Loop (lo que grabaste en la pista 1 del looper, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formant Shift cambia el carácter de la voz (más aguda o más grave) y Noise Level añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
       <h3 class="grp">Grabar y capturar</h3>
       <h4>Looper</h4>
       <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 esperan al inicio del siguiente loop para empezar (su botón parpadea; tócalo para cancelar) y se paran solas al terminar la vuelta.</p>
-      <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
+      <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Drum Loop sonando lo pasa a la pista.</p>
       <h4>Guardar audio</h4>
       <p>El botón del círculo, junto al osciloscopio, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
-      <h4>Mic (sampler)</h4>
-      <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
-      <h4>Afinador</h4>
-      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Afinador, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya. La línea fina de abajo muestra cuánto oye el micrófono: si no se mueve cuando cantas, el sonido no está llegando.</p>
-      <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube la "Ganancia del micro" en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
+      <h4>Mic Sample (sampler)</h4>
+      <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic Sample y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic Sample; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
+      <h4>Tuner (afinador)</h4>
+      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Tuner, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya. La línea fina de abajo muestra cuánto oye el micrófono: si no se mueve cuando cantas, el sonido no está llegando.</p>
+      <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube «Mic Gain» en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
       <h4>Permiso del micrófono</h4>
       <p>El micrófono se cierra en cuanto terminas de usarlo, así que Safari puede volver a pedir permiso cada vez. Para que no lo pida más, toca "aA" en la barra de direcciones → Ajustes del sitio web → Micrófono → Permitir; la app seguirá cerrando el micrófono al terminar. En Ajustes → Sonido, "Probar el micrófono" muestra el estado: "granted" significa que Safari ya lo recuerda y "prompt" que lo volverá a pedir.</p>
       <p>Alternativa: activar "Mantener el micrófono abierto" en Ajustes → Sonido. El micrófono queda abierto pero mudo mientras la app esté abierta (el punto naranja del iPhone puede seguir encendido) y se libera al salir de la app o tras 15 minutos sin usarlo.</p>
@@ -622,12 +651,12 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Juego de acordes</h4>
       <p>Un juego de ritmo que enseña progresiones reales. Elige nivel con el chip de la derecha (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión) y pulsa "jugar". Tras una cuenta atrás de cuatro tiempos, los acordes avanzan hacia la línea de golpeo: pulsa su botón justo cuando lleguen y, si el bloque lleva una flecha, mantén también esa dirección del joystick. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
       <p>"Práctica" juega más despacio: empieza al 75 % y con "vel −" y "vel +" va del 50 al 100 %. Tras los resultados, "siguiente" pasa al nivel siguiente y "repetir" vuelve a jugar el actual. Cada nivel estrena una idea: el acorde 6 (nivel 2), el sus4 con el joystick abajo (3), cambios cada dos tiempos y anticipos (4), el iv prestado con el joystick arriba (5), la mezcla con 2 y 3 (6), séptimas (7), novenas (8), dominantes secundarias (9) y una cadena por quintas (10).</p>
-      <h4>Entrenador de oído</h4>
+      <h4>Ear Trainer (entrenador de oído)</h4>
       <p>La app toca algo y tú lo repites. Elige nivel con el chip de la derecha y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
       <h3 class="grp">Ajustes y mantenimiento</h3>
       <h4>Aspecto</h4>
-      <p>En Ajustes → Aspecto eliges la carcasa (cinco acabados: dos oficiales, Oscuro y Claro, y tres ediciones) y, por separado, la pantalla (OLED cálida, LCD verde o LCD azul; por defecto cada carcasa trae la suya), así que hay quince combinaciones. «Automático» sigue el modo claro u oscuro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas».</p>
+      <p>En Ajustes → Aspecto eliges la carcasa (cinco acabados: dos oficiales, Oscuro y Claro, y tres ediciones) y, por separado, la pantalla (OLED cálida, LCD verde o LCD azul; por defecto cada carcasa trae la suya), así que hay quince combinaciones. «Automático» sigue el modo claro u oscuro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Copia de seguridad</h4>
@@ -682,16 +711,16 @@ window.addEventListener('unhandledrejection', ev => logErr('promesa', ev.reason)
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
 const SCALES = [
-  { id:'major',   name:'Mayor',             steps:[0,2,4,5,7,9,11] },
-  { id:'minor',   name:'Menor natural',     steps:[0,2,3,5,7,8,10] },
-  { id:'harm',    name:'Menor armónica',    steps:[0,2,3,5,7,8,11] },
-  { id:'mel',     name:'Menor melódica',    steps:[0,2,3,5,7,9,11] },
-  { id:'majpent', name:'Pentatónica mayor', steps:[0,2,4,7,9] },
-  { id:'minpent', name:'Pentatónica menor', steps:[0,3,5,7,10] },
+  { id:'major',   name:'Major',             steps:[0,2,4,5,7,9,11] },
+  { id:'minor',   name:'Minor',             steps:[0,2,3,5,7,8,10] },
+  { id:'harm',    name:'Harmonic Minor',    steps:[0,2,3,5,7,8,11] },
+  { id:'mel',     name:'Melodic Minor',     steps:[0,2,3,5,7,9,11] },
+  { id:'majpent', name:'Major Pentatonic',  steps:[0,2,4,7,9] },
+  { id:'minpent', name:'Minor Pentatonic',  steps:[0,3,5,7,10] },
   { id:'blues',   name:'Blues',             steps:[0,3,5,6,7,10] },
-  { id:'dorian',  name:'Dórica',            steps:[0,2,3,5,7,9,10] },
-  { id:'mixo',    name:'Mixolidia',         steps:[0,2,4,5,7,9,10] },
-  { id:'lydian',  name:'Lidia',             steps:[0,2,4,6,7,9,11] },
+  { id:'dorian',  name:'Dorian',            steps:[0,2,3,5,7,9,10] },
+  { id:'mixo',    name:'Mixolydian',        steps:[0,2,4,5,7,9,10] },
+  { id:'lydian',  name:'Lydian',            steps:[0,2,4,6,7,9,11] },
 ];
 
 const DIRS = ['u','ur','r','dr','d','dl','l','ul'];
@@ -810,10 +839,10 @@ JOY.og = Object.assign({}, JOY.default, {
 });
 
 const JOY_MODES = [
-  { id:'default',   name:'Básico' },
-  { id:'extended',  name:'Extendido' },
-  { id:'chromatic', name:'Cromático' },
-  { id:'borrow',    name:'Préstamo' },
+  { id:'default',   name:'Default' },
+  { id:'extended',  name:'Extend' },
+  { id:'chromatic', name:'Chrom' },
+  { id:'borrow',    name:'Borrow' },
   { id:'og',        name:'OG' },
 ];
 
@@ -1226,16 +1255,17 @@ function currentEnv() {
 
 // ===== MODOS DE INTERPRETACIÓN =====
 const MODES = [
+  // Nombres y orden del HiChord (Rev 3.0). «Chord Hiro» es un nombre propio del aparato: aquí se llama «Juego».
   { id:'play', name:'Play' }, { id:'strum', name:'Strum' }, { id:'lead', name:'Lead' },
   { id:'drone', name:'Drone' }, { id:'arp', name:'Arp' }, { id:'repeat', name:'Repeat' },
-  { id:'drum', name:'Drums' }, { id:'beat', name:'Beats' }, { id:'seq', name:'Seq' }, { id:'mixer', name:'Mixer' },
-  { id:'hiro', name:'Juego' }, { id:'ear', name:'Oído' }, { id:'mic', name:'Mic' }, { id:'tuner', name:'Afinador' },
+  { id:'seq', name:'Sequencer' }, { id:'drum', name:'Drum' }, { id:'beat', name:'Drum Loop' },
+  { id:'hiro', name:'Juego' }, { id:'ear', name:'Ear Trainer' }, { id:'tuner', name:'Tuner' }, { id:'mic', name:'Mic Sample' }, { id:'mixer', name:'Mixer' },
 ];
 const STRUM_MS = { slow:0.2, medium:0.08, fast:0.04 };
 const RATES = [['1/1',4],['1/2',2],['1/4',1],['1/8',0.5],['1/16',0.25],['1/16T',1/6],['1/32',0.125],['sw8',0.5,true],['sw16',0.25,true]];
-const RATE_NAMES = { '1/1':'1/1', '1/2':'1/2', '1/4':'1/4', '1/8':'1/8', '1/16':'1/16', '1/16T':'1/16 tresillo', '1/32':'1/32', sw8:'Swing 8', sw16:'Swing 16' };
-const ARP_PATTERNS = [['up','Arriba'],['down','Abajo'],['updown','Arriba y abajo'],['downup','Abajo y arriba'],['random','Aleatorio'],['finger','Fingerpick']];
-const ARP_LAYERS = [['arp','Solo arpegio'],['chord','Acorde + arpegio'],['rhythm','Ritmo + arpegio']];
+const RATE_NAMES = { '1/1':'1/1', '1/2':'1/2', '1/4':'1/4', '1/8':'1/8', '1/16':'1/16', '1/16T':'1/16T', '1/32':'1/32', sw8:'Swing 8th', sw16:'Swing 16th' };
+const ARP_PATTERNS = [['up','Up'],['down','Down'],['updown','Up/Down'],['downup','Down/Up'],['random','Random'],['finger','Fingerpick']];
+const ARP_LAYERS = [['arp','Arp Only'],['chord','Chord+Arp'],['rhythm','Rhythm+Arp']];
 
 function stepDur(rateId, step) {
   const r = RATES.find(x => x[0] === rateId) || RATES[3];
@@ -1244,13 +1274,13 @@ function stepDur(rateId, step) {
   return step % 2 === 0 ? d * 4 / 3 : d * 2 / 3;   // swing: largo-corto
 }
 function modeParam() {
-  if (state.mode === 'strum') return { key:'strumSpeed', list:['slow','medium','fast'], names:{ slow:'Lento', medium:'Medio', fast:'Rápido' } };
+  if (state.mode === 'strum') return { key:'strumSpeed', list:['slow','medium','fast'], names:{ slow:'Slow', medium:'Medium', fast:'Fast' } };
   if (state.mode === 'arp') return { key:'arpRate', list:RATES.map(r => r[0]), names:RATE_NAMES };
   if (state.mode === 'repeat') return { key:'repeatRate', list:RATES.map(r => r[0]), names:RATE_NAMES };
   if (state.mode === 'drum') return { key:'kit', list:KITS.map(k => k[0]), names:Object.fromEntries(KITS) };
   if (state.mode === 'beat') return { key:'beatVar', list:BEAT_VARS.map(v => v[0]), names:Object.fromEntries(BEAT_VARS) };
   if (state.mode === 'hiro') return { key:'hiroLevel', list:HIRO_SONGS.map((s, i) => i), names:Object.fromEntries(HIRO_SONGS.map((s, i) => [i, (i + 1) + ' · ' + HIRO_TIERS[s.tier]])) };
-  if (state.mode === 'ear') return { key:'earLevel', list:[0, 1, 2, 3, 4, 5], names:Object.fromEntries([0, 1, 2, 3, 4, 5].map(i => [i, 'Nivel ' + (i + 1)])) };
+  if (state.mode === 'ear') return { key:'earLevel', list:[0, 1, 2, 3, 4, 5], names:Object.fromEntries([0, 1, 2, 3, 4, 5].map(i => [i, 'Level ' + (i + 1)])) };
   return null;
 }
 function cycleModeParam() {
@@ -1349,6 +1379,14 @@ function buildModes() {
     const b = document.createElement('button'); b.className = 'chip'; b.dataset.m = m.id; b.textContent = m.name;
     onTap(b, () => setMode(m.id)); scroll.appendChild(b);
   }
+  const arrow = (dir) => {   // solo con ratón: desplazan la franja una página
+    const a = document.createElement('button'); a.className = 'modes-arrow'; a.setAttribute('aria-label', dir < 0 ? 'Modos anteriores' : 'Modos siguientes');
+    a.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + (dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>';
+    a.addEventListener('click', () => scroll.scrollBy({ left: dir * scroll.clientWidth * 0.7, behavior: 'smooth' }));
+    return a;
+  };
+  wrap.insertBefore(arrow(-1), scroll); wrap.appendChild(arrow(1));
+  scroll.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { scroll.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });   // rueda del ratón = desplazar en horizontal
   const p = document.createElement('button'); p.className = 'chip param'; p.id = 'modeParam';
   onTap(p, cycleModeParam); wrap.appendChild(p);
   fadeEdges(scroll);
@@ -1819,7 +1857,7 @@ function drumHit(kitId, pad, t, vel) {
 
 // ----- Ritmos: 7 estilos × 8 variaciones (16 pasos de semicorchea; x = fuerte, o = suave) -----
 const BEAT_STYLES = [['rock','Rock'],['break','Break'],['dub','Dub'],['funk','Funk'],['house','House'],['dembow','Dembow'],['swing','Swing']];
-const BEAT_VARS = [['orig','Original'],['ghost','Ghost'],['16th','16th'],['push','Push'],['fill','Fill'],['half','Half'],['dbl','Doble'],['perc','Perc']];
+const BEAT_VARS = [['orig','Orig'],['ghost','Ghost'],['16th','16th'],['push','Push'],['fill','Fill'],['half','Half'],['dbl','Dbl'],['perc','Perc']];
 const LANES = { K:0, S:2, H:3, O:6, T:4, B:5 };
 const BEAT_BASE = {
   rock:  { K:'x.......x.x.....', S:'....x.......x...', H:'x.x.x.x.x.x.x.x.' },
@@ -2637,18 +2675,28 @@ function tunerLoop() {
 // ===== HÁPTICOS =====
 // Android: navigator.vibrate. iOS: Safari no vibra, pero un interruptor (input switch) cambiado
 // dentro de un gesto del usuario produce un toque háptico en iOS 18+.
-let hapticSwitch = null;
+let hapticSwitch = null;   // (antiguo; ya no se usa)
+function iosTick() {   // iOS 18+: un interruptor nuevo, oculto, pulsado dentro de un gesto del usuario, produce un toque háptico
+  const lab = document.createElement('label'); lab.ariaHidden = 'true'; lab.style.display = 'none';
+  const inp = document.createElement('input'); inp.type = 'checkbox'; inp.setAttribute('switch', '');
+  lab.appendChild(inp); document.head.appendChild(lab); lab.click(); document.head.removeChild(lab);
+}
+function hapticTest() {   // botón «Probar» de Ajustes → Aspecto (se ejecuta dentro del toque)
+  const ua = navigator.userAgent, m = /OS (\d+)_/.exec(ua), ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  try { if (navigator.vibrate) navigator.vibrate([20, 60, 20]); else { iosTick(); setTimeout(() => {}, 0); } } catch (e) {}
+  const lines = [
+    'Sistema: ' + (ios ? 'iOS ' + (m ? m[1] : '?') : (/Android/.test(ua) ? 'Android' : 'ordenador')),
+    'App instalada: ' + ((navigator.standalone || matchMedia('(display-mode: standalone)').matches) ? 'sí' : 'no'),
+    'Método: ' + (navigator.vibrate ? 'vibración del sistema (Android)' : ios ? 'interruptor de iOS (necesita iOS 18 o posterior y «Hápticos del sistema» activados)' : 'no disponible en este dispositivo'),
+  ];
+  if (ios && m && +m[1] < 18) lines.push('Este iPhone tiene iOS ' + m[1] + ': la vibración desde una web necesita iOS 18 o posterior.');
+  showDiag(lines.join('\n'), 'set-hapticTest');
+}
 function haptic(strong) {
   if (!state.haptics) return;
   try {
     if (navigator.vibrate) { navigator.vibrate(strong ? 14 : 7); return; }
-    if (!hapticSwitch) {
-      const lab = document.createElement('label');
-      lab.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.01;pointer-events:none;overflow:hidden;z-index:-1';
-      hapticSwitch = document.createElement('input'); hapticSwitch.type = 'checkbox'; hapticSwitch.setAttribute('switch', '');
-      lab.appendChild(hapticSwitch); document.body.appendChild(lab); hapticSwitch._lab = lab;
-    }
-    hapticSwitch._lab.click();
+    iosTick();
   } catch (e) {}
 }
 
@@ -2877,7 +2925,7 @@ function renderTools() {
     setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play', { off: none });
     setTool('tLock', 'minus', 'quitar', { off: none }); setTool('tOctDn', 'trash', 'borrar', { off: none });
     setTool('tOctUp', 'step', 'paso ×' + seq.stepLen);
-    $('targetLbl').textContent = 'Secuencia'; return;
+    $('targetLbl').textContent = 'Sequencer'; return;
   }
   if (m === 'mixer') {
     const t = tracks[target] || {};
@@ -2897,12 +2945,12 @@ function renderTools() {
     setTool('tInv', act ? 'stop' : res ? 'next' : 'play', act ? 'parar' : res ? 'siguiente' : 'jugar');
     setTool('tLock', 'replay', 'repetir', { off: ear.phase !== 'answer' && !res });
     setTool('tOctDn', 'note', 'tónica', { off: ear.phase !== 'answer' }); setTool('tOctUp', 'none', '', { off: true });
-    $('targetLbl').textContent = 'Oído'; return;
+    $('targetLbl').textContent = 'Ear Trainer'; return;
   }
   if (m === 'drum' || m === 'beat' || m === 'mic' || m === 'tuner') {
     setTool('tInv', 'none', '', { off:true }); setTool('tLock', 'none', '', { off:true });
     setTool('tOctDn', 'none', '', { off:true }); setTool('tOctUp', 'none', '', { off:true });
-    $('targetLbl').textContent = { drum:'Pads', beat:'Ritmos', mic:'Sampler', tuner:'Afinador' }[m]; return;
+    $('targetLbl').textContent = { drum:'Drum', beat:'Drum Loop', mic:'Mic Sample', tuner:'Tuner' }[m]; return;
   }
   const locked = !!state.locks[target];
   const canLock = locked || !!(held.includes(target) ? dirFor(target) : lastDirUsed[target]);
@@ -2924,7 +2972,8 @@ function renderScreen(active) {
   const sound = SOUNDS.find(s => s.id === state.sound);
   $('sKey').textContent = NOTE_NAMES[state.key] + ' ' + SCALES[state.scale].name.toLowerCase()
     + (state.globalOct ? ' ' + (state.globalOct > 0 ? '+' : '') + state.globalOct : '');
-  $('sSound').textContent = sound ? sound.name : '';
+  const named = sound || allSounds().find(s => s.id === state.sound);   // la biblioteca e importados también tienen nombre
+  $('sSound').textContent = named ? named.name : '';
   const p = modeParam();
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
   const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : '') : '';
@@ -3081,20 +3130,6 @@ function buildJoy() {
   joy.addEventListener('pointerup', end);
   joy.addEventListener('pointercancel', end);
 }
-function randomWaveOnly() {   // «Sonido»: solo cambia la forma de onda; los efectos se quedan
-  const snd = rnd(SOUNDS.filter(x => x.id !== 'micsample' || sampleBuf.mic));
-  quickSet('sound', snd.id); toast(snd.name);
-}
-function randomArpSeq() {       // «Modo»: patrón de arpegio y de secuenciador; el sonido se queda
-  state.arpPattern = rnd(ARP_PATTERNS)[0]; state.arpRate = rnd(['1/4', '1/8', '1/8', '1/16', '1/16T', 'sw8', 'sw16']); state.arpLayer = rnd(ARP_LAYERS)[0];
-  if (state.mode === 'seq' && !seq.playing) seq.steps = Array.from({ length:4 }, () => ({ btn:Math.floor(Math.random() * 7), dir:null }));
-  saveState(); syncSettings(); renderModes(); renderScreen(false); renderPads();
-  toast(ARP_PATTERNS.find(a => a[0] === state.arpPattern)[1] + ' · ' + RATE_NAMES[state.arpRate]);
-}
-function randomEverything() {   // «Tonalidad»: sonido, efectos, tonalidad y patrón de arpegio
-  state.arpPattern = rnd(ARP_PATTERNS)[0];
-  randomize('all');
-}
 // El clic de la perilla solo sirve para aleatorizar, con la tonalidad, el sonido o el modo mantenidos. El resto de funciones (looper, Seq, Mixer) ya tienen su botón visible,
 // así que en cualquier otro caso la perilla es solo un joystick.
 function joyClickAction() { return !!quick && state.mode !== 'hiro' && state.mode !== 'ear'; }
@@ -3103,7 +3138,7 @@ function joyClick() {
   const knob = $('knob'); knob.classList.add('click'); setTimeout(() => knob.classList.remove('click'), 130);
   haptic(true);
   try {
-    if (quick.group === 'sound') randomWaveOnly(); else if (quick.group === 'mode') randomArpSeq(); else randomEverything();   // aleatorizar ese menú
+    randomize(quick.group === 'sound' ? 'sound' : quick.group === 'mode' ? 'pattern' : 'all');   // como en la Rev 3.0: SONIDO = onda y efectos; KEY = todo; MODO = patrón
     renderPads();
   } catch (e) { logErr('clic', e); errToast(e); }
 }
@@ -3151,7 +3186,7 @@ window.addEventListener('blur', () => {
 
 // ===== SELECCIÓN RÁPIDA =====
 // Mantener el sonido, la tonalidad o el modo de la pantalla: los botones de acorde pasan a elegir y el joystick cambia de página.
-const SCALE_SHORT = ['Mayor','Menor','Arm.','Mel.','Pent +','Pent −','Blues','Dórica','Mixol.','Lidia'];
+const SCALE_SHORT = ['Major','Minor','Harm Min','Mel Min','Maj Pent','Min Pent','Blues','Dorian','Mixolyd.','Lydian'];
 const KEY_PAGES = [[0,2,4,5,7,9,11],[1,3,6,8,10]];
 function quickSet(id, raw) {
   state[id] = raw;
@@ -3162,10 +3197,30 @@ function quickSet(id, raw) {
   }
   onSettingChanged(id); afterSettingChange();
 }
+const QUICK_SOUNDS = ['saw', 'sine', 'fmep', 'hx7', 'strings', 'clarinet', 'fmbell'];   // amarillo + 1–7 en el aparato: Saw, Sine, FM EPiano, HX7 Piano, Strings, Clarinet, FM Wow
+const QUICK_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat', 'mic'];            // rojo + 1–7: Play, Strum, Lead, Drone, Arp, Repeat, Mic Sample
 function quickPages(group) {
   const chunk = a => { const o = []; for (let i = 0; i < a.length; i += 7) o.push(a.slice(i, i + 7)); return o; };
-  if (group === 'sound') return chunk(SOUNDS.map(s => ({ label:s.name, on:state.sound === s.id, pick:() => quickSet('sound', s.id) })));
-  if (group === 'mode') return chunk(MODES.map(m => ({ label:m.name, on:state.mode === m.id, pick:() => setMode(m.id) })));
+  if (group === 'sound') {
+    if (state.mode === 'drum' || state.mode === 'beat')   // en Drum, amarillo + 1–7 = kits (el 7 repite Tight, como el aparato)
+      return [KITS.concat([KITS[0]]).map(k => ({ label:k[1], on:state.kit === k[0], pick:() => quickSet('kit', k[0]) }))];
+    const item = s => ({ label:s.name, on:state.sound === s.id, pick:() => quickSet('sound', s.id) });
+    const first = QUICK_SOUNDS.map(id => SOUNDS.find(s => s.id === id)).filter(Boolean);
+    const rest = SOUNDS.filter(s => !QUICK_SOUNDS.includes(s.id) && (s.id !== 'micsample' || sampleBuf.mic));
+    return [first.map(item)].concat(chunk(rest.map(item)));
+  }
+  if (group === 'mode') {
+    const item = m => ({ label:m.name, on:state.mode === m.id, pick:() => setMode(m.id) });
+    const first = QUICK_MODES.map(id => MODES.find(m => m.id === id));
+    const rest = MODES.filter(m => !QUICK_MODES.includes(m.id) && (m.id !== 'mixer' || loopHasAudio()));
+    return [first.map(item)].concat(chunk(rest.map(item)));
+  }
+  if (state.mode === 'arp') {   // en Arp, gris + 1–5 = patrón; 6 = Fingerpick; 7 = cambia las capas
+    const pats = ARP_PATTERNS.map(a => ({ label:a[1], on:state.arpPattern === a[0], pick:() => quickSet('arpPattern', a[0]) }));
+    const lay = ARP_LAYERS.find(l => l[0] === state.arpLayer) || ARP_LAYERS[0];
+    const next = ARP_LAYERS[(ARP_LAYERS.indexOf(lay) + 1) % ARP_LAYERS.length];
+    return [pats.concat([{ label:lay[1], on:false, pick:() => quickSet('arpLayer', next[0]) }])];
+  }
   return KEY_PAGES.map(p => p.map(i => ({ label:NOTE_NAMES[i], on:state.key === i, pick:() => quickSet('key', i) })))
     .concat(chunk(SCALES.map((s, i) => ({ label:SCALE_SHORT[i], on:state.scale === i, pick:() => quickSet('scale', i) }))));
 }
@@ -3303,7 +3358,7 @@ const msFromSlider = v => 0.0001 * Math.pow(50000, v / 1000);
 const sliderFromMs = s => Math.round(1000 * Math.log(Math.max(s, 0.0001) / 0.0001) / Math.log(50000));
 const pct = { to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' };
 const opts = list => () => list;
-const DIV_OPTS = [['off','Apagado'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16 tresillo'],['1/32','1/32']];
+const DIV_OPTS = [['off','Off'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16T'],['1/32','1/32']];
 
 const SCREENS = [['auto','Según la carcasa'],['oled','OLED cálida'],['lcdg','LCD verde'],['lcdb','LCD azul']];
 const SCREEN_OF = { dark:'oled', light:'lcdg', olive:'lcdg', blue:'lcdb', burgundy:'oled' };   // pantalla por defecto de cada carcasa
@@ -3359,15 +3414,16 @@ const SETTINGS = [
   { id:'keyLabels', label:'Notas y números en las teclas', type:'check' },
   { id:'osc', label:'Osciloscopio', type:'check' },
   { id:'haptics', label:'Vibración', type:'check' },
+  { id:'hapticTest', label:'Probar la vibración', type:'button', text:'Probar', run:() => hapticTest() },
   { id:'swipe', label:'Deslizar sobre los botones', type:'check' },
   { section:'Tono' },
-  { id:'key', label:'Tonalidad', type:'select', numeric:true, options:() => NOTE_NAMES.map((n, i) => [i, n]) },
-  { id:'scale', label:'Escala', type:'select', numeric:true, options:() => SCALES.map((s, i) => [i, s.name]) },
-  { id:'globalOct', label:'Octava', type:'select', numeric:true, options:() => [-2,-1,0,1,2].map(v => [v, v > 0 ? '+' + v : String(v)]) },
-  { id:'bpm', label:'Tempo', type:'range', min:40, max:300, to:v => v, from:v => Math.round(v), fmt:v => Math.round(v) + ' BPM' },
-  { id:'tap', label:'Marcar tempo', type:'tap' },
+  { id:'key', label:'Key', type:'select', numeric:true, options:() => NOTE_NAMES.map((n, i) => [i, n]) },
+  { id:'scale', label:'Scale', type:'select', numeric:true, options:() => SCALES.map((s, i) => [i, s.name]) },
+  { id:'globalOct', label:'Octave', type:'select', numeric:true, options:() => [-2,-1,0,1,2].map(v => [v, v > 0 ? '+' + v : String(v)]) },
+  { id:'bpm', label:'BPM', type:'range', min:40, max:300, to:v => v, from:v => Math.round(v), fmt:v => Math.round(v) + ' BPM' },
+  { id:'tap', label:'Tap Tempo', type:'tap' },
   { section:'Sonido' },
-  { id:'sound', label:'Instrumento', type:'select', groups:true, options:() => {
+  { id:'sound', label:'Sound', type:'select', groups:true, options:() => {
       const lib = LIB.filter(s => s.id.startsWith('lib:')), cats = [...new Set(lib.map(s => s.cat))], usr = LIB.filter(s => s.id.startsWith('usr:'));
       return [
         ['Instrumentos', SOUNDS.map(s => [s.id, s.name])],
@@ -3375,17 +3431,17 @@ const SETTINGS = [
         ...(usr.length ? [['Importados', usr.map(s => [s.id, s.name])]] : []),
       ];
     } },
-  { id:'adsr', label:'Envolvente', type:'select', options:() => Object.keys(ADSR).map(k => [k, k.charAt(0) + k.slice(1).toLowerCase()]) },
-  { id:'attack', label:'Ataque', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
+  { id:'adsr', label:'ADSR', type:'select', options:() => Object.keys(ADSR).map(k => [k, k.charAt(0) + k.slice(1).toLowerCase()]) },
+  { id:'attack', label:'Attack', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
   { id:'release', label:'Release', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
-  { id:'voices', label:'Voces', type:'select', numeric:true, options:opts([[8,'8 (llenas)'],[4,'4'],[2,'2'],[1,'1 (una nota)']]) },
-  { id:'glide', label:'Glide', type:'select', options:opts([['off','Apagado'],['short','Corto'],['medium','Medio'],['long','Largo']]) },
-  { id:'lfo', label:'Vibrato', type:'select', options:opts([['off','Apagado'],['low','Suave'],['med','Medio'],['high','Intenso']]) },
-  { id:'stereo', label:'Estéreo', type:'check' },
-  { id:'cutoff', label:'Filtro', type:'range', min:0, max:1000, to:v => v, from:v => v,
+  { id:'voices', label:'Voice', type:'select', numeric:true, options:opts([[8,'8'],[4,'4'],[2,'2'],[1,'1']]) },
+  { id:'glide', label:'Glide', type:'select', options:opts([['off','Off'],['short','Short'],['medium','Medium'],['long','Long']]) },
+  { id:'lfo', label:'LFO', type:'select', options:opts([['off','Off'],['low','Low'],['med','Medium'],['high','High']]) },
+  { id:'stereo', label:'Stereo', type:'check' },
+  { id:'cutoff', label:'Filter', type:'range', min:0, max:1000, to:v => v, from:v => v,
     fmt:v => v >= 1000 ? 'abierto' : Math.round(cutoffHz(v)) + ' Hz' },
-  { id:'volume', label:'Volumen', type:'range', min:0, max:100, ...pct },
-  { id:'micGain', label:'Ganancia del micro', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
+  { id:'volume', label:'Volume', type:'range', min:0, max:100, ...pct },
+  { id:'micGain', label:'Mic Gain', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
   { id:'mic_test', label:'Probar el micrófono', type:'button', text:'Probar', run:() => onActivation(runMicTest) },
   { id:'micHold', label:'Mantener el micrófono abierto', type:'check' },
   { id:'midi', label:'MIDI (entrada y salida)', type:'check' },
@@ -3399,33 +3455,33 @@ const SETTINGS = [
   { id:'tw_code', label:'Código del instrumento', type:'code' },
   { id:'tw_reset', label:'Volver a los valores originales', type:'button', text:'Restablecer', run:() => { delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrumento restablecido'); } },
   { section:'Efectos' },
-  { id:'reverb', label:'Reverb', type:'select', options:opts([['off','Apagada'],['room','Room'],['hall','Hall'],['plate','Plate'],['spring','Spring'],['ambient','Ambient']]) },
+  { id:'reverb', label:'Reverb', type:'select', options:opts([['off','Off'],['room','Room'],['hall','Hall'],['plate','Plate'],['spring','Spring'],['ambient','Ambient']]) },
   { id:'reverbAmt', label:'Cantidad de reverb', type:'range', min:0, max:100, ...pct },
   { id:'delay', label:'Delay', type:'select', options:opts(DIV_OPTS) },
   { id:'delayAmt', label:'Cantidad de delay', type:'range', min:0, max:100, ...pct },
-  { id:'chorus', label:'Chorus', type:'select', options:opts([['off','Apagado'],['light','Light'],['warm','Warm'],['wide','Wide'],['lush','Lush']]) },
-  { id:'flanger', label:'Flanger', type:'select', options:opts([['off','Apagado'],['slow','Slow'],['jet','Jet'],['deep','Deep'],['metal','Metal']]) },
-  { id:'drive', label:'Drive', type:'select', options:opts([['off','Apagado'],['tube','Tube'],['drive','Drive'],['dist','Dist'],['fuzz','Fuzz']]) },
-  { id:'tape', label:'Tape', type:'select', options:opts([['off','Apagado'],['lofi','Lo-fi'],['vinyl','Vinilo'],['tape','Cinta']]) },
-  { id:'tremolo', label:'Trémolo', type:'select', options:opts(DIV_OPTS) },
-  { id:'vocoder', label:'Vocoder', type:'select', options:opts([['off','Apagado'],['mic','Micrófono'],['loop','Pista 1 del looper']]) },
-  { id:'vocFormant', label:'Vocoder: formante', type:'range', min:-12, max:12, to:v => v, from:v => v, fmt:v => (v > 0 ? '+' : '') + v + ' st' },
-  { id:'vocNoise', label:'Vocoder: consonantes', type:'range', min:0, max:100, ...pct },
+  { id:'chorus', label:'Chorus', type:'select', options:opts([['off','Off'],['light','Light'],['warm','Warm'],['wide','Wide'],['lush','Lush']]) },
+  { id:'flanger', label:'Flanger', type:'select', options:opts([['off','Off'],['slow','Slow'],['jet','Jet'],['deep','Deep'],['metal','Metal']]) },
+  { id:'drive', label:'Drive', type:'select', options:opts([['off','Off'],['tube','Tube'],['drive','Drive'],['dist','Dist'],['fuzz','Fuzz']]) },
+  { id:'tape', label:'Tape', type:'select', options:opts([['off','Off'],['lofi','LoFi'],['vinyl','Vinyl'],['tape','Tape']]) },
+  { id:'tremolo', label:'Tremolo', type:'select', options:opts(DIV_OPTS) },
+  { id:'vocoder', label:'Vocoder', type:'select', options:opts([['off','Off'],['mic','Mic'],['loop','Loop (pista 1)']]) },
+  { id:'vocFormant', label:'Vocoder: Formant Shift', type:'range', min:-12, max:12, to:v => v, from:v => v, fmt:v => (v > 0 ? '+' : '') + v + ' st' },
+  { id:'vocNoise', label:'Vocoder: Noise Level', type:'range', min:0, max:100, ...pct },
   { section:'Modos' },
-  { id:'mode', label:'Modo', type:'select', options:() => MODES.map(m => [m.id, m.name]) },
-  { id:'strumSpeed', label:'Strum: velocidad', type:'select', options:opts([['slow','Lento (200 ms)'],['medium','Medio (80 ms)'],['fast','Rápido (40 ms)']]) },
-  { id:'arpPattern', label:'Arp: patrón', type:'select', options:opts(ARP_PATTERNS) },
-  { id:'arpRate', label:'Arp: velocidad', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
-  { id:'arpLayer', label:'Arp: capas', type:'select', options:opts(ARP_LAYERS) },
-  { id:'repeatRate', label:'Repeat: velocidad', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
+  { id:'mode', label:'Mode', type:'select', options:() => MODES.map(m => [m.id, m.name]) },
+  { id:'strumSpeed', label:'Strum Speed', type:'select', options:opts([['slow','Slow (200 ms)'],['medium','Medium (80 ms)'],['fast','Fast (40 ms)']]) },
+  { id:'arpPattern', label:'Arp Pattern', type:'select', options:opts(ARP_PATTERNS) },
+  { id:'arpRate', label:'Arp Rate', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
+  { id:'arpLayer', label:'Arp Layering', type:'select', options:opts(ARP_LAYERS) },
+  { id:'repeatRate', label:'Repeat Rate', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
   { section:'Batería' },
   { id:'kit', label:'Kit', type:'select', options:opts(KITS) },
-  { id:'beatVar', label:'Variación del ritmo', type:'select', options:opts(BEAT_VARS) },
+  { id:'beatVar', label:'Drum Loop Variation', type:'select', options:opts(BEAT_VARS) },
   { id:'drumVol', label:'Volumen de batería', type:'range', min:0, max:100, ...pct },
   { section:'Acordes' },
   { id:'joy', label:'Joystick', type:'select', options:() => JOY_MODES.map(m => [m.id, m.name]) },
-  { id:'bass', label:'Bajo', type:'select', options:opts([['off','Sin bajo'],['root','Raíz'],['slash','Slash (botón + botón)']]) },
-  { id:'vlead', label:'Conducción de voces', type:'check' },
+  { id:'bass', label:'Bass', type:'select', options:opts([['off','Off'],['root','Root'],['slash','Slash']]) },
+  { id:'vlead', label:'V.Lead (Voice Leading)', type:'check' },
   { id:'btn_reset', label:'Quitar fijados, octavas e inversiones', type:'button', text:'Restablecer', run:() => {
     state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
     saveState(); renderPads(); toast('Botones restablecidos'); } },
@@ -3734,7 +3790,7 @@ function presetLoad(i) {
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 const chance = p => Math.random() < p;
 function randomSound() {
-  const snd = rnd(allSounds().filter(s => s.id !== 'micsample' || sampleBuf.mic));
+  const snd = rnd(allSounds().filter(s => (s.id !== 'micsample' || sampleBuf.mic) && s.id !== state.sound));   // como el aparato: nunca repite el sonido anterior
   state.sound = snd.id;
   if (snd.lib) applyLibPreset(snd);
   else {
@@ -4181,18 +4237,10 @@ document.addEventListener('visibilitychange', () => {
   if (state.vocoder === 'mic') vocoderSource();
 });
 onTap($('closeSheetTop'), closeSettings);
-// Deslizar hacia abajo sobre la cabecera (o sobre el contenido ya en el inicio) cierra los ajustes
-(function () {
-  const body = document.querySelector('.sheet-body'); let y0 = null, fromHead = false;
-  body.addEventListener('pointerdown', e => { y0 = e.clientY; fromHead = !!e.target.closest('.sheet-head'); });
-  body.addEventListener('pointermove', e => {
-    if (y0 == null) return;
-    if ((fromHead || body.scrollTop <= 0) && e.clientY - y0 > 70) { y0 = null; closeSettings(); }
-  });
-  body.addEventListener('pointerup', () => { y0 = null; });
-  body.addEventListener('pointercancel', () => { y0 = null; });
-})();
-$('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSettings(); });
+// Tocar fuera cierra, solo si el toque empezó y acabó fuera (antes, al cambiar de pestaña la ventana encogía y el clic caía fuera y la cerraba)
+let sheetDownOutside = false;
+$('sheet').addEventListener('pointerdown', e => { sheetDownOutside = e.target === $('sheet'); });
+$('sheet').addEventListener('click', e => { if (e.target === $('sheet') && sheetDownOutside) closeSettings(); sheetDownOutside = false; });
 onTap($('tInv'), toolInversion);
 onTap($('tLock'), toolLock);
 onTap($('tOctDn'), () => toolOct(-1));
