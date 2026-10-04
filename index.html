@@ -19,15 +19,15 @@
 :root, [data-theme="light"] {           /* Atari Future */
   --body: #E2DAC7; --panel: #252525; --panel-ink: #E2DAC7; --panel-dim: #9a9484;
   --accent: #E76527; --accent2: #D9A832; --accent3: #6F8F82;
-  --ink: #252525; --muted: #6b6659; --line: #252525;
+  --ink: #252525; --muted: #635E53; --line: #252525;
   --btn: #E2DAC7; --btn-ink: #252525; --btn-line: #252525;
   --ctl: #E2DAC7; --ctl-ink: #252525; --ctl-line: #252525;
   --scope: #6F8F82;
   --sel: #252525; --sel-ink: #E2DAC7;
-  --sheet: #E2DAC7; --sheet-ink: #252525; --sheet-muted: #6b6659; --sheet-line: #b8b09c; --field: #ebe4d3;
+  --sheet: #E2DAC7; --sheet-ink: #252525; --sheet-muted: #635E53; --sheet-line: #b8b09c; --field: #ebe4d3;
 }
 [data-theme="dark"] {                   /* Atari Night */
-  --body: #171717; --panel: #292A28; --panel-ink: #E5DDC9; --panel-dim: #8f8a7c;
+  --body: #171717; --panel: #292A28; --panel-ink: #E5DDC9; --panel-dim: #979183;
   --accent: #E05B22; --accent2: #C2A343; --accent3: #536C70;
   --ink: #E5DDC9; --muted: #9b958a; --line: #3a3b38;
   --btn: #171717; --btn-ink: #E5DDC9; --btn-line: #3a3b38;
@@ -37,14 +37,14 @@
   --sheet: #1d1d1d; --sheet-ink: #E5DDC9; --sheet-muted: #9b958a; --sheet-line: #3a3b38; --field: #292A28;
 }
 [data-theme="alt"] {                    /* Petrol 78 */
-  --body: #174B4B; --panel: #D8CBA8; --panel-ink: #292B29; --panel-dim: #7a7461;
+  --body: #174B4B; --panel: #D8CBA8; --panel-ink: #292B29; --panel-dim: #585549;
   --accent: #D95B28; --accent2: #A83D2A; --accent3: #292B29;
   --ink: #D8CBA8; --muted: #a9b9b4; --line: #292B29;
   --btn: #292B29; --btn-ink: #D8CBA8; --btn-line: #292B29;
   --ctl: #D8CBA8; --ctl-ink: #292B29; --ctl-line: #292B29;
   --scope: #292B29;
   --sel: #292B29; --sel-ink: #D8CBA8;
-  --sheet: #D8CBA8; --sheet-ink: #292B29; --sheet-muted: #6b6457; --sheet-line: #b3a888; --field: #e6dcc0;
+  --sheet: #D8CBA8; --sheet-ink: #292B29; --sheet-muted: #59554B; --sheet-line: #b3a888; --field: #e6dcc0;
 }
 
 /* ===== Base ===== */
@@ -94,6 +94,11 @@ body {
 }
 .gear svg, .oscbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .gear { position: absolute; top: 5px; right: 6px; }
+.gear, .oscbtn { position: relative; }
+.gear { position: absolute; }
+.gear, .oscbtn { z-index: 3; }
+.gear::after { content: ''; position: absolute; inset: -5px -6px -12px -12px; }   /* área de toque ≈44×43 sin cambiar el dibujo (arriba y a la derecha limita el borde de la pantalla) */
+.oscbtn::after { content: ''; position: absolute; inset: -9px -5px; }
 .oscbtn.on { color: var(--panel-ink); }
 #wavBtn.on circle { fill: currentColor; }
 .compass { width: 20px; height: 20px; }
@@ -109,7 +114,7 @@ body {
 
 /* ===== Modos ===== */
 .modes { flex: 0 0 auto; display: flex; gap: 8px; align-items: center; }
-.modes-scroll { position: relative; flex: 1 1 auto; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.modes-scroll { position: relative; flex: 1 1 auto; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 7px 0; margin: -7px 0; }
 .modes-scroll::-webkit-scrollbar { display: none; }
 .modes::-webkit-scrollbar { display: none; }
 .chip {
@@ -117,6 +122,8 @@ body {
   border: 1.5px solid var(--ctl-line); background: var(--ctl); color: var(--ctl-ink); touch-action: manipulation;
   transition: transform .06s;
 }
+.chip { position: relative; }
+.modes-scroll .chip::after, .sheet-nav button::after { content: ''; position: absolute; inset: -9px -3px; }   /* área de toque ≥ 44 px de alto */
 .chip:active { transform: translateY(1px) scale(.98); }
 .chip.on { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
 .chip.param { flex: 0 0 auto; margin-left: 0; border-style: dashed; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -231,10 +238,22 @@ body {
   font: inherit; font-size: 22px; line-height: 1; width: 38px; height: 38px; border-radius: 50%; margin-top: 6px;
   border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation;
 }
-.sheet-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 10px 0 2px; }
+.sheet-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 17px 0 9px; margin: -7px 0; }
 .sheet-nav::-webkit-scrollbar { display: none; }
-.sheet-nav button { flex: 0 0 auto; font: inherit; font-size: 12px; padding: 6px 11px; border-radius: 999px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; }
+.sheet-nav button { position: relative; flex: 0 0 auto; font: inherit; font-size: 12px; padding: 6px 11px; border-radius: 999px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; }
 .sheet-nav button.on { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
+/* Aviso de que hay más contenido a los lados (franjas que se desplazan con el dedo) */
+.modes-scroll.fade-r, .sheet-nav.fade-r { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent); }
+.modes-scroll.fade-l, .sheet-nav.fade-l { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent); }
+.modes-scroll.fade-l.fade-r, .sheet-nav.fade-l.fade-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent); }
+/* Ratón: no hay forma cómoda de desplazar en horizontal, así que las franjas se reparten en filas y todo queda a la vista */
+@media (hover: hover) and (pointer: fine) {
+  .modes-scroll, .sheet-nav { flex-wrap: wrap; overflow: visible; padding: 0; margin: 0; -webkit-mask-image: none !important; mask-image: none !important; }
+  .modes-scroll { padding-bottom: 2px; }
+  .sheet-nav { padding: 10px 0 2px; }
+  .modes-scroll .chip::after, .sheet-nav button::after { display: none; }
+  .gear::after, .oscbtn::after { inset: -4px; }
+}
 .sec[hidden] { display: none; }
 .sec h3 { margin-top: 12px; }
 .row .act { font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; transition: transform .05s; }
@@ -354,7 +373,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Guardar audio</h4>
       <p>El botón del círculo, junto al osciloscopio, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
       <h4>MIDI</h4>
-      <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas. En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
+      <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Mic (sampler)</h4>
       <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
       <h4>Afinador</h4>
@@ -1031,7 +1050,7 @@ function scrollModeIntoView() {   // centra el modo activo en la franja
 }
 function renderModes() {
   document.querySelectorAll('#modes .chip:not(.param)').forEach(el => {
-    el.classList.toggle('on', el.dataset.m === state.mode);
+    el.classList.toggle('on', el.dataset.m === state.mode); el.setAttribute('aria-pressed', el.dataset.m === state.mode ? 'true' : 'false');
     if (el.dataset.m === 'mixer') el.hidden = !loopHasAudio() && state.mode !== 'mixer';
   });
   const p = modeParam(), el = $('modeParam');
@@ -1047,6 +1066,7 @@ function buildModes() {
   }
   const p = document.createElement('button'); p.className = 'chip param'; p.id = 'modeParam';
   onTap(p, cycleModeParam); wrap.appendChild(p);
+  fadeEdges(scroll);
 }
 function glideTc() {
   const snd = curSound();
@@ -2804,7 +2824,11 @@ bindQuick('sSound', 'sound'); bindQuick('sKey', 'key'); bindQuick('sMode', 'mode
 // Entrada: las teclas blancas de cualquier octava tocan los botones 1–7 (Do = 1). Salida: el acorde que suena, como notas.
 const WHITE_PAD = { 0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6 };
 const midiHeld = new Map();
-function midiSend(bytes) { if (!midiAcc) return; for (const o of midiAcc.outputs.values()) { try { o.send(bytes); } catch (e) {} } }
+const midiLast = { on:new Map(), off:new Map() };   // cuándo envié cada nota: para ignorar el eco de un puerto en bucle
+function midiSend(bytes) {
+  if (!midiAcc) return;
+  if (bytes[0] === 0x90) midiLast.on.set(bytes[1], performance.now()); else if (bytes[0] === 0x80) midiLast.off.set(bytes[1], performance.now());
+  for (const o of midiAcc.outputs.values()) { try { o.send(bytes); } catch (e) {} } }
 function midiSync(now) {
   if (!state.midi || !midiAcc) { midiSent.clear(); return; }
   for (const n of midiSent) if (!now.has(n)) midiSend([0x80, n, 0]);
@@ -2814,6 +2838,10 @@ function midiSync(now) {
 function midiIn(e) {
   if (!state.midi || !e.data) return;
   const st = e.data[0], n = e.data[1], v = e.data[2], cmd = st & 0xF0;
+  if (cmd === 0x90 || cmd === 0x80) {   // eco de lo que acabo de enviar (puerto en bucle): se ignora, o se realimentaría sin fin
+    const last = (cmd === 0x90 && v > 0 ? midiLast.on : midiLast.off).get(n);
+    if (last != null && performance.now() - last < 150) return;
+  }
   if (cmd === 0x90 && v > 0) {
     const pad = WHITE_PAD[n % 12];
     if (pad == null || midiHeld.has(n)) return;
@@ -3035,11 +3063,18 @@ const SETTINGS = [
   { section:'Manual', manual:true },
 ];
 let settingsTab = 'Aspecto';
+function fadeEdges(el) {
+  if (!el) return;
+  const upd = () => { el.classList.toggle('fade-l', el.scrollLeft > 4); el.classList.toggle('fade-r', el.scrollLeft + el.clientWidth < el.scrollWidth - 4); };
+  el.addEventListener('scroll', upd, { passive: true }); window.addEventListener('resize', upd); upd(); setTimeout(upd, 300);
+  el._fade = upd;
+}
 function showTab(name) {
   settingsTab = name;
   document.querySelectorAll('#settingsRows .sec, #manualSec').forEach(el => { el.hidden = el.dataset.sec !== name; });
-  document.querySelectorAll('#sheetNav button').forEach(b => b.classList.toggle('on', b.dataset.sec === name));
+  document.querySelectorAll('#sheetNav button').forEach(b => { const on = b.dataset.sec === name; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
   document.querySelector('.sheet-body').scrollTop = 0;
+  const act = document.querySelector('#sheetNav button.on'); if (act && act.scrollIntoView) { try { act.scrollIntoView({ block:'nearest', inline:'nearest' }); } catch (e) {} }
 }
 
 // Un preset de la biblioteca trae su envolvente y sus efectos, como en el original
@@ -3096,9 +3131,22 @@ function tapTempo() {
 
 function buildSettings() {
   const wrap = $('settingsRows'); wrap.innerHTML = ''; let sec = null;
+  const nav = $('sheetNav'); nav.setAttribute('role', 'tablist'); nav.setAttribute('aria-label', 'Secciones de ajustes');
+  if (!nav._keys) {   // flechas, Inicio y Fin mueven entre pestañas (patrón estándar de pestañas)
+    nav._keys = true;
+    nav.addEventListener('keydown', e => {
+      const tabs = [...nav.querySelectorAll('button')], i = tabs.indexOf(document.activeElement); if (i < 0) return;
+      let j = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = tabs.length - 1;
+      if (j == null) return;
+      e.preventDefault(); showTab(tabs[j].dataset.sec); tabs[j].focus();
+    });
+  }
   for (const s of SETTINGS) {
     if (s.section) {
-      const nb = document.createElement('button'); nb.textContent = s.section; nb.dataset.sec = s.section;
+      const nb = document.createElement('button'); nb.textContent = s.section; nb.dataset.sec = s.section; nb.setAttribute('role', 'tab'); nb.setAttribute('aria-selected', 'false'); nb.tabIndex = -1;
       onTap(nb, () => showTab(s.section));
       $('sheetNav').appendChild(nb);
       if (s.manual) { $('manualSec').dataset.sec = s.section; sec = null; continue; }
@@ -3220,7 +3268,7 @@ function afterSettingChange() {
   if (held.length) refresh();
 }
 
-function openSettings() { syncSettings(); $('sheet').hidden = false; showTab(settingsTab); }
+function openSettings() { syncSettings(); $('sheet').hidden = false; showTab(settingsTab); const n = $('sheetNav'); if (n._fade) { n._fade(); setTimeout(n._fade, 120); } }
 function closeSettings() { $('sheet').hidden = true; }
 
 // ===== PRESETS, AZAR Y COPIA DE SEGURIDAD =====
@@ -3709,7 +3757,7 @@ function gameTexts() {
 }
 
 // ===== ARRANQUE =====
-buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); renderModes(); scrollModeIntoView();
+buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); fadeEdges($('sheetNav')); renderModes(); scrollModeIntoView();
 $('oscBtn').addEventListener('click', () => setOsc(!state.osc));
 applyTheme();
 if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
