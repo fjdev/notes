@@ -247,6 +247,7 @@ body {
 .range-wrap input { flex: 1; max-width: none; }
 .row .tap { font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; }
 .row .tap:active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.row .file { font: inherit; font-size: 12px; max-width: 58%; color: var(--sheet-muted); }
 .row .code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; max-width: 60%; text-align: left; }
 .sheet .help { font-size: 13px; color: var(--sheet-muted); line-height: 1.5; margin: 14px 0; }
 .sheet .actions { display: flex; gap: 8px; margin-top: 12px; }
@@ -311,6 +312,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Modos</h4>
       <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo.</p>
       <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
+      <h4>Biblioteca de sonidos</h4>
+      <p>En Ajustes → Sonido, el grupo "Biblioteca" contiene 50 presets construidos como los de fábrica de la app oficial: cada voz con su propio motor, y su envolvente y efectos, que se aplican al elegirlos. Puedes importar un archivo .json exportado desde la app oficial y sus presets aparecerán en "Importados".</p>
       <h4>Micrófono</h4>
       <p><b>Mic</b>: mantén el botón 1 para grabar hasta tres segundos. La app detecta la afinación, la lleva a Do y pasa al modo Lead con el instrumento "Mic Sample", que también puedes elegir en Sonido. <b>Afinador</b>: canta o toca cerca del micro; la pantalla se invierte cuando estás afinado. <b>Vocoder</b> (en Efectos): tu voz, o la pista 1 del looper, da forma al sonido mientras mantienes un acorde. Usa auriculares.</p>
       <h4>Looper</h4>
@@ -579,7 +582,54 @@ const SOUNDS = [
   { id:'ocean',   name:'Ocean',     waves:['sine','sine'], level:0.5, adsr:'LONG', noise:{ q:30, mix:2.2 } },
   { id:'micsample', name:'Mic Sample', sample:'mic', level:1.2, adsr:'KEYS' },
 ];
-const curSound = () => SOUNDS.find(s => s.id === state.sound) || SOUNDS[0];
+// Biblioteca de fábrica (50 presets de la app complementaria): parámetros de construcción, sin grabaciones.
+const FACTORY_LIB = [{"n":"Polar Saw","c":"Analog","L":[["w","SAW",116,0],["w","SAW",110,-14],["w","SAW",104,16],["w","SAW",99,-30],["w","SAW",93,32],["w","SAW",86,-48]],"g":[40,30,80,70,78,0,0,46,30],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Square Garden","c":"Analog","L":[["w","SQUARE",116,0],["w","SQUARE",110,-8],["w","SQUARE",104,10],["w","SQUARE",99,-18],["w","SQUARE",93,19],["w","SQUARE",86,-29]],"g":[2,55,55,35,86,0,0,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Glass Sub","c":"Analog","L":[["w","SINE",127,0],["w","SINE",120,-3],["w","SINE",108,3],["w","SINE",96,-6],["w","SINE",80,6],["w","SINE",66,-10]],"g":[6,30,80,40,60,0,0,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":0,"bass":1,"hp":0,"filt":0},"v":0},{"n":"Triad Bloom","c":"Analog","L":[["w","TRIANGLE",116,0],["w","TRIANGLE",110,-12],["w","TRIANGLE",104,14],["w","TRIANGLE",99,-25],["w","TRIANGLE",93,27],["w","TRIANGLE",86,-41]],"g":[55,40,85,80,90,0,0,40,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Buzzsaw Lead","c":"Analog","L":[["w","SAW",116,0],["w","SAW",110,-5],["w","SAW",104,6],["w","SAW",99,-10],["w","SAW",93,11],["w","SAW",86,-17]],"g":[1,25,90,18,108,24,0,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":34,"bass":0,"hp":0,"filt":0},"v":3},{"n":"Rhodes Dream","c":"FM","L":[["f","EPIANO",116,0],["f","EPIANO",110,-10],["f","EPIANO",104,11],["f","EPIANO",99,-21],["f","EPIANO",93,22],["f","EPIANO",86,-34]],"g":[2,45,60,40,90,0,0,24,40],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Cathedral Bells","c":"FM","L":[["f","BELL",100,0],["f","BELL",100,-13],["f","BELL",104,14],["f","BELL",108,-27],["f","BELL",110,29],["f","BELL",112,-43]],"g":[1,90,20,110,90,0,0,64,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Drawbar","c":"FM","L":[["f","ORGAN",116,0],["f","ORGAN",110,-8],["f","ORGAN",104,9],["f","ORGAN",99,-16],["f","ORGAN",93,18],["f","ORGAN",86,-26]],"g":[1,30,100,8,100,0,0,0,0],"e":{"rev":0,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Brass Section","c":"FM","L":[["f","BRASS",116,0],["f","BRASS",110,-7],["f","BRASS",104,8],["f","BRASS",99,-15],["f","BRASS",93,16],["f","BRASS",86,-24]],"g":[6,30,78,22,104,0,0,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"HX Keys","c":"FM","L":[["f","HX7",116,0],["f","HX7",110,-9],["f","HX7",104,10],["f","HX7",99,-19],["f","HX7",93,21],["f","HX7",86,-31]],"g":[2,40,55,30,90,0,0,20,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"String Quartet","c":"Sample","L":[["s","STRINGS",116,0],["s","STRINGS",110,-12],["s","STRINGS",104,14],["s","STRINGS",99,-25],["s","STRINGS",93,27],["s","STRINGS",86,-41]],"g":[35,30,80,60,90,0,0,40,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Felt Piano","c":"Sample","L":[["s","PIANO",116,0],["s","PIANO",110,-7],["s","PIANO",104,8],["s","PIANO",99,-15],["s","PIANO",93,16],["s","PIANO",86,-24]],"g":[1,60,40,45,90,0,0,34,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Vibe Mallets","c":"Sample","L":[["s","VIBRAPHONE",116,0],["s","VIBRAPHONE",110,-10],["s","VIBRAPHONE",104,11],["s","VIBRAPHONE",99,-21],["s","VIBRAPHONE",93,22],["s","VIBRAPHONE",86,-34]],"g":[1,70,25,55,90,0,0,0,24],"e":{"rev":0,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Choir Ahh","c":"Sample","L":[["s","VOX",116,0],["s","VOX",110,-14],["s","VOX",104,16],["s","VOX",99,-30],["s","VOX",93,32],["s","VOX",86,-48]],"g":[45,30,80,75,90,0,0,52,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Harpsong","c":"Sample","L":[["s","HARP",116,0],["s","HARP",110,-11],["s","HARP",104,13],["s","HARP",99,-24],["s","HARP",93,26],["s","HARP",86,-38]],"g":[1,80,15,60,90,0,0,38,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Wurli Soul","c":"Sample","L":[["s","WURLI",116,0],["s","WURLI",110,-8],["s","WURLI",104,10],["s","WURLI",99,-18],["s","WURLI",93,19],["s","WURLI",86,-29]],"g":[2,50,55,35,90,0,0,0,38],"e":{"rev":0,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Flute Air","c":"Sample","L":[["s","FLUTE",110,0],["s","FLUTE",110,-6],["s","FLUTE",110,6],["s","FLUTE",110,-12],["s","FLUTE",108,13],["s","FLUTE",106,-19]],"g":[18,30,80,40,90,0,0,30,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":3},{"n":"Cello Section","c":"Sample","L":[["s","CELLOS",120,0],["s","CELLOS",114,-10],["s","CELLOS",106,11],["s","CELLOS",98,-21],["s","CELLOS",90,22],["s","CELLOS",82,-34]],"g":[40,30,80,65,90,0,0,36,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"White Wash","c":"Texture","L":[["n","WHITE",116,0],["n","WHITE",110,-14],["n","WHITE",104,16],["n","WHITE",99,-30],["n","WHITE",93,32],["n","WHITE",86,-48]],"g":[70,30,80,90,70,0,0,50,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":1,"filt":0},"v":0},{"n":"Pink Veil","c":"Texture","L":[["n","PINK",80,0],["n","PINK",80,-13],["n","PINK",80,14],["n","PINK",80,-27],["n","PINK",80,29],["n","PINK",80,-43]],"g":[80,30,80,100,56,0,0,44,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Bell Saw","c":"Hybrid","L":[["f","BELL",116,0],["f","BELL",110,-13],["f","BELL",104,14],["f","BELL",99,-27],["f","BELL",93,29],["f","BELL",86,-43]],"g":[3,60,50,50,90,0,0,40,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Glass Strings","c":"Hybrid","L":[["s","STRINGS",116,0],["s","STRINGS",110,-12],["s","STRINGS",104,14],["s","STRINGS",99,-25],["f","BELL",93,27],["f","BELL",86,-41]],"g":[25,30,80,60,90,0,0,48,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Choir Machine","c":"Hybrid","L":[["s","VOX",116,0],["s","VOX",110,-14],["s","VOX",104,16],["s","VOX",99,-30],["s","VOX",93,32],["s","VOX",86,-48]],"g":[30,30,80,70,90,0,0,50,24],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Neon Pluck","c":"Hybrid","L":[["w","SQUARE",116,0],["w","SQUARE",110,-8],["w","SQUARE",104,10],["w","SQUARE",99,-18],["w","SQUARE",93,19],["w","SQUARE",86,-29]],"g":[1,40,35,25,100,0,0,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Tape Choir","c":"Hybrid","L":[["s","VOX",116,0],["s","VOX",110,-14],["s","VOX",104,16],["s","VOX",99,-30],["s","VOX",93,32],["n","WHITE",86,-48]],"g":[40,30,80,80,90,0,0,46,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Synthetic Brass","c":"Hybrid","L":[["f","BRASS",116,0],["f","BRASS",110,-11],["f","BRASS",104,13],["f","BRASS",99,-24],["f","BRASS",93,26],["f","BRASS",86,-38]],"g":[8,30,80,24,102,0,0,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Crystal Keys","c":"Hybrid","L":[["s","PIANO",116,0],["s","PIANO",110,-10],["s","PIANO",104,11],["s","PIANO",99,-21],["f","BELL",93,22],["f","BELL",86,-34]],"g":[1,55,45,50,90,0,0,40,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Vapor Pad","c":"Hybrid","L":[["w","SAW",116,0],["w","SAW",110,-14],["w","SAW",104,16],["w","SAW",99,-30],["w","SAW",93,32],["w","SAW",86,-48]],"g":[60,30,80,90,72,0,0,60,36],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Mallet Bell","c":"Hybrid","L":[["s","VIBRAPHONE",116,0],["s","VIBRAPHONE",110,-11],["s","VIBRAPHONE",104,13],["s","VIBRAPHONE",99,-24],["s","VIBRAPHONE",93,26],["s","VIBRAPHONE",86,-38]],"g":[1,75,20,60,90,0,0,42,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Aurora","c":"Hybrid","L":[["w","SINE",122,0],["w","SINE",112,-14],["w","SAW",104,16],["w","SAW",98,-30],["n","WHITE",76,32],["f","BELL",104,-48]],"g":[35,50,75,80,84,0,0,58,28],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Frostlight","c":"Hybrid","L":[["s","STRINGS",116,0],["s","STRINGS",110,-14],["s","STRINGS",104,16],["f","BELL",99,-30],["f","BELL",93,32],["f","BELL",86,-48]],"g":[42,50,80,90,80,0,0,60,30],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Driftwood Keys","c":"Hybrid","L":[["s","WURLI",116,0],["s","WURLI",110,-8],["s","WURLI",104,10],["s","WURLI",99,-18],["s","WURLI",93,19],["s","WURLI",86,-29]],"g":[2,48,55,42,88,0,0,30,40],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Lantern Pluck","c":"Hybrid","L":[["s","HARP",116,0],["s","HARP",110,-8],["s","HARP",104,9],["s","HARP",99,-16],["s","HARP",93,18],["s","HARP",86,-26]],"g":[1,62,18,48,98,0,0,34,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Underglow","c":"Hybrid","L":[["w","SINE",124,0],["w","SINE",118,-6],["f","BRASS",104,6],["f","BRASS",98,-12],["f","BRASS",90,13],["f","BRASS",82,-19]],"g":[6,30,82,24,96,18,14,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":28,"bass":1,"hp":0,"filt":0},"v":0},{"n":"Seraphine","c":"Hybrid","L":[["s","VOX",116,0],["s","VOX",110,-14],["s","VOX",104,16],["s","VOX",99,-30],["s","VOX",93,32],["s","VOX",86,-48]],"g":[38,50,88,85,82,0,0,62,26],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Copper Sky","c":"Hybrid","L":[["w","SAW",116,0],["w","SAW",110,-13],["w","SAW",104,14],["w","SAW",99,-27],["f","HX7",93,29],["f","HX7",86,-43]],"g":[34,45,82,72,86,0,0,50,28],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Moss Bell","c":"Hybrid","L":[["s","VIBRAPHONE",116,0],["s","VIBRAPHONE",110,-11],["s","VIBRAPHONE",104,13],["s","VIBRAPHONE",99,-24],["s","VIBRAPHONE",93,26],["s","VIBRAPHONE",86,-38]],"g":[1,78,22,64,92,0,0,48,20],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Tidal Brass","c":"Hybrid","L":[["f","BRASS",116,0],["f","BRASS",110,-11],["f","BRASS",104,13],["f","BRASS",99,-24],["f","BRASS",93,26],["f","BRASS",86,-38]],"g":[14,35,84,40,100,12,0,34,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Velvet Static","c":"Hybrid","L":[["s","PIANO",112,0],["s","PIANO",106,-12],["s","PIANO",100,14],["s","PIANO",94,-25],["s","PIANO",86,27],["s","PIANO",78,-41]],"g":[6,58,42,55,74,0,0,46,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":1,"filt":0},"v":0},{"n":"Cirrus","c":"Hybrid","L":[["w","TRIANGLE",116,0],["w","TRIANGLE",110,-14],["w","TRIANGLE",104,16],["w","TRIANGLE",99,-30],["s","HARP",93,32],["s","HARP",86,-48]],"g":[55,48,80,95,78,0,0,64,30],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Ember Wurli","c":"Hybrid","L":[["s","WURLI",116,0],["s","WURLI",110,-9],["s","WURLI",104,10],["s","WURLI",99,-19],["f","BELL",93,21],["f","BELL",86,-31]],"g":[2,52,50,46,90,0,0,36,34],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Hollowglass","c":"Hybrid","L":[["w","SQUARE",116,0],["w","SQUARE",110,-10],["w","SQUARE",104,11],["s","CLARINET",99,-21],["s","CLARINET",93,22],["s","CLARINET",86,-34]],"g":[18,40,78,50,88,0,0,42,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Gravity Well","c":"Hybrid","L":[["s","CELLOS",122,0],["s","CELLOS",116,-10],["f","ORGAN",106,11],["f","ORGAN",98,-21],["f","ORGAN",90,22],["f","ORGAN",82,-34]],"g":[30,45,84,70,80,0,0,48,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":1,"hp":0,"filt":0},"v":0},{"n":"Neon Cathedral","c":"Hybrid","L":[["w","SAW",116,0],["w","SAW",110,-14],["w","SAW",104,16],["f","BELL",99,-30],["f","BELL",93,32],["f","BELL",86,-48]],"g":[36,55,80,100,84,0,0,66,24],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Paper Lantern","c":"Hybrid","L":[["s","ACOUSTIC",116,0],["s","ACOUSTIC",110,-8],["s","ACOUSTIC",104,9],["s","ACOUSTIC",99,-16],["s","ACOUSTIC",93,18],["s","ACOUSTIC",86,-26]],"g":[1,60,30,44,96,0,0,38,22],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Subzero Lead","c":"Hybrid","L":[["w","SAW",118,0],["w","SAW",114,-5],["w","SAW",108,6],["w","SAW",102,-10],["w","SAW",96,11],["w","SAW",90,-17]],"g":[2,28,88,20,110,26,18,0,0],"e":{"rev":0,"cho":0,"dly":0,"fl":0,"gl":36,"bass":0,"hp":0,"filt":0},"v":3},{"n":"Auroral Choir","c":"Hybrid","L":[["s","HUMMING",116,0],["s","HUMMING",110,-14],["s","HUMMING",104,16],["s","VOX",99,-30],["s","VOX",93,32],["s","VOX",86,-48]],"g":[48,50,85,92,80,0,0,62,28],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0},{"n":"Glacier Mallet","c":"Hybrid","L":[["w","SINE",114,0],["w","SINE",108,-12],["s","VIBRAPHONE",104,14],["s","VIBRAPHONE",100,-25],["s","VIBRAPHONE",92,27],["s","VIBRAPHONE",84,-41]],"g":[3,72,30,62,84,0,0,50,0],"e":{"rev":1,"cho":0,"dly":0,"fl":0,"gl":0,"bass":0,"hp":1,"filt":0},"v":0},{"n":"Smoke Organ","c":"Hybrid","L":[["f","ORGAN",116,0],["f","ORGAN",110,-8],["f","ORGAN",104,10],["f","ORGAN",99,-18],["f","ORGAN",93,19],["f","ORGAN",86,-29]],"g":[4,40,92,30,82,0,0,34,30],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":1,"filt":0},"v":0},{"n":"Stargazer","c":"Hybrid","L":[["w","SINE",120,0],["s","VIOLA",110,-14],["w","SAW",104,16],["s","VOX",98,-30],["n","WHITE",80,32],["f","BELL",102,-48]],"g":[40,52,78,96,82,0,0,64,30],"e":{"rev":1,"cho":1,"dly":0,"fl":0,"gl":0,"bass":0,"hp":0,"filt":0},"v":0}];
+
+// Mapa de las fuentes de los presets a nuestros motores
+const SRC = {
+  w:{ SAW:'sawtooth', SINE:'sine', SQUARE:'square', TRIANGLE:'triangle' },
+  f:{ EPIANO:[{ ratio:1, i0:2.4, i1:0.35, decay:1.1 }],
+      BELL:[{ ratio:3.5, i0:4.0, i1:0.6, decay:1.8 }],
+      HX7:[{ ratio:1, i0:3.4, i1:0.5, decay:0.7 }, { ratio:7, i0:0.6, i1:0.05, decay:0.25 }],
+      ORGAN:[{ ratio:2, i0:1.1, i1:1.1, decay:1 }, { ratio:3, i0:0.5, i1:0.5, decay:1 }],
+      BRASS:[{ ratio:1, i0:0.5, i1:1.7, decay:0.3 }] },
+  s:{ STRINGS:['strings',0], PIANO:['piano',0], VIBRAPHONE:['vibraph',0], VOX:['voxahh',0], HARP:['harp',0], WURLI:['retroep',0],
+      FLUTE:['flute',0], CELLOS:['strings',-12], CLARINET:['clarinet',0], ACOUSTIC:['acoustic',0], HUMMING:['humming',0],
+      VIOLA:['strings',-7], VIOLINS:['strings',0], ORGAN:['organ',0], TINEEP:['tineep',0], HORNS:['horns',0], EGUITAR:['eguitar',0],
+      GRANDPIANO:['grandpno',0], BRASS:['brass',0], COMBO:['buzzorg',0], ROBBO:null, SHUTTER:null },
+  n:{ WHITE:null, PINK:900 },
+};
+// Escalas 0–127 de los presets → unidades reales
+const lib127 = { time:v => Math.max(0.001, 5 * Math.pow(v / 127, 2)), amt:v => v / 127 };
+function libSound(p, id) {
+  return { id, name:p.n, lib:true, level:0.95, layers:p.L, cat:p.c,
+    env:{ a:lib127.time(p.g[0]), d:lib127.time(p.g[1]), s:Math.min(1, p.g[2] / 100), r:lib127.time(p.g[3]) }, fx:p.e, g:p.g, v:p.v };
+}
+let LIB = [];
+function buildLib() {
+  LIB = FACTORY_LIB.map((p, i) => libSound(p, 'lib:' + i));
+  for (const [i, p] of (state.library || []).entries()) LIB.push(libSound(p, 'usr:' + i));
+}
+const allSounds = () => SOUNDS.concat(LIB);
+const curSound = () => allSounds().find(s => s.id === state.sound) || SOUNDS[0];
+// Importa un archivo exportado por la app complementaria (formato hichord-library)
+function importLibrary(json) {
+  const d = typeof json === 'string' ? JSON.parse(json) : json;
+  const list = d.presets || (Array.isArray(d) ? d : [d]);
+  const T = { waveform:'w', fm:'f', sample:'s', noise:'n' }; let n = 0;
+  for (const p of list) {
+    const pr = p.preset || p; if (!pr.oscillators) continue;
+    const g = pr.global || {}, e = pr.effects || {}, s = pr.settings || {};
+    state.library = state.library || [];
+    state.library.push({ n:p.name || 'Preset', c:p.category || 'Importado',
+      L:pr.oscillators.slice(0, 6).map(o => [T[o.type] || 'w', o.source, o.gain, o.pan]),
+      g:[g.attack|0, g.decay|0, g.sustain|0, g.release|0, g.filterCutoff|0, g.filterResonance|0, g.filterDrive|0, g.reverb|0, g.chorus|0],
+      e:{ rev:+!!e.reverbOn, cho:+!!e.chorusOn, dly:e.delayOn ? e.delayRate : 0, fl:+!!e.flangerOn, gl:e.glideOn ? e.glideRate : 0, bass:+!!e.bassOn, hp:+!!e.hifiltOn, filt:+!!e.filterOn },
+      v:s.voiceRate|0 });
+    n++;
+  }
+  saveState(); buildLib(); return n;
+}
 
 // Valores de los presets de envolvente (segundos; sustain 0-1), según el manual 3.0
 const ADSR = {
@@ -604,6 +654,7 @@ const DEFAULT_STATE = {
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', swipe:false, osc:false, haptics:false,
+  library:[],
   micGain:1, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
@@ -611,13 +662,14 @@ const DEFAULT_STATE = {
 };
 const STORE_KEY = 'notes-state-v1';
 let state = loadState();
+buildLib();
+if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const s = Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(raw));
-      if (!SOUNDS.find(x => x.id === s.sound)) s.sound = 'saw';
       return s;
     }
   } catch (e) {}
@@ -634,7 +686,8 @@ let waveCache = {}, irCache = {}, fxSlots = {};
 // Por eso, tras volver, se reconstruye el motor de audio en el siguiente toque.
 let needsRebuild = false, justBuilt = false;
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
-const SLOT_PAN = [-0.55, -0.15, 0.25, 0, 0.5, 0.75];
+const SLOT_PAN = [0, -14 / 64, 16 / 64, -30 / 64, 32 / 64, -48 / 64];
+const SLOT_GAIN = [116, 110, 104, 99, 93, 86].map(v => v / 127);
 const lastSlotMidi = [null, null, null, null, null, null];
 
 function ensureAudio() {
@@ -766,7 +819,7 @@ function applyVibrato() {
 }
 
 function currentEnv() {
-  const p = ADSR[state.adsr];
+  const snd = curSound(), p = snd.env || ADSR[state.adsr];
   // Repeat limita el release a 200 ms para que los pulsos queden limpios
   const r = state.mode === 'repeat' ? Math.min(state.release, 0.2) : state.release;
   return { a:state.attack, d:p.d, s:p.s, r };
@@ -863,8 +916,8 @@ function setMode(id) {
   droneBtn = null; arpTones = []; clockStop(); autoUpdate();
   state.mode = id; saveState();
   renderModes(); renderScreen(false); renderPads(); syncSettings();
-  if (id === 'tuner') tunerStart();
-  if (id === 'mic') micStart('sampler');
+  if (id === 'tuner') onActivation(tunerStart);
+  if (id === 'mic') onActivation(() => micStart('sampler'));
   if (held.length) refresh();
 }
 function renderModes() {
@@ -891,20 +944,39 @@ function glideTc() {
   return GLIDE_TC[g] || 0;
 }
 
+// Motor que usa una voz: el del instrumento, o el de su capa si es un preset de la biblioteca
+function engineFor(sound, slot) {
+  if (!sound.layers) {
+    return { waves:sound.waves, periodic:sound.periodic, fm:sound.fm || [], sample:sound.sample, offset:0,
+             pnoise:sound.noise, filter:sound.filter, gain:SLOT_GAIN[slot] * (slot === 3 ? 1.4 : 1), pan:SLOT_PAN[slot] };
+  }
+  const L = sound.layers[slot] || sound.layers[0], g = L[2] / 127, pan = Math.max(-1, Math.min(1, L[3] / 64));
+  const base = { fm:[], offset:0, gain:g, pan };
+  if (L[0] === 'w') return Object.assign(base, { waves:[SRC.w[L[1]] || 'sawtooth', SRC.w[L[1]] || 'sawtooth'] });
+  if (L[0] === 'f') return Object.assign(base, { waves:['sine', 'sine'], fm:SRC.f[L[1]] || SRC.f.EPIANO });
+  if (L[0] === 'n') return Object.assign(base, { noise:true, noiseLp:SRC.n[L[1]] || null, gain:g * 0.35 });
+  const sm = SRC.s[L[1]];
+  if (sm) return Object.assign(base, { sample:sm[0], offset:sm[1] });
+  return Object.assign(base, { waves:['sawtooth', 'sawtooth'] });
+}
+
 // Una voz (de las 6) con su pareja desafinada panoramizada al lado contrario
 class SlotVoice {
   constructor(slot, midi, opts = {}) {
-    const sound = curSound(), tw = tweak(sound), env = currentEnv(), t = Math.max(ctx.currentTime, opts.startAt || 0), f = mtof(midi), gtc = glideTc();
-    const from = (gtc && lastSlotMidi[slot] != null) ? mtof(lastSlotMidi[slot]) : f;
+    const sound = curSound(), tw = tweak(sound), env = currentEnv(), t = Math.max(ctx.currentTime, opts.startAt || 0), gtc = glideTc();
+    const eng = engineFor(sound, slot);
+    midi += eng.offset;
+    const f = mtof(midi);
+    const from = (gtc && lastSlotMidi[slot] != null) ? mtof(lastSlotMidi[slot] + eng.offset) : f;
     const slide = (param, a, b) => { param.value = a; if (a !== b) param.setTargetAtTime(b, t, gtc); };
-    this.sound = sound; this.oscs = []; this.mods = []; this.srcs = []; this.bps = []; this.rates = [];
+    this.sound = sound; this.eng = eng; this.oscs = []; this.mods = []; this.srcs = []; this.bps = []; this.rates = [];
     this.env = ctx.createGain(); this.env.gain.value = 0;
-    this.out = ctx.createGain(); this.out.gain.value = (slot === 3 ? 0.15 : 0.1) * sound.level * tw.level;
+    this.out = ctx.createGain(); this.out.gain.value = 0.11 * eng.gain * sound.level * tw.level;
     this.env.connect(this.out); this.out.connect(opts.dest || master);
-    const pan = opts.mono ? 0 : (opts.pan != null ? opts.pan : (state.stereo ? SLOT_PAN[slot] : 0));
+    const pan = opts.mono ? 0 : (opts.pan != null ? opts.pan : (state.stereo ? eng.pan : 0));
     const det = opts.mono ? 0 : tw.detune / 2;
-    const buf = sound.sample ? sampleBuf[sound.sample] : null;
-    if (sound.sample && !buf) { loadSample(sound.sample); }
+    const buf = eng.sample ? sampleBuf[eng.sample] : null;
+    if (eng.sample && !buf) loadSample(eng.sample);
     for (let k = 0; k < 2; k++) {
       let dest = this.env;
       if (ctx.createStereoPanner) {
@@ -915,16 +987,25 @@ class SlotVoice {
         const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoffHz(tw.bright);
         lp.connect(dest); dest = lp;
       }
-      if (sound.filter) {
+      if (eng.filter) {
         // Filtro con envolvente (bajos sintéticos, golpes): abre y se cierra rápido
-        const fe = ctx.createBiquadFilter(); fe.type = 'lowpass'; fe.Q.value = sound.filter.q;
-        fe.frequency.setValueAtTime(sound.filter.f0, t);
-        fe.frequency.setTargetAtTime(sound.filter.f1, t, sound.filter.decay / 3);
+        const fe = ctx.createBiquadFilter(); fe.type = 'lowpass'; fe.Q.value = eng.filter.q;
+        fe.frequency.setValueAtTime(eng.filter.f0, t);
+        fe.frequency.setTargetAtTime(eng.filter.f1, t, eng.filter.decay / 3);
         fe.connect(dest); dest = fe;
       }
       const g = ctx.createGain(); g.gain.value = 0.5; g.connect(dest);
       const detune = k === 0 ? -det : det;
-      if (sound.sample) {
+      if (eng.noise) {
+        // Capa de ruido sin afinar (texturas): blanco, o rosa aproximado con un paso bajo
+        if (k === 1) continue;
+        const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+        let nd = g;
+        if (eng.noiseLp) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = eng.noiseLp; lp.Q.value = 0.4; lp.connect(g); nd = lp; }
+        src.connect(nd); src.start(t, Math.random() * 1.5); this.srcs.push(src);
+        continue;
+      }
+      if (eng.sample) {
         if (!buf) continue;
         const src = ctx.createBufferSource(); src.buffer = buf;
         const r0 = from / mtof(buf._root), r1 = f / mtof(buf._root);
@@ -936,12 +1017,12 @@ class SlotVoice {
         continue;
       }
       const o = ctx.createOscillator();
-      if (sound.periodic) o.setPeriodicWave(getWave(sound.periodic)); else o.type = sound.waves[k];
+      if (eng.periodic) o.setPeriodicWave(getWave(eng.periodic)); else o.type = eng.waves[k];
       slide(o.frequency, from, f);
       o.detune.value = detune;
       vibGain.connect(o.detune);
       o.connect(g);
-      (sound.fm || []).forEach((spec0, idx) => {
+      eng.fm.forEach((spec0, idx) => {
         const spec = idx === 0 ? Object.assign({}, spec0, {
           ratio: tw.fmRatio != null ? tw.fmRatio : spec0.ratio,
           i0: tw.fmIndex != null ? tw.fmIndex : spec0.i0,
@@ -958,12 +1039,12 @@ class SlotVoice {
       });
       o.start(t); this.oscs.push(o);
     }
-    if (sound.noise) {
+    if (eng.pnoise) {
       // Ruido afinado: ruido blanco por un filtro muy estrecho en la nota
       const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = sound.noise.q;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = eng.pnoise.q;
       slide(bp.frequency, from, f);
-      const ng = ctx.createGain(); ng.gain.value = sound.noise.mix;
+      const ng = ctx.createGain(); ng.gain.value = eng.pnoise.mix;
       src.connect(bp); bp.connect(ng); ng.connect(this.env);
       src.start(t, Math.random() * 1.5);
       this.srcs.push(src); this.bps.push(bp);
@@ -972,11 +1053,11 @@ class SlotVoice {
     g.setValueAtTime(0, t);
     g.linearRampToValueAtTime(1, t + a);
     g.setTargetAtTime(env.s, t + a, Math.max(env.d, 0.005) / 3);
-    this.midi = midi;
+    this.midi = midi - eng.offset;
   }
   setNote(midi) {
     if (midi === this.midi) return;
-    const t = ctx.currentTime, f = mtof(midi), tc = glideTc() || 0.006;
+    const t = ctx.currentTime, f = mtof(midi + this.eng.offset), tc = glideTc() || 0.006;
     for (const o of this.oscs) o.frequency.setTargetAtTime(f, t, tc);
     for (const bp of this.bps) bp.frequency.setTargetAtTime(f, t, tc);
     for (const s of this.rates) s.playbackRate.setTargetAtTime(f / mtof(s.buffer._root), t, tc);
@@ -1477,9 +1558,17 @@ function startTrackSource(t, when, offset) {
 }
 
 // Metrónomo: clics programados sobre el reloj de audio
+loop.metroNodes = [];
+function metroCancel() {
+  if (!ctx) { loop.metroNodes = []; return; }
+  const now = ctx.currentTime;
+  for (const n of loop.metroNodes) { try { if (n.t > now) { n.g.gain.cancelScheduledValues(0); n.g.gain.value = 0; n.o.stop(); } } catch (e) {} }
+  loop.metroNodes = [];
+}
 function click(t, accent) {
   if (!loop.metro) return;
   const o = ctx.createOscillator(), g = ctx.createGain();
+  loop.metroNodes.push({ t, o, g });
   o.frequency.value = accent ? 1600 : 1100; o.connect(g); g.connect(outGain);
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(accent ? 0.5 : 0.3, t + 0.002);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05); o.start(t); o.stop(t + 0.07);
@@ -1535,6 +1624,7 @@ function scheduleStop(t, t1, isMaster) {
 }
 function stopRecording(t, t1) {
   clearTimeout(t.autoStop);
+  if (t.free) metroCancel();
   if (t.state === 'armed' && t.countdown) { t.state = 'off'; renderLooper(); return; }
   if (t.isMaster && t.free) {
     if (t1 - t.t0 < 0.25) { t.state = 'off'; toast('Loop demasiado corto'); renderLooper(); return; }
@@ -1558,6 +1648,7 @@ function finalizeTrack(p) {
 }
 
 function wipeTrack(t) {
+  if (t.state === 'rec' || t.state === 'armed') metroCancel();
   if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; }
   clearTimeout(t.autoStop);
   t.buffer = null; t.len = 0; t.state = 'off'; t.isMaster = false; t.mute = false; t.solo = false; t.countdown = false;
@@ -1573,7 +1664,7 @@ function clearTrack(i) {
   applyMutesSafe(); renderLooper(); renderModes();
 }
 function applyMutesSafe() { if (ctx) applyMutes(); }
-function clearAll() { for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderModes(); toast('Loops borrados'); }
+function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderModes(); toast('Loops borrados'); }
 
 function togglePause() {
   if (!loopHasAudio()) return;
@@ -1592,6 +1683,7 @@ function togglePause() {
   haptic(true); renderLooper();
 }
 function looperSuspend() {   // al ir a segundo plano
+  metroCancel();
   for (const t of tracks) { if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; } if (t.state === 'rec' || t.state === 'armed' || t.state === 'finishing') { clearTimeout(t.autoStop); t.state = 'off'; } }
   pendingFinal.length = 0;
   if (loopHasAudio()) loop.paused = true;
@@ -1952,9 +2044,14 @@ function haptic(strong) {
   } catch (e) {}
 }
 
-let hapticPending = false;
+let hapticPending = false, activationQueue = [];
 function hapticLater() { hapticPending = true; }
-['pointerup', 'touchend'].forEach(ev => document.addEventListener(ev, () => { if (hapticPending) { hapticPending = false; haptic(true); } }, true));
+// Ejecuta algo en el próximo gesto válido para iOS (levantar el dedo o clic): permisos, audio
+function onActivation(fn) { activationQueue.push(fn); }
+['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => {
+  if (hapticPending) { hapticPending = false; haptic(true); }
+  if (activationQueue.length) { const q = activationQueue; activationQueue = []; for (const fn of q) fn(); }
+}, true));
 
 // ===== INTERPRETACIÓN =====
 const held = [];                 // botones pulsados, en orden
@@ -2393,7 +2490,16 @@ const SETTINGS = [
   { id:'bpm', label:'Tempo', type:'range', min:40, max:300, to:v => v, from:v => Math.round(v), fmt:v => Math.round(v) + ' BPM' },
   { id:'tap', label:'Marcar tempo', type:'tap' },
   { section:'Sonido' },
-  { id:'sound', label:'Instrumento', type:'select', options:() => SOUNDS.map(s => [s.id, s.name]) },
+  { id:'sound', label:'Instrumento', type:'select', groups:true, options:() => [
+      ['Instrumentos', SOUNDS.map(s => [s.id, s.name])],
+      ['Biblioteca', LIB.filter(s => s.id.startsWith('lib:')).map(s => [s.id, s.name + ' · ' + s.cat])],
+      ...(LIB.some(s => s.id.startsWith('usr:')) ? [['Importados', LIB.filter(s => s.id.startsWith('usr:')).map(s => [s.id, s.name])]] : []),
+    ] },
+  { id:'lib_import', label:'Importar presets (.json de la app oficial)', type:'file', run:text => {
+      try { const n = importLibrary(text); rebuildSoundOptions(); toast(n + ' preset' + (n === 1 ? '' : 's') + ' importado' + (n === 1 ? '' : 's')); }
+      catch (e) { toast('No se pudo leer el archivo'); } } },
+  { id:'lib_clear', label:'Quitar los presets importados', type:'button', text:'Quitar', run:() => {
+      state.library = []; if (state.sound.startsWith('usr:')) state.sound = 'saw'; saveState(); buildLib(); rebuildSoundOptions(); toast('Importados eliminados'); } },
   { id:'adsr', label:'Envolvente', type:'select', options:() => Object.keys(ADSR).map(k => [k, k.charAt(0) + k.slice(1).toLowerCase()]) },
   { id:'attack', label:'Ataque', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
   { id:'release', label:'Release', type:'range', min:0, max:1000, to:msFromSlider, from:sliderFromMs, fmt:fmtMs },
@@ -2455,6 +2561,22 @@ function showTab(name) {
   document.querySelector('.sheet-body').scrollTop = 0;
 }
 
+// Un preset de la biblioteca trae su envolvente y sus efectos, como en el original
+function applyLibPreset(snd) {
+  const e = snd.fx, g = snd.g;
+  state.attack = snd.env.a; state.release = snd.env.r;
+  state.reverb = e.rev ? 'hall' : 'off'; state.reverbAmt = Math.max(0.1, lib127.amt(g[7]));
+  state.chorus = e.cho ? (g[8] < 30 ? 'light' : g[8] < 45 ? 'warm' : g[8] < 60 ? 'wide' : 'lush') : 'off';
+  state.delay = e.dly ? (['1/4', '1/8', '1/16', '1/16T', '1/32'][e.dly - 1] || '1/8') : 'off';
+  state.flanger = e.fl ? 'jet' : 'off';
+  state.glide = e.gl ? (e.gl < 30 ? 'short' : e.gl < 60 ? 'medium' : 'long') : 'off';
+  state.bass = e.bass ? 'root' : (state.bass === 'root' ? 'off' : state.bass);
+  state.voices = snd.v === 3 ? 1 : 8;
+  state.cutoff = e.filt ? Math.round(g[4] / 127 * 1000) : 1000;
+  for (const id of ['reverb', 'chorus', 'delay', 'flanger']) updateFx(id);
+  applyFilter();
+}
+
 function onSettingChanged(id) {
   if (id === 'mode') { const m = state.mode; state.mode = 'play'; setMode(m); }
   if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id)) renderModes();
@@ -2507,14 +2629,15 @@ function buildSettings() {
     let input;
     if (s.type === 'select') {
       input = document.createElement('select');
-      for (const [v, t] of s.options()) { const o = document.createElement('option'); o.value = v; o.textContent = t; input.appendChild(o); }
+      fillSelect(input, s);
       input.addEventListener('change', () => {
         const raw = input.value;
         state[s.id] = s.numeric ? Number(raw) : raw;
         if (s.id === 'adsr') { state.attack = ADSR[raw].a; state.release = ADSR[raw].r; }
         if (s.id === 'sound') {
-          const snd = SOUNDS.find(x => x.id === raw);
+          const snd = allSounds().find(x => x.id === raw);
           if (snd && snd.adsr) { state.adsr = snd.adsr; state.attack = ADSR[snd.adsr].a; state.release = ADSR[snd.adsr].r; }
+          if (snd && snd.lib) applyLibPreset(snd);
         }
         onSettingChanged(s.id);
         afterSettingChange();
@@ -2535,6 +2658,13 @@ function buildSettings() {
       });
       w.appendChild(input); w.appendChild(out); row.appendChild(w);
       input._out = out;
+    } else if (s.type === 'file') {
+      input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.className = 'file';
+      input.addEventListener('change', () => {
+        const f = input.files && input.files[0]; if (!f) return;
+        const r = new FileReader(); r.onload = () => s.run(r.result); r.readAsText(f); input.value = '';
+      });
+      row.appendChild(input);
     } else if (s.type === 'button') {
       input = document.createElement('button'); input.className = 'act'; input.textContent = s.text;
       onTap(input, s.run); row.appendChild(input);
@@ -2561,12 +2691,25 @@ function buildSettings() {
   syncSettings(); showTab(settingsTab);
 }
 
+function fillSelect(input, s) {
+  input.innerHTML = '';
+  if (s.groups) {
+    for (const [label, items] of s.options()) {
+      if (!items.length) continue;
+      const og = document.createElement('optgroup'); og.label = label;
+      for (const [v, t] of items) { const o = document.createElement('option'); o.value = v; o.textContent = t; og.appendChild(o); }
+      input.appendChild(og);
+    }
+  } else for (const [v, t] of s.options()) { const o = document.createElement('option'); o.value = v; o.textContent = t; input.appendChild(o); }
+}
+function rebuildSoundOptions() { const s = SETTINGS.find(x => x.id === 'sound'); if (s && s.el) { fillSelect(s.el, s); syncSettings(); } }
+
 function syncSettings() {
   for (const s of SETTINGS) {
-    if (!s.el || s.type === 'tap' || s.type === 'code' || s.type === 'button') continue;
+    if (!s.el || s.type === 'tap' || s.type === 'code' || s.type === 'button' || s.type === 'file') continue;
     if (s.tweak) {
       const snd = curSound(), tw = tweak(snd), row = s.el.closest('.row');
-      row.hidden = !!s.fmOnly && !snd.fm;
+      row.hidden = !!s.fmOnly && !(snd.fm && !snd.lib);
       let v = tw[s.tweak];
       if (v == null && snd.fm) v = s.tweak === 'fmRatio' ? snd.fm[0].ratio : s.tweak === 'fmIndex' ? snd.fm[0].i0 : snd.fm[0].decay;
       if (v == null) v = 0;
