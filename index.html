@@ -7,6 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" id="themeColor" content="#E2DAC7">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="notes">
 <title>notes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,7 +84,8 @@ body {
 .chord.idle { color: var(--panel-dim); }
 .screen.osc .chord { font-size: 26px; margin: 2px 0; min-height: 1em; }
 .scope { display: none; width: 100%; height: 64px; margin: 2px 0 4px; }
-.screen.osc .scope { display: block; }
+.screen.osc .scope, .screen.tuner .scope { display: block; }
+.screen.tuner .chord { font-size: 40px; margin: 2px 0; min-height: 1em; }
 .gear, .oscbtn {
   background: none; border: 0; color: var(--panel-dim); padding: 4px; cursor: pointer; line-height: 0; touch-action: manipulation;
 }
@@ -141,6 +145,9 @@ body {
 .lp-transport { width: 42px; height: 36px; border-radius: 8px; border: 1.5px solid var(--ctl-line); background: var(--ctl); color: var(--ctl-ink); font-size: 16px; flex: 0 0 auto; }
 .lp-transport:disabled, .lp-bars:disabled { opacity: .35; }
 .lp-bars { min-width: 46px; height: 36px; border-radius: 8px; border: 1.5px dashed var(--ctl-line); background: var(--ctl); color: var(--ctl-ink); font-size: 11px; flex: 0 0 auto; }
+.lp-rec.off { opacity: .35; }
+.row .btns { display: flex; gap: 8px; }
+.row .act:disabled { opacity: .35; }
 @keyframes blink { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .lp-rec.s-armed span, .lp-track.s-armed { animation: none; } }
 
@@ -319,11 +326,25 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
       <h4>Biblioteca de sonidos</h4>
       <p>En Ajustes → Sonido, el grupo "Biblioteca" contiene 50 presets construidos como los de fábrica de la app oficial: cada voz con su propio motor, y su envolvente y efectos, que se aplican al elegirlos. Puedes importar un archivo .json exportado desde la app oficial y sus presets aparecerán en "Importados".</p>
-      <h4>Micrófono</h4>
-      <p><b>Mic</b>: mantén el botón 1 para grabar hasta tres segundos; es el único que funciona en este modo. Al soltar, la app detecta la afinación, la lleva a Do y pasa al modo Lead con el instrumento "Mic Sample", que también puedes elegir en Sonido. <b>Afinador</b>: canta o toca cerca del micro; la pantalla se invierte cuando estás afinado. <b>Vocoder</b> (en Efectos): tu voz, o la pista 1 del looper, da forma al sonido mientras mantienes un acorde. Usa auriculares.</p>
+      <h4>Mic (sampler)</h4>
+      <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
+      <h4>Afinador</h4>
+      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Afinador, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, el punto se vuelve naranja y la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya.</p>
+      <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube la "Ganancia del micro" en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
+      <h4>Vocoder</h4>
+      <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Micrófono (tu voz) o Pista 1 del looper (lo que grabaste en ella, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formante cambia el carácter de la voz (más aguda o más grave) y Consonantes añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
+      <h4>Si el micrófono no funciona</h4>
+      <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
       <h4>Looper</h4>
       <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 arrancan al inicio del loop y se paran solas.</p>
       <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
+      <h4>Presets y azar</h4>
+      <p>En Ajustes → Presets hay cuatro ranuras (P1 a P4). Guardar escribe en la ranura el instrumento, los efectos, la tonalidad, la escala, el modo, el tempo, las octavas, las inversiones y los acordes fijados; Cargar lo restaura. Los loops, el tema y los volúmenes no se guardan.</p>
+      <p>El azar propone cosas nuevas. Sonido elige otro instrumento con efectos; Patrón cambia el patrón del modo actual (arpegio, ritmo o secuencia) y la disposición de octavas; Todo cambia además la tonalidad y el tempo.</p>
+      <h4>Copia de seguridad</h4>
+      <p>Exportar guarda en un archivo tus ajustes, presets, sonidos importados y la última muestra del micrófono. Importar restaura esa copia y también acepta los archivos de presets de la app oficial.</p>
+      <h4>Sin conexión</h4>
+      <p>Abre la página una vez con internet y añádela a la pantalla de inicio (Compartir → Añadir a pantalla de inicio). Desde entonces funciona sin conexión. Las versiones nuevas se descargan al abrirla con internet.</p>
       <h4>Teclado del ordenador</h4>
       <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W A S D</span> y <span class="k">Q E Z C</span> joystick · <span class="k">M</span> modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava</p>
       <h4>Créditos</h4>
@@ -921,7 +942,9 @@ function setMode(id) {
   droneBtn = null; arpTones = []; clockStop(); autoUpdate();
   state.mode = id; saveState();
   renderModes(); renderScreen(false); renderPads(); syncSettings();
-  if (id === 'tuner') onActivation(tunerStart);
+  $('screen').classList.toggle('tuner', id === 'tuner');
+  renderLooper();
+  if (id === 'tuner') { const cn = $('chordName'); cn.textContent = '—'; cn.classList.add('idle'); onActivation(tunerStart); }
   if (id === 'mic') onActivation(() => micStart('sampler'));
   if (held.length) refresh();
 }
@@ -1584,16 +1607,24 @@ function metroRange(from, to) {
 }
 
 // El clic del joystick del original: avanza el estado de la pista actual
+function recEnabled() {
+  if (state.mode === 'seq' || loop.paused) return false;
+  const t = tracks[loop.cur];
+  if (t.state === 'play' || t.state === 'finishing') return false;
+  if (t.state === 'rec' && !t.free) return false;
+  if (t.state === 'armed' && t.countdown) return false;
+  return true;
+}
 function looperClick() {
-  if (state.mode === 'seq') { toast('En el secuenciador no hay looper: la secuencia es el loop'); return; }
+  if (!recEnabled()) return;
   ensureAudio();
-  if (!recReady) { toast('Preparando la grabación, prueba otra vez'); return; }
-  if (loop.paused) { toast('Reanuda los loops antes de grabar'); return; }
+  if (!recReady) { toast('Preparando la grabación'); return; }
+  
   const t = tracks[loop.cur];
   if (t.state === 'off') { t.state = 'armed'; haptic(true); renderLooper(); return; }
   if (t.state === 'armed') { startRecording(t); return; }
-  if (t.state === 'rec') { if (t.free) stopRecording(t, ctx.currentTime + 0.08); else toast('Se completa al final del loop'); return; }
-  if (t.state === 'play') toast('Mantén pulsada la pista para borrarla');
+  if (t.state === 'rec') { if (t.free) stopRecording(t, ctx.currentTime + 0.08); return; }
+  
 }
 function disarm(t) { if (t.state === 'armed') { t.state = 'off'; renderLooper(); } }
 
@@ -1673,6 +1704,7 @@ function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.
 
 function togglePause() {
   if (!loopHasAudio()) return;
+  ensureAudio();
   const now = ctx.currentTime;
   if (!loop.paused) {
     // Freno de cinta: la velocidad baja hasta pararse
@@ -1738,7 +1770,7 @@ function renderLooper() {
     el.className = 'lp-track s-' + t.state + (loop.cur === i ? ' cur' : '') + (t.mute ? ' muted' : '') + (t.solo ? ' solo' : '') + (el.classList.contains('hold') ? ' hold' : '');
   }
   const rec = $('lpRec'), cur = tracks[loop.cur];
-  rec.className = 'lp-rec s-' + cur.state;
+  rec.className = 'lp-rec s-' + cur.state + (recEnabled() ? '' : ' off');
   const tr = $('lpTransport'); tr.innerHTML = loop.paused || !loopHasAudio() ? I.play : I.pause; tr.disabled = !loopHasAudio();
   $('lpBars').textContent = loop.bars ? loop.bars + 'c' : 'libre'; $('lpBars').disabled = !!loop.len;
 }
@@ -1753,7 +1785,7 @@ function looperStatus() {
 const seq = { steps:[], playing:false, pos:0, timer:null, next:0, stepLen:1 };
 function seqChord(step) { return resolveChord(state, step.btn, step.dir); }
 function seqAdd(btn) {
-  if (seq.steps.length >= 16) { toast('Máximo 16 pasos'); return; }
+  if (seq.steps.length >= 16) return;
   seq.steps.push({ btn, dir: dirFor(btn) || null }); haptic(false); renderScreen(false); renderModes();
 }
 function seqStart() {
@@ -1817,10 +1849,10 @@ function mixerPress(btn) {
   t.mute = !t.mute; applyMutesSafe(); loop.cur = btn; renderPads(); renderLooper();
 }
 function mixerTool(which) {
-  const t = tracks[target]; if (!t || !t.buffer) { toast('Esa pista está vacía'); return; }
+  const t = tracks[target]; if (!t || !t.buffer) return;
   if (which === 'solo') { t.solo = !t.solo; applyMutesSafe(); }
-  else if (which === 'down') { t.vol = Math.max(0, +(t.vol - 0.1).toFixed(2)); if (t.gain) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
-  else if (which === 'up') { t.vol = Math.min(1.5, +(t.vol + 0.1).toFixed(2)); if (t.gain) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
+  else if (which === 'down') { t.vol = Math.max(0, +(t.vol - 0.1).toFixed(2)); if (t.gain && ctx) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
+  else if (which === 'up') { t.vol = Math.min(1.5, +(t.vol + 0.1).toFixed(2)); if (t.gain && ctx) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
   toast('Pista ' + (target + 1) + (which === 'solo' ? (t.solo ? ' en solo' : ' sin solo') : ': ' + Math.round(t.vol * 100) + '%'));
   renderPads(); renderLooper();
 }
@@ -1841,9 +1873,9 @@ function micErrorText(e) {
   const n = e && e.name;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     return window.isSecureContext === false ? 'La página no es segura (hace falta https)' : 'Este navegador no ofrece micrófono a las webs';
-  if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') return 'Micrófono bloqueado. Actívalo en aA → Ajustes del sitio web';
+  if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') return 'Micrófono bloqueado';
   if (n === 'NotFoundError') return 'No se encuentra ningún micrófono';
-  if (n === 'InvalidStateError') return 'iOS no pudo iniciar el audio del micrófono. Cierra Safari del todo y reabre';
+  if (n === 'InvalidStateError') return 'iOS no pudo iniciar el audio del micrófono';
   if (n === 'NotReadableError' || n === 'AbortError') return 'El micrófono está ocupado por otra app';
   return 'Error del micrófono' + (n ? ' (' + n + ')' : '');
 }
@@ -1912,6 +1944,7 @@ function micAttach() {
     micAnalyser = ctx.createAnalyser(); micAnalyser.fftSize = 2048;
     micSource.connect(micGain); micGain.connect(micAnalyser);
     if (vocModIn) micGain.connect(vocModIn);
+    if (micCap) { try { micGain.connect(micCap); } catch (e) {} }   // la grabadora debe seguir al micrófono nuevo
   }
 }
 function micStop(user) {
@@ -1939,7 +1972,7 @@ function makeCapture(src, onChunk) {
 function detectPitch(data, sr) {
   const N = data.length; let rms = 0;
   for (let i = 0; i < N; i++) rms += data[i] * data[i];
-  rms = Math.sqrt(rms / N); if (rms < 0.01) return null;
+  rms = Math.sqrt(rms / N); if (rms < 0.004) return null;
   const minLag = Math.floor(sr / 1000), maxLag = Math.floor(sr / 60);
   let best = -1, bestLag = -1;
   const corr = new Float32Array(maxLag + 1);
@@ -1994,7 +2027,7 @@ function micRecordStop() {
     for (let i = 0; i < n; i++) data[i] = micRing.L[(take.f0 + i) % micRing.len];
     // recorta el silencio inicial y normaliza
     let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(data[i]));
-    if (peak < 0.005) { toast('No se ha captado sonido: sube la ganancia del micro'); renderPads(); return; }
+    if (peak < 0.005) { toast('No se captó sonido'); renderPads(); return; }
     let s = 0; while (s < n && Math.abs(data[s]) < peak * 0.05) s++; s = Math.max(0, s - Math.round(sr * 0.005));
     const trimmed = data.subarray(s); const g = 0.9 / peak;
     const buf = ctx.createBuffer(1, trimmed.length, sr), ch = buf.getChannelData(0);
@@ -2068,21 +2101,51 @@ function vocoderSource() {
 }
 
 // ----- Afinador -----
-let tunerRaf = null, tunerBuf = null;
+let tunerRaf = null, tunerBuf = null, tunerFrame = 0, tunerPitch = null, tunerMiss = 0, meterCents = 0;
 function tunerStart() { micStart('tuner').then(ok => { if (ok && !tunerRaf) tunerLoop(); }); }
-function tunerStop() { micStop('tuner'); if (tunerRaf) cancelAnimationFrame(tunerRaf); tunerRaf = null; $('screen').classList.remove('intune'); }
+function tunerStop() { micStop('tuner'); if (tunerRaf) cancelAnimationFrame(tunerRaf); tunerRaf = null; tunerPitch = null; $('screen').classList.remove('intune'); }
+// Escala de ±50 cents con un punto que marca la desviación
+function drawTunerMeter(cents, inTune) {
+  const c = $('scope'), g = c.getContext && c.getContext('2d'); if (!g) return;
+  const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
+  const ink = inTune ? v('--panel') : v('--panel-ink'), faint = inTune ? v('--panel') : v('--panel-dim');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  const mid = W / 2, span = W / 2 - 14, y = H / 2;
+  g.lineWidth = 1.5; g.lineCap = 'round';
+  for (let k = -50; k <= 50; k += 10) {
+    const x = mid + k / 50 * span, h = k === 0 ? 18 : (k % 50 === 0 ? 12 : 6);
+    g.strokeStyle = k === 0 ? ink : faint; g.globalAlpha = k === 0 ? 1 : 0.7;
+    g.beginPath(); g.moveTo(x, y - h); g.lineTo(x, y + h); g.stroke();
+  }
+  g.globalAlpha = 1;
+  if (cents != null) {
+    const x = mid + Math.max(-50, Math.min(50, cents)) / 50 * span;
+    g.fillStyle = v('--accent'); g.beginPath(); g.arc(x, y, 7, 0, Math.PI * 2); g.fill();
+  }
+}
 function tunerLoop() {
   tunerRaf = null;
-  if (state.mode !== 'tuner' || !micAnalyser) return;
+  if (state.mode !== 'tuner' || !micAnalyser || !ctx) return;
   if (!tunerBuf) tunerBuf = new Float32Array(2048);
-  let p = null;
-  if (micAnalyser.getFloatTimeDomainData) { micAnalyser.getFloatTimeDomainData(tunerBuf); p = detectPitch(tunerBuf, ctx.sampleRate); }
-  const cn = $('chordName');
-  if (p) {
-    const m = Math.round(p.midi), cents = Math.round((p.midi - m) * 100);
-    cn.textContent = midiName(m) + (cents >= 0 ? ' +' : ' ') + cents;
-    cn.classList.remove('idle'); $('screen').classList.toggle('intune', Math.abs(cents) <= 5);
-  } else { cn.textContent = '—'; cn.classList.add('idle'); $('screen').classList.remove('intune'); }
+  if ((tunerFrame++ % 3) === 0) {   // la detección es costosa: unas 20 veces por segundo
+    if (micAnalyser.getFloatTimeDomainData) micAnalyser.getFloatTimeDomainData(tunerBuf);
+    else { const bb = new Uint8Array(2048); micAnalyser.getByteTimeDomainData(bb); for (let i = 0; i < 2048; i++) tunerBuf[i] = (bb[i] - 128) / 128; }
+    const p = detectPitch(tunerBuf, ctx.sampleRate);
+    if (p) { if (!tunerPitch) meterCents = Math.round((p.midi - Math.round(p.midi)) * 100); tunerPitch = p; tunerMiss = 0; }
+    else if (++tunerMiss > 8) tunerPitch = null;
+  }
+  const cn = $('chordName'); let cents = null, inTune = false;
+  if (tunerPitch) {
+    const m = Math.round(tunerPitch.midi); cents = Math.round((tunerPitch.midi - m) * 100);
+    meterCents += (cents - meterCents) * 0.35;
+    inTune = Math.abs(cents) <= 5;
+    cn.textContent = NOTE_NAMES[((m % 12) + 12) % 12] + (cents > 0 ? ' +' : cents < 0 ? ' −' : ' ') + Math.abs(cents);
+    cn.classList.remove('idle');
+  } else { cn.textContent = '—'; cn.classList.add('idle'); }
+  $('screen').classList.toggle('intune', inTune);
+  drawTunerMeter(tunerPitch ? meterCents : null, inTune);
   tunerRaf = requestAnimationFrame(tunerLoop);
 }
 
@@ -2229,24 +2292,24 @@ function setJoyDir(source, dir) {
 // ===== HERRAMIENTAS POR BOTÓN =====
 const NO_TOOLS = ['drum', 'beat', 'mic', 'tuner'];
 function toolInversion() {
-  if (NO_TOOLS.includes(state.mode)) return;
+  if (NO_TOOLS.includes(state.mode) || state.vlead) return;
   if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
   if (state.mode === 'mixer') { mixerTool('solo'); return; }
   state.inv[target] = (state.inv[target] + 1) % 3; saveState();
   const names = ['posición fundamental', '1ª inversión', '2ª inversión'];
-  toast('Botón ' + (target + 1) + ': ' + names[state.inv[target]] + (state.vlead ? ' (sin efecto con conducción de voces)' : ''));
+  toast('Botón ' + (target + 1) + ': ' + names[state.inv[target]]);
   if (held.length) refresh(); else renderPads();
 }
 function toolLock() {
   if (NO_TOOLS.includes(state.mode)) return;
-  if (state.mode === 'seq') { seq.steps.pop(); renderModes(); renderScreen(false); toast('Último paso quitado'); return; }
+  if (state.mode === 'seq') { seq.steps.pop(); renderModes(); renderScreen(false); renderPads(); toast('Último paso quitado'); return; }
   if (state.mode === 'mixer') { mixerTool('down'); return; }
   if (state.locks[target]) {
     state.locks[target] = null; saveState();
     toast('Botón ' + (target + 1) + ' liberado');
   } else {
     const dir = held.includes(target) ? dirFor(target) : lastDirUsed[target];
-    if (!dir) { toast('Mantén el botón, mueve el joystick y pulsa aquí'); return; }
+    if (!dir) return;
     const ch = resolveChord(Object.assign({}, state, { locks:[] }), target, dir);
     state.locks[target] = { rootBase:ch.rootBase, iv:ch.iv, suffix:ch.suffix };
     saveState();
@@ -2258,7 +2321,7 @@ let clearArm = null;
 function toolOct(d) {
   if (NO_TOOLS.includes(state.mode)) return;
   if (state.mode === 'seq') {
-    if (d < 0) { seqStop(); seq.steps = []; renderModes(); renderScreen(false); toast('Secuencia borrada'); }
+    if (d < 0) { seqStop(); seq.steps = []; renderModes(); renderScreen(false); renderPads(); toast('Secuencia borrada'); }
     else { const L = [1, 2, 4]; seq.stepLen = L[(L.indexOf(seq.stepLen) + 1) % L.length]; renderPads(); toast('Paso: ' + (seq.stepLen === 4 ? '1 compás' : seq.stepLen + (seq.stepLen === 1 ? ' tiempo' : ' tiempos'))); }
     return;
   }
@@ -2318,7 +2381,8 @@ function renderTools() {
     $('targetLbl').textContent = { drum:'Pads', beat:'Ritmos', mic:'Sampler', tuner:'Afinador' }[m]; return;
   }
   const locked = !!state.locks[target];
-  setTool('tInv', 'inv', 'inv'); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked });
+  const canLock = locked || !!(held.includes(target) ? dirFor(target) : lastDirUsed[target]);
+  setTool('tInv', 'inv', 'inv', { off: state.vlead }); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked, off: !canLock });
   setTool('tOctDn', 'down', 'oct −'); setTool('tOctUp', 'up', 'oct +');
   $('targetLbl').textContent = 'Botón ' + (target + 1);
 }
@@ -2343,8 +2407,8 @@ function renderScreen(active) {
   $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
     + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '');
   const cn = $('chordName');
-  if (lastDisplay) cn.textContent = lastDisplay.name;
-  cn.classList.toggle('idle', !active);
+  if (lastDisplay && state.mode !== 'tuner') cn.textContent = lastDisplay.name;
+  if (state.mode !== 'tuner') cn.classList.toggle('idle', !active);
   const d = padDir || keyDir || (held.length ? dirFor(held[held.length - 1]) : null);
   if (!$('sDir').childElementCount) {
     $('sDir').innerHTML = DIRS.map(k => '<circle data-d="' + k + '" cx="' + (10 + DIR_VEC[k][0] * 7) + '" cy="' + (10 + DIR_VEC[k][1] * 7) + '" r="1.6"/>').join('');
@@ -2392,6 +2456,7 @@ function padEnabled(b) {
   const m = state.mode;
   if (m === 'mic') return b === 0;
   if (m === 'tuner') return false;
+  if (m === 'seq') return seq.steps.length < 16;
   if (m === 'mixer') return b === 6 || !!tracks[b].buffer;
   return true;
 }
@@ -2524,6 +2589,7 @@ let scopeRaf = null;
 function drawScope() {
   scopeRaf = null;
   if (!state.osc || document.hidden) return;
+  if (state.mode === 'tuner') { scopeRaf = requestAnimationFrame(drawScope); return; }   // el afinador usa el mismo lienzo
   const c = $('scope'), g = c.getContext && c.getContext('2d');
   if (!g) return;
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
@@ -2569,9 +2635,6 @@ const SETTINGS = [
       ['Biblioteca', LIB.filter(s => s.id.startsWith('lib:')).map(s => [s.id, s.name + ' · ' + s.cat])],
       ...(LIB.some(s => s.id.startsWith('usr:')) ? [['Importados', LIB.filter(s => s.id.startsWith('usr:')).map(s => [s.id, s.name])]] : []),
     ] },
-  { id:'lib_import', label:'Importar presets (.json de la app oficial)', type:'file', run:text => {
-      try { const n = importLibrary(text); rebuildSoundOptions(); toast(n + ' preset' + (n === 1 ? '' : 's') + ' importado' + (n === 1 ? '' : 's')); }
-      catch (e) { toast('No se pudo leer el archivo'); } } },
   { id:'lib_clear', label:'Quitar los presets importados', type:'button', text:'Quitar', run:() => {
       state.library = []; if (state.sound.startsWith('usr:')) state.sound = 'saw'; saveState(); buildLib(); rebuildSoundOptions(); toast('Importados eliminados'); } },
   { id:'adsr', label:'Envolvente', type:'select', options:() => Object.keys(ADSR).map(k => [k, k.charAt(0) + k.slice(1).toLowerCase()]) },
@@ -2626,6 +2689,16 @@ const SETTINGS = [
   { id:'btn_reset', label:'Quitar fijados, octavas e inversiones', type:'button', text:'Restablecer', run:() => {
     state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
     saveState(); renderPads(); toast('Botones restablecidos'); } },
+  { section:'Presets' },
+  { id:'pre_1', label:'P1', type:'preset', slot:0 },
+  { id:'pre_2', label:'P2', type:'preset', slot:1 },
+  { id:'pre_3', label:'P3', type:'preset', slot:2 },
+  { id:'pre_4', label:'P4', type:'preset', slot:3 },
+  { id:'rnd_sound', label:'Azar: sonido', type:'button', text:'Sortear', run:() => randomize('sound') },
+  { id:'rnd_pattern', label:'Azar: patrón', type:'button', text:'Sortear', run:() => randomize('pattern') },
+  { id:'rnd_all', label:'Azar: todo', type:'button', text:'Sortear', run:() => randomize('all') },
+  { id:'bk_export', label:'Exportar ajustes', type:'button', text:'Exportar', run:() => onActivation(exportBackup) },
+  { id:'bk_import', label:'Importar copia o presets', type:'file', run:text => importFile(text) },
   { section:'Manual', manual:true },
 ];
 let settingsTab = 'Aspecto';
@@ -2659,7 +2732,7 @@ function onSettingChanged(id) {
   if (id === 'micGain' && micGain) micGain.gain.setTargetAtTime(state.micGain, ctx.currentTime, 0.02);
   if (id === 'vocoder') { ensureAudio(); updateFx('vocoder'); vocoderSource(); }
   if (id === 'vocFormant' || id === 'vocNoise') { if (state.vocoder !== 'off') updateFx('vocoder'); }
-  if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('Graba una muestra en el modo Mic');
+  if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('Sin muestra grabada');
   if (id === 'theme') applyTheme();
   else if (id === 'osc') setOsc(state.osc);
   else if (FX_ORDER.includes(id)) updateFx(id);
@@ -2733,6 +2806,14 @@ function buildSettings() {
       });
       w.appendChild(input); w.appendChild(out); row.appendChild(w);
       input._out = out;
+    } else if (s.type === 'preset') {
+      input = document.createElement('div'); input.className = 'btns';
+      const sv = document.createElement('button'); sv.className = 'act'; sv.textContent = 'Guardar';
+      const ld = document.createElement('button'); ld.className = 'act'; ld.textContent = 'Cargar';
+      onTap(sv, () => presetSave(s.slot)); onTap(ld, () => presetLoad(s.slot));
+      input.appendChild(sv); input.appendChild(ld); input._ld = ld;
+      const info = document.createElement('div'); info.className = 'diag'; row.classList.add('wrap'); input._info = info;
+      row.appendChild(input); row.appendChild(info);
     } else if (s.type === 'file') {
       input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.className = 'file';
       input.addEventListener('change', () => {
@@ -2763,7 +2844,7 @@ function buildSettings() {
     input.id = id; s.el = input;
     (sec || wrap).appendChild(row);
   }
-  syncSettings(); showTab(settingsTab);
+  syncSettings(); showTab(settingsTab); refreshPresetRows();
 }
 
 function fillSelect(input, s) {
@@ -2781,7 +2862,7 @@ function rebuildSoundOptions() { const s = SETTINGS.find(x => x.id === 'sound');
 
 function syncSettings() {
   for (const s of SETTINGS) {
-    if (!s.el || s.type === 'tap' || s.type === 'code' || s.type === 'button' || s.type === 'file') continue;
+    if (!s.el || s.type === 'tap' || s.type === 'code' || s.type === 'button' || s.type === 'file' || s.type === 'preset') continue;
     if (s.tweak) {
       const snd = curSound(), tw = tweak(snd), row = s.el.closest('.row');
       row.hidden = !!s.fmOnly && !(snd.fm && !snd.lib);
@@ -2805,6 +2886,121 @@ function afterSettingChange() {
 
 function openSettings() { syncSettings(); $('sheet').hidden = false; showTab(settingsTab); }
 function closeSettings() { $('sheet').hidden = true; }
+
+// ===== PRESETS, AZAR Y COPIA DE SEGURIDAD =====
+const PRESET_KEYS = ['sound','adsr','attack','release','bass','vlead','stereo','cutoff','bpm','voices','glide','lfo','reverb','reverbAmt','delay','delayAmt',
+  'chorus','flanger','drive','tape','tremolo','key','scale','globalOct','joy','mode','strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar',
+  'vocFormant','vocQ','vocRelease','vocNoise','tweaks','btnOct','inv','locks'];
+function loadPresets() { try { const p = JSON.parse(localStorage.getItem('notes-presets-v1')); if (Array.isArray(p) && p.length === 4) return p; } catch (e) {} return [null, null, null, null]; }
+function savePresets() { try { localStorage.setItem('notes-presets-v1', JSON.stringify(presets)); } catch (e) {} }
+let presets = loadPresets();
+function presetSummary(p) {
+  const sn = allSounds().find(x => x.id === p.snap.sound), md = MODES.find(m => m.id === p.snap.mode) || { name:'' };
+  return (sn ? sn.name : '—') + ' · ' + NOTE_NAMES[p.snap.key] + ' ' + SCALES[p.snap.scale].name.toLowerCase() + ' · ' + md.name;
+}
+function refreshPresetRows() {
+  for (const s of SETTINGS) if (s.type === 'preset' && s.el) { const p = presets[s.slot]; s.el._info.textContent = p ? presetSummary(p) : 'vacío'; s.el._ld.disabled = !p; }
+}
+function presetSave(i) {
+  const snap = {}; for (const k of PRESET_KEYS) snap[k] = structuredClone(state[k]);
+  presets[i] = { snap, at:Date.now() }; savePresets(); refreshPresetRows(); toast('P' + (i + 1) + ' guardado');
+}
+// Aplica al motor y a la interfaz todo el estado (tras cargar un preset o restaurar una copia)
+function reapplyAll() {
+  lastUpper = null; saveState(); applyTheme(); setOsc(state.osc);
+  if (ctx) {
+    for (const id of FX_ORDER) updateFx(id);
+    applyFilter(true); applyVolume(true); applyVibrato();
+    if (drumBus) drumBus.gain.value = state.drumVol;
+    if (micGain) micGain.gain.value = state.micGain;
+  }
+  rebuildSoundOptions(); syncSettings();
+  const m = state.mode; state.mode = 'play'; setMode(m);
+  renderModes(); renderPads(); renderScreen(false);
+}
+function presetLoad(i) {
+  const p = presets[i]; if (!p) return;
+  setMode('play');
+  const next = structuredClone(p.snap);
+  if (['mic', 'tuner', 'mixer'].includes(next.mode)) next.mode = 'play';
+  Object.assign(state, next);
+  if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
+  reapplyAll(); toast('P' + (i + 1) + ' cargado');
+}
+
+// Azar: sonido (instrumento + efectos), patrón (del modo actual + octavas) o todo (+ tonalidad y tempo)
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const chance = p => Math.random() < p;
+function randomSound() {
+  const snd = rnd(allSounds().filter(s => s.id !== 'micsample' || sampleBuf.mic));
+  state.sound = snd.id;
+  if (snd.lib) applyLibPreset(snd);
+  else {
+    const a = snd.adsr || rnd(Object.keys(ADSR)); state.adsr = a; state.attack = ADSR[a].a; state.release = ADSR[a].r;
+    state.reverb = chance(0.6) ? rnd(['room', 'hall', 'plate', 'spring', 'ambient']) : 'off'; state.reverbAmt = 0.25 + Math.random() * 0.3;
+    state.chorus = chance(0.35) ? rnd(['light', 'warm', 'wide', 'lush']) : 'off';
+    state.delay = chance(0.25) ? rnd(['1/4', '1/8', '1/16', '1/16T']) : 'off'; state.delayAmt = 0.2 + Math.random() * 0.25;
+    state.flanger = chance(0.1) ? rnd(['slow', 'jet', 'deep', 'metal']) : 'off';
+    state.drive = chance(0.1) ? rnd(['tube', 'drive']) : 'off';
+    state.tape = chance(0.12) ? rnd(['lofi', 'vinyl', 'tape']) : 'off';
+    state.tremolo = chance(0.1) ? rnd(['1/4', '1/8', '1/16']) : 'off';
+    state.lfo = chance(0.2) ? rnd(['low', 'med']) : 'off';
+    state.glide = chance(0.12) ? rnd(['short', 'medium']) : 'off';
+    state.cutoff = chance(0.25) ? 450 + Math.floor(Math.random() * 400) : 1000;
+  }
+  for (const id of FX_ORDER) updateFx(id);
+  applyFilter(); applyVibrato();
+  return snd;
+}
+function randomPattern() {
+  state.arpPattern = rnd(ARP_PATTERNS)[0]; state.arpRate = rnd(['1/4', '1/8', '1/8', '1/16', '1/16T', 'sw8', 'sw16']); state.arpLayer = rnd(ARP_LAYERS)[0];
+  state.strumSpeed = rnd(['slow', 'medium', 'fast']); state.repeatRate = rnd(['1/8', '1/16', '1/16T', 'sw16']);
+  state.beatVar = rnd(BEAT_VARS)[0];
+  state.btnOct = state.btnOct.map(() => rnd([-1, 0, 0, 0, 1]));
+  if (state.mode === 'seq') seq.steps = Array.from({ length:4 }, () => ({ btn:Math.floor(Math.random() * 7), dir:null }));
+}
+function randomize(kind) {
+  let msg;
+  if (kind === 'sound') msg = randomSound().name;
+  else if (kind === 'pattern') { randomPattern(); msg = 'Patrón nuevo'; }
+  else { state.key = Math.floor(Math.random() * 12); state.bpm = 70 + Math.floor(Math.random() * 71); msg = randomSound().name + ' · ' + NOTE_NAMES[state.key] + ' · ' + state.bpm; }
+  saveState(); lastUpper = null; syncSettings(); renderModes(); renderPads(); renderScreen(held.length > 0);
+  if (held.length) refresh();
+  toast(msg);
+}
+
+// Copia de seguridad: ajustes, presets, sonidos importados y la última muestra del micrófono
+function backupObject() {
+  let mic = null; try { const m = localStorage.getItem('notes-mic-v1'); if (m) mic = JSON.parse(m); } catch (e) {}
+  return { app:'notes-backup', version:1, at:new Date().toISOString(), state, presets, mic };
+}
+async function exportBackup() {
+  const text = JSON.stringify(backupObject()), name = 'notes-ajustes-' + new Date().toISOString().slice(0, 10) + '.json';
+  try {
+    const file = new File([text], name, { type:'application/json' });
+    if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:name }); toast('Ajustes exportados'); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type:'application/json' })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast('Ajustes exportados');
+}
+function restoreBackup(d) {
+  setMode('play');
+  state = Object.assign(structuredClone(DEFAULT_STATE), d.state || {});
+  presets = Array.isArray(d.presets) && d.presets.length === 4 ? d.presets : [null, null, null, null]; savePresets();
+  if (d.mic) { try { localStorage.setItem('notes-mic-v1', JSON.stringify(d.mic)); } catch (e) {} delete sampleBuf.mic; if (ctx) loadMicSample(); }
+  buildLib(); if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
+  if (['mic', 'tuner', 'mixer'].includes(state.mode)) state.mode = 'play';
+  reapplyAll(); refreshPresetRows();
+}
+function importFile(text) {
+  try {
+    const d = JSON.parse(text);
+    if (d && d.app === 'notes-backup') { restoreBackup(d); toast('Copia restaurada'); return; }
+    const n = importLibrary(d); rebuildSoundOptions();
+    toast(n ? n + ' preset' + (n === 1 ? '' : 's') + ' importado' + (n === 1 ? '' : 's') : 'El archivo no contiene presets');
+  } catch (e) { toast('No se pudo leer el archivo'); }
+}
 
 // ===== ARRANQUE =====
 buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); renderModes();
@@ -2845,6 +3041,10 @@ function goneToBackground() {
   if (micTake) { clearTimeout(micTake.timer); micTake = null; }
   if (tunerRaf) { cancelAnimationFrame(tunerRaf); tunerRaf = null; }
   micUsers.clear(); micStop('all');
+  // Cerrar el motor de audio: así iOS libera la sesión y la pantalla de bloqueo deja de mostrar «reproduciendo»
+  if (ctx) { try { ctx.close(); } catch (e) {} ctx = null; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch (e) {}
+  try { if (navigator.mediaSession) { navigator.mediaSession.playbackState = 'none'; navigator.mediaSession.metadata = null; } } catch (e) {}
   if (auto.timer) { clearInterval(auto.timer); auto.timer = null; }
   needsRebuild = true;
 }
@@ -2852,6 +3052,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) goneT
 window.addEventListener('pagehide', goneToBackground);
 window.addEventListener('pageshow', e => { if (e.persisted) needsRebuild = true; });
 renderPads(); renderScreen(false); renderJoy();
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
 </body>
 </html>
