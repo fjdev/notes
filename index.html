@@ -58,7 +58,7 @@ body {
 
 /* Botones de acorde */
 .pads {
-  flex: 1 1 auto; display: grid; grid-template-columns: repeat(4, 1fr);
+  flex: 1 1 auto; display: grid; grid-template-columns: repeat(12, 1fr);
   grid-template-rows: 1fr 1fr; gap: 10px; min-height: 180px;
 }
 .cb {
@@ -74,7 +74,13 @@ body {
 .cb.held { background: var(--hold); border-color: var(--hold); color: #fff; transform: scale(.97); }
 .cb.held .cn, .cb.held .badge { color: #dbe6ff; }
 .cb.target { outline: 2px solid var(--ink); outline-offset: 2px; }
-.cb.settings { background: var(--panel); font-size: 15px; color: var(--muted); }
+.cb { grid-column: span 3; }
+.cb:nth-child(n+5) { grid-column: span 4; }
+.gear {
+  position: absolute; top: 4px; right: 6px; font: inherit; font-size: 22px; line-height: 1;
+  background: none; border: 0; color: var(--lcd-dim); padding: 6px; cursor: pointer;
+}
+.screen-top { padding-right: 34px; }
 
 /* Joystick y herramientas */
 .controls { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; }
@@ -130,6 +136,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <main class="app">
   <section class="screen" id="screen" aria-label="Pantalla. Toca para abrir los ajustes">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
+    <button class="gear" id="gear" aria-label="Ajustes">&#9881;&#xFE0E;</button>
     <div class="chord idle" id="chordName">—</div>
     <div class="screen-bottom"><span id="sNotes">Pulsa un botón</span><span class="dir" id="sDir"></span></div>
     <div class="toast" id="toast"></div>
@@ -154,6 +161,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <h2>Ajustes</h2>
     <div id="settingsRows"></div>
     <p class="help">
+      Para fijar un acorde: mantén el botón, desliza hacia la variación y pulsa Fijar acorde (con el botón aún pulsado o justo después de soltarlo).<br>
       Mantén un botón y desliza el dedo en cualquier dirección para cambiar el acorde, o usa el joystick con la otra mano.
       Los botones de la derecha del joystick actúan sobre el último botón que has tocado.<br>
       Teclado del ordenador: 1–7 tocan los acordes; W, A, S, D (y Q, E, Z, C en diagonal) mueven el joystick;
@@ -423,10 +431,18 @@ function saveState() {
 
 // ===== AUDIO =====
 let ctx = null, master, filterNode, comp, outGain;
+// En iPhone, al salir de la app el audio se congela y a veces vuelve "mudo".
+// Por eso, tras volver, se reconstruye el motor de audio en el siguiente toque.
+let needsRebuild = false;
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const SLOT_PAN = [-0.55, -0.15, 0.25, 0, 0.5, 0.75];
 
 function ensureAudio() {
+  if (ctx && (needsRebuild || ctx.state === 'interrupted' || ctx.state === 'closed')) {
+    try { ctx.close(); } catch (e) {}
+    ctx = null;
+  }
+  needsRebuild = false;
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     ctx = new AC({ latencyHint:'interactive' });
@@ -702,10 +718,6 @@ function buildPads() {
     el.addEventListener('pointercancel', end);
     el.addEventListener('contextmenu', e => e.preventDefault());
   }
-  const s = document.createElement('button');
-  s.className = 'cb settings'; s.textContent = 'Ajustes';
-  s.addEventListener('click', openSettings);
-  pads.appendChild(s);
 }
 
 function renderPads() {
@@ -720,6 +732,7 @@ function renderPads() {
     el.querySelector('.badge').textContent = badges.join(', ');
   }
   $('targetLbl').textContent = 'Botón ' + (target + 1) + ' (' + resolveChord(state, target, null).name + ')';
+  $('tLock').textContent = state.locks[target] ? 'Liberar acorde' : 'Fijar acorde';
 }
 
 // Vector -> una de las 8 direcciones (o null si no supera el umbral)
@@ -892,13 +905,27 @@ $('resetBtns').addEventListener('click', () => {
   state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
   saveState(); renderPads(); toast('Botones restablecidos');
 });
-$('tInv').addEventListener('click', toolInversion);
-$('tLock').addEventListener('click', toolLock);
-$('tOctDn').addEventListener('click', () => toolOct(-1));
-$('tOctUp').addEventListener('click', () => toolOct(1));
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { held.length = 0; pointers.clear(); refresh(); }
-});
+// pointerdown responde aunque otro dedo esté pulsando un acorde (en iPhone, click no)
+function onTap(el, fn) {
+  el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
+  el.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
+}
+onTap($('tInv'), toolInversion);
+onTap($('tLock'), toolLock);
+onTap($('tOctDn'), () => toolOct(-1));
+onTap($('tOctUp'), () => toolOct(1));
+$('gear').addEventListener('click', e => { e.stopPropagation(); openSettings(); });
+function goneToBackground() {
+  held.length = 0; pointers.clear(); padDir = null; dirKeys.clear(); keyDir = null;
+  if (ctx) refresh(); else renderPads();
+  renderJoy(); $('knob').style.transform = '';
+  for (const [, v] of voices) v.cv.releaseAll(0.01);
+  voices.clear();
+  needsRebuild = true;
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) goneToBackground(); });
+window.addEventListener('pagehide', goneToBackground);
+window.addEventListener('pageshow', e => { if (e.persisted) needsRebuild = true; });
 renderPads(); renderScreen(false); renderJoy();
 </script>
 </body>
