@@ -101,7 +101,9 @@ body {
 .chip {
   flex: 0 0 auto; font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 999px;
   border: 1.5px solid var(--ctl-line); background: var(--ctl); color: var(--ctl-ink); touch-action: manipulation;
+  transition: transform .06s;
 }
+.chip:active { transform: translateY(1px) scale(.98); }
 .chip.on { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
 .chip.param { margin-left: auto; border-style: dashed; }
 .chip.param:disabled { opacity: .35; }
@@ -116,7 +118,9 @@ body {
   background: var(--btn); color: var(--btn-ink);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
   font: inherit; touch-action: none; padding: 4px; position: relative;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,.18); transition: transform .05s, box-shadow .05s;
 }
+.cb.held { box-shadow: inset 0 2px 3px rgba(0,0,0,.35); transform: translateY(1px) scale(.985); }
 .cb:nth-child(n+5) { grid-column: span 4; }
 .cb .num { font-family: var(--serif); font-size: 40px; line-height: 1; }
 .cb .cn { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -144,10 +148,14 @@ body {
 .tools { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tools .target-lbl { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
 .tools button {
-  font: inherit; font-size: 13px; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--ctl-line);
+  font: inherit; font-size: 10px; padding: 8px 4px 6px; border-radius: 10px; border: 1.5px solid var(--ctl-line);
   background: var(--ctl); color: var(--ctl-ink); touch-action: manipulation;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; line-height: 1;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,.18); transition: transform .05s;
 }
-.tools button:active { background: var(--accent2); border-color: var(--accent2); color: #1a1a1a; }
+.tools button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tools button:active { background: var(--accent2); border-color: var(--accent2); color: #1a1a1a; transform: translateY(1px); box-shadow: none; }
+.tools button.locked { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
 
 /* ===== Ajustes ===== */
 .sheet {
@@ -160,7 +168,20 @@ body {
   border-radius: 14px 14px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   border-top: 1.5px solid var(--sheet-line); -webkit-user-select: text; user-select: text;
 }
-.sheet h2 { font-family: var(--serif); font-size: 30px; font-weight: 400; margin: 0 0 4px; }
+.sheet-head {
+  position: sticky; top: -16px; margin: -16px -16px 0; padding: 14px 16px 10px; background: var(--sheet); z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1.5px solid var(--sheet-line);
+  touch-action: pan-x;
+}
+.sheet-head::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--sheet-line); }
+.sheet h2 { font-family: var(--serif); font-size: 30px; font-weight: 400; margin: 6px 0 0; }
+.sheet-close {
+  font: inherit; font-size: 22px; line-height: 1; width: 38px; height: 38px; border-radius: 50%; margin-top: 6px;
+  border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation;
+}
+.sheet-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 10px 0 2px; }
+.sheet-nav::-webkit-scrollbar { display: none; }
+.sheet-nav button { flex: 0 0 auto; font: inherit; font-size: 12px; padding: 5px 10px; border-radius: 999px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); }
 .sheet h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin: 20px 0 2px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--sheet-line); }
 .row label { font-size: 14px; }
@@ -210,17 +231,21 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
     <div class="tools">
       <div class="target-lbl" id="targetLbl">Botón 1</div>
-      <button id="tInv">Inv</button>
-      <button id="tLock">Fijar</button>
-      <button id="tOctDn">Octava −</button>
-      <button id="tOctUp">Octava +</button>
+      <button id="tInv" aria-label="Inversión"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h10"/><path d="M19 5v14M16 8l3-3 3 3"/></svg><span>inv</span></button>
+      <button id="tLock" aria-label="Fijar acorde"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0" id="lockShackle"/></svg><span id="tLockLbl">fijar</span></button>
+      <button id="tOctDn" aria-label="Octava abajo"><svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg><span>oct −</span></button>
+      <button id="tOctUp" aria-label="Octava arriba"><svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg><span>oct +</span></button>
     </div>
   </section>
 </main>
 
 <div class="sheet" id="sheet" hidden>
   <div class="sheet-body" role="dialog" aria-label="Ajustes">
-    <h2>Ajustes</h2>
+    <div class="sheet-head" id="sheetHead">
+      <h2>Ajustes</h2>
+      <button class="sheet-close" id="closeSheetTop" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="sheet-nav" id="sheetNav"></div>
     <div id="settingsRows"></div>
     <p class="help">
       Fijar un acorde: mantén el botón, mueve el joystick y pulsa Fijar. Teclado: 1–7 acordes, WASD/QEZC joystick, M modo, I inversión, F fijar, coma y punto octava.<br>
@@ -511,7 +536,7 @@ const DEFAULT_STATE = {
   cutoff:1000, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
-  theme:'auto', swipe:false, osc:false,
+  theme:'auto', swipe:false, osc:false, haptics:true,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
   btnOct:[0,0,0,0,0,0,0], inv:[0,0,0,0,0,0,0], locks:[null,null,null,null,null,null,null],
@@ -770,10 +795,10 @@ function buildModes() {
   const wrap = $('modes');
   for (const m of MODES) {
     const b = document.createElement('button'); b.className = 'chip'; b.dataset.m = m.id; b.textContent = m.name;
-    b.addEventListener('click', () => setMode(m.id)); wrap.appendChild(b);
+    b.addEventListener('click', () => { haptic(false); setMode(m.id); }); wrap.appendChild(b);
   }
   const p = document.createElement('button'); p.className = 'chip param'; p.id = 'modeParam';
-  p.addEventListener('click', cycleModeParam); wrap.appendChild(p);
+  p.addEventListener('click', () => { haptic(false); cycleModeParam(); }); wrap.appendChild(p);
 }
 function glideTc() {
   const snd = curSound();
@@ -1274,6 +1299,24 @@ function autoTick() {
   }
 }
 
+// ===== HÁPTICOS =====
+// Android: navigator.vibrate. iOS: Safari no vibra, pero un interruptor (input switch) cambiado
+// dentro de un gesto del usuario produce un toque háptico en iOS 18+.
+let hapticSwitch = null;
+function haptic(strong) {
+  if (!state.haptics) return;
+  try {
+    if (navigator.vibrate) { navigator.vibrate(strong ? 14 : 7); return; }
+    if (!hapticSwitch) {
+      const lab = document.createElement('label');
+      lab.style.cssText = 'position:fixed;left:-100px;top:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden';
+      hapticSwitch = document.createElement('input'); hapticSwitch.type = 'checkbox'; hapticSwitch.setAttribute('switch', '');
+      lab.appendChild(hapticSwitch); document.body.appendChild(lab); hapticSwitch._lab = lab;
+    }
+    hapticSwitch._lab.click();
+  } catch (e) {}
+}
+
 // ===== INTERPRETACIÓN =====
 const held = [];                 // botones pulsados, en orden
 const pointers = new Map();      // pointerId -> { btn, x0, y0, dir }
@@ -1347,7 +1390,7 @@ function refresh() {
 }
 
 function press(btn) {
-  ensureAudio();
+  ensureAudio(); haptic(true);
   if (!held.includes(btn)) held.push(btn);
   target = btn; lastDirUsed[btn] = null;
   if (state.mode === 'drone') droneBtn = btn;
@@ -1368,6 +1411,7 @@ function release(btn) {
 function setJoyDir(source, dir) {
   const prev = source === 'pad' ? padDir : keyDir;
   if (prev === dir) return;
+  if (dir && source === 'pad') haptic(false);
   if (source === 'pad') padDir = dir; else keyDir = dir;
   // En modo cromático, sin acorde pulsado, izquierda/derecha cambian la tonalidad
   if (state.joy === 'chromatic' && held.length === 0 && (dir === 'l' || dir === 'r')) {
@@ -1485,7 +1529,10 @@ function renderPads() {
     el.querySelector('.badge').textContent = badges.join(' ');
   }
   $('targetLbl').textContent = 'Botón ' + (target + 1);
-  $('tLock').textContent = state.locks[target] ? 'Liberar' : 'Fijar';
+  const locked = !!state.locks[target];
+  $('tLockLbl').textContent = locked ? 'liberar' : 'fijar';
+  $('tLock').classList.toggle('locked', locked);
+  $('lockShackle').setAttribute('d', locked ? 'M8 11V8a4 4 0 0 1 8 0v3' : 'M8 11V8a4 4 0 0 1 8 0');
 }
 
 // Vector -> una de las 8 direcciones (o null si no supera el umbral)
@@ -1592,17 +1639,17 @@ function drawScope() {
   if (!g) return;
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-  g.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--scope').trim() || '#888';
-  g.lineWidth = 1.5; g.lineJoin = 'round'; g.beginPath();
+  const css = getComputedStyle(document.documentElement);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Persistencia tipo fósforo: el trazo anterior se desvanece en vez de borrarse
+  g.globalAlpha = 0.3; g.fillStyle = css.getPropertyValue('--panel').trim() || '#222'; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+  g.strokeStyle = css.getPropertyValue('--scope').trim() || '#888';
+  g.lineWidth = 1.6; g.lineJoin = 'round'; g.beginPath();
   if (analyser && ctx && ctx.state === 'running') {
     analyser.getByteTimeDomainData(scopeData);
-    // Disparo en un cruce por cero ascendente para que la onda no "corra"
-    let start = 0;
-    for (let i = 1; i < scopeData.length / 2; i++) { if (scopeData[i - 1] <= 128 && scopeData[i] > 128) { start = i; break; } }
-    const N = Math.min(1024, scopeData.length - start);
+    const N = 700;   // ~15 ms: la onda corre y se ve el batido de los pares desafinados
     for (let i = 0; i < N; i++) {
-      const x = i / (N - 1) * W, y = H / 2 - ((scopeData[start + i] - 128) / 128) * H * 0.46;
+      const x = i / (N - 1) * W, y = H / 2 - ((scopeData[i] - 128) / 128) * H * 0.46;
       if (i) g.lineTo(x, y); else g.moveTo(x, y);
     }
   } else { g.moveTo(0, H / 2); g.lineTo(W, H / 2); }
@@ -1619,6 +1666,7 @@ const SETTINGS = [
   { section:'Aspecto' },
   { id:'theme', label:'Tema', type:'select', options:opts(THEMES) },
   { id:'osc', label:'Osciloscopio', type:'check' },
+  { id:'haptics', label:'Vibración', type:'check' },
   { id:'swipe', label:'Deslizar sobre los botones', type:'check' },
   { section:'Tono' },
   { id:'key', label:'Tonalidad', type:'select', numeric:true, options:() => NOTE_NAMES.map((n, i) => [i, n]) },
@@ -1707,7 +1755,11 @@ function buildSettings() {
   const wrap = $('settingsRows'); wrap.innerHTML = '';
   for (const s of SETTINGS) {
     if (s.section) {
-      const h = document.createElement('h3'); h.textContent = s.section; wrap.appendChild(h); continue;
+      const h = document.createElement('h3'); h.textContent = s.section; wrap.appendChild(h);
+      const nb = document.createElement('button'); nb.textContent = s.section;
+      nb.addEventListener('click', () => h.scrollIntoView({ block:'start', behavior:'smooth' }));
+      $('sheetNav').appendChild(nb);
+      continue;
     }
     const row = document.createElement('div'); row.className = 'row';
     const id = 'set-' + s.id;
@@ -1801,6 +1853,18 @@ if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)')
 setOsc(state.osc);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && state.osc && !scopeRaf) drawScope(); });
 $('closeSheet').addEventListener('click', closeSettings);
+$('closeSheetTop').addEventListener('click', closeSettings);
+// Deslizar hacia abajo sobre la cabecera (o sobre el contenido ya en el inicio) cierra los ajustes
+(function () {
+  const body = document.querySelector('.sheet-body'); let y0 = null, fromHead = false;
+  body.addEventListener('pointerdown', e => { y0 = e.clientY; fromHead = !!e.target.closest('.sheet-head'); });
+  body.addEventListener('pointermove', e => {
+    if (y0 == null) return;
+    if ((fromHead || body.scrollTop <= 0) && e.clientY - y0 > 70) { y0 = null; closeSettings(); }
+  });
+  body.addEventListener('pointerup', () => { y0 = null; });
+  body.addEventListener('pointercancel', () => { y0 = null; });
+})();
 $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSettings(); });
 $('resetTweak').addEventListener('click', () => {
   delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrumento restablecido');
@@ -1811,7 +1875,7 @@ $('resetBtns').addEventListener('click', () => {
 });
 // pointerdown responde aunque otro dedo esté pulsando un acorde (en iPhone, click no)
 function onTap(el, fn) {
-  el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
+  el.addEventListener('pointerdown', e => { e.preventDefault(); haptic(false); fn(); });
   el.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
 }
 onTap($('tInv'), toolInversion);
