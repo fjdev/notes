@@ -209,7 +209,22 @@ body {
 }
 .sheet-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 10px 0 2px; }
 .sheet-nav::-webkit-scrollbar { display: none; }
-.sheet-nav button { flex: 0 0 auto; font: inherit; font-size: 12px; padding: 5px 10px; border-radius: 999px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); }
+.sheet-nav button { flex: 0 0 auto; font: inherit; font-size: 12px; padding: 6px 11px; border-radius: 999px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; }
+.sheet-nav button.on { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
+.sec[hidden] { display: none; }
+.sec h3 { margin-top: 12px; }
+.row .act { font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; transition: transform .05s; }
+.row .act:active, .row .tap:active, .sheet-close:active { transform: translateY(1px) scale(.97); background: var(--accent); border-color: var(--accent); color: #fff; }
+.manual { font-size: 14px; line-height: 1.55; color: var(--sheet-ink); }
+.manual h4 { font-family: var(--serif); font-size: 21px; font-weight: 400; margin: 18px 0 4px; }
+.manual p { margin: 0 0 8px; }
+.manual .k { display: inline-block; border: 1px solid var(--sheet-line); border-radius: 4px; padding: 0 5px; font-size: 12px; }
+.sheet-toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--sel); color: var(--sel-ink); font-size: 13px; padding: 8px 14px; border-radius: 999px; z-index: 12;
+  opacity: 0; transition: opacity .15s; pointer-events: none; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sheet-toast.show { opacity: 1; }
 .sheet h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin: 20px 0 2px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--sheet-line); }
 .row label { font-size: 14px; }
@@ -277,17 +292,26 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     </div>
     <div class="sheet-nav" id="sheetNav"></div>
     <div id="settingsRows"></div>
-    <p class="help">
-      Fijar un acorde: mantén el botón, mueve el joystick y pulsa Fijar. Teclado: 1–7 acordes, WASD/QEZC joystick, M modo, I inversión, F fijar, coma y punto octava.<br>
-      Grabaciones: VCSL y VSCO 2 CE (Versilian Studios, CC0) y FluidR3_GM vía midi-js-soundfonts (CC BY 3.0).
-    </p>
-    <div class="actions">
-      <button id="resetTweak">Restablecer instrumento</button>
-      <button id="resetBtns">Restablecer botones</button>
-      <button class="primary" id="closeSheet">Cerrar</button>
+    <div class="sec manual" id="manualSec" hidden>
+      <h4>Acordes</h4>
+      <p>Los siete botones tocan los acordes de la tonalidad: 1, 4 y 5 mayores; 2, 3 y 6 menores; 7 disminuido. Nunca suenan mal entre sí. Prueba 1 → 5 → 6 → 4.</p>
+      <p>Mantén un botón y mueve el joystick: cada dirección cambia el color del acorde. Suelta y vuelve al acorde normal. En Ajustes → Acordes eliges entre cinco mapas del joystick.</p>
+      <h4>Herramientas</h4>
+      <p>Actúan sobre el último botón tocado. <b>Inv</b> cambia la inversión. <b>Fijar</b> deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. <b>Oct −/+</b> sube o baja una octava solo ese botón.</p>
+      <h4>Modos</h4>
+      <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo.</p>
+      <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
+      <h4>Looper</h4>
+      <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 arrancan al inicio del loop y se paran solas.</p>
+      <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
+      <h4>Teclado del ordenador</h4>
+      <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W A S D</span> y <span class="k">Q E Z C</span> joystick · <span class="k">M</span> modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava</p>
+      <h4>Créditos</h4>
+      <p>Grabaciones: VCSL y VSCO 2 Community Edition de Versilian Studios (CC0) y FluidR3_GM a través de midi-js-soundfonts (CC BY 3.0).</p>
     </div>
   </div>
 </div>
+<div class="sheet-toast" id="sheetToast"></div>
 
 <script src="samples.js"></script>
 <script>
@@ -835,10 +859,10 @@ function buildModes() {
   const wrap = $('modes');
   for (const m of MODES) {
     const b = document.createElement('button'); b.className = 'chip'; b.dataset.m = m.id; b.textContent = m.name;
-    b.addEventListener('click', () => { haptic(false); setMode(m.id); }); wrap.appendChild(b);
+    onTap(b, () => setMode(m.id)); wrap.appendChild(b);
   }
   const p = document.createElement('button'); p.className = 'chip param'; p.id = 'modeParam';
-  p.addEventListener('click', () => { haptic(false); cycleModeParam(); }); wrap.appendChild(p);
+  onTap(p, cycleModeParam); wrap.appendChild(p);
 }
 function glideTc() {
   const snd = curSound();
@@ -1687,6 +1711,12 @@ function mixerTool(which) {
   renderPads(); renderLooper();
 }
 
+// pointerdown responde aunque otro dedo esté pulsando un acorde (en iPhone, click no)
+function onTap(el, fn) {
+  el.addEventListener('pointerdown', e => { e.preventDefault(); haptic(false); fn(); });
+  el.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
+}
+
 // ===== HÁPTICOS =====
 // Android: navigator.vibrate. iOS: Safari no vibra, pero un interruptor (input switch) cambiado
 // dentro de un gesto del usuario produce un toque háptico en iOS 18+.
@@ -1697,13 +1727,17 @@ function haptic(strong) {
     if (navigator.vibrate) { navigator.vibrate(strong ? 14 : 7); return; }
     if (!hapticSwitch) {
       const lab = document.createElement('label');
-      lab.style.cssText = 'position:fixed;left:-100px;top:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden';
+      lab.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.01;pointer-events:none;overflow:hidden;z-index:-1';
       hapticSwitch = document.createElement('input'); hapticSwitch.type = 'checkbox'; hapticSwitch.setAttribute('switch', '');
       lab.appendChild(hapticSwitch); document.body.appendChild(lab); hapticSwitch._lab = lab;
     }
     hapticSwitch._lab.click();
   } catch (e) {}
 }
+
+let hapticPending = false;
+function hapticLater() { hapticPending = true; }
+['pointerup', 'touchend'].forEach(ev => document.addEventListener(ev, () => { if (hapticPending) { hapticPending = false; haptic(true); } }, true));
 
 // ===== INTERPRETACIÓN =====
 const held = [];                 // botones pulsados, en orden
@@ -1779,7 +1813,7 @@ function refresh() {
 }
 
 function press(btn) {
-  ensureAudio(); haptic(true);
+  ensureAudio(); haptic(true); hapticLater();
   if (!held.includes(btn)) held.push(btn);
   target = btn; lastDirUsed[btn] = null;
   if (state.mode === 'drone') droneBtn = btn;
@@ -1857,8 +1891,9 @@ function toolOct(d) {
 const $ = id => document.getElementById(id);
 let toastTimer = null;
 function toast(msg) {
-  const el = $('toast'); el.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  const el = $('sheet').hidden ? $('toast') : $('sheetToast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').classList.remove('show'); $('sheetToast').classList.remove('show'); }, 1800);
 }
 
 function renderScreen(active) {
@@ -2111,6 +2146,7 @@ const SETTINGS = [
   { id:'tw_fmIndex', label:'FM: cantidad', type:'range', min:0, max:80, tweak:'fmIndex', fmOnly:true, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) },
   { id:'tw_fmDecay', label:'FM: caída', type:'range', min:5, max:300, tweak:'fmDecay', fmOnly:true, to:v => v / 100, from:v => Math.round(v * 100), fmt:v => v.toFixed(2) + ' s' },
   { id:'tw_code', label:'Código del instrumento', type:'code' },
+  { id:'tw_reset', label:'Volver a los valores originales', type:'button', text:'Restablecer', run:() => { delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrumento restablecido'); } },
   { section:'Efectos' },
   { id:'reverb', label:'Reverb', type:'select', options:opts([['off','Apagada'],['room','Room'],['hall','Hall'],['plate','Plate'],['spring','Spring'],['ambient','Ambient']]) },
   { id:'reverbAmt', label:'Cantidad de reverb', type:'range', min:0, max:100, ...pct },
@@ -2136,7 +2172,18 @@ const SETTINGS = [
   { id:'joy', label:'Joystick', type:'select', options:() => JOY_MODES.map(m => [m.id, m.name]) },
   { id:'bass', label:'Bajo', type:'select', options:opts([['off','Sin bajo'],['root','Raíz'],['slash','Slash (botón + botón)']]) },
   { id:'vlead', label:'Conducción de voces', type:'check' },
+  { id:'btn_reset', label:'Quitar fijados, octavas e inversiones', type:'button', text:'Restablecer', run:() => {
+    state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
+    saveState(); renderPads(); toast('Botones restablecidos'); } },
+  { section:'Manual', manual:true },
 ];
+let settingsTab = 'Aspecto';
+function showTab(name) {
+  settingsTab = name;
+  document.querySelectorAll('#settingsRows .sec, #manualSec').forEach(el => { el.hidden = el.dataset.sec !== name; });
+  document.querySelectorAll('#sheetNav button').forEach(b => b.classList.toggle('on', b.dataset.sec === name));
+  document.querySelector('.sheet-body').scrollTop = 0;
+}
 
 function onSettingChanged(id) {
   if (id === 'mode') { const m = state.mode; state.mode = 'play'; setMode(m); }
@@ -2169,13 +2216,15 @@ function tapTempo() {
 }
 
 function buildSettings() {
-  const wrap = $('settingsRows'); wrap.innerHTML = '';
+  const wrap = $('settingsRows'); wrap.innerHTML = ''; let sec = null;
   for (const s of SETTINGS) {
     if (s.section) {
-      const h = document.createElement('h3'); h.textContent = s.section; wrap.appendChild(h);
-      const nb = document.createElement('button'); nb.textContent = s.section;
-      nb.addEventListener('click', () => h.scrollIntoView({ block:'start', behavior:'smooth' }));
+      const nb = document.createElement('button'); nb.textContent = s.section; nb.dataset.sec = s.section;
+      onTap(nb, () => showTab(s.section));
       $('sheetNav').appendChild(nb);
+      if (s.manual) { $('manualSec').dataset.sec = s.section; sec = null; continue; }
+      sec = document.createElement('div'); sec.className = 'sec'; sec.dataset.sec = s.section; sec.hidden = true;
+      const h = document.createElement('h3'); h.textContent = s.section; sec.appendChild(h); wrap.appendChild(sec);
       continue;
     }
     const row = document.createElement('div'); row.className = 'row';
@@ -2212,6 +2261,9 @@ function buildSettings() {
       });
       w.appendChild(input); w.appendChild(out); row.appendChild(w);
       input._out = out;
+    } else if (s.type === 'button') {
+      input = document.createElement('button'); input.className = 'act'; input.textContent = s.text;
+      onTap(input, s.run); row.appendChild(input);
     } else if (s.type === 'code') {
       input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Mostrar';
       const out = document.createElement('output'); out.className = 'code'; out.hidden = true;
@@ -2230,14 +2282,14 @@ function buildSettings() {
       row.appendChild(input);
     }
     input.id = id; s.el = input;
-    wrap.appendChild(row);
+    (sec || wrap).appendChild(row);
   }
-  syncSettings();
+  syncSettings(); showTab(settingsTab);
 }
 
 function syncSettings() {
   for (const s of SETTINGS) {
-    if (!s.el || s.type === 'tap' || s.type === 'code') continue;
+    if (!s.el || s.type === 'tap' || s.type === 'code' || s.type === 'button') continue;
     if (s.tweak) {
       const snd = curSound(), tw = tweak(snd), row = s.el.closest('.row');
       row.hidden = !!s.fmOnly && !snd.fm;
@@ -2259,7 +2311,7 @@ function afterSettingChange() {
   if (held.length) refresh();
 }
 
-function openSettings() { syncSettings(); $('sheet').hidden = false; }
+function openSettings() { syncSettings(); $('sheet').hidden = false; showTab(settingsTab); }
 function closeSettings() { $('sheet').hidden = true; }
 
 // ===== ARRANQUE =====
@@ -2269,8 +2321,7 @@ applyTheme();
 if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
 setOsc(state.osc);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && state.osc && !scopeRaf) drawScope(); });
-$('closeSheet').addEventListener('click', closeSettings);
-$('closeSheetTop').addEventListener('click', closeSettings);
+onTap($('closeSheetTop'), closeSettings);
 // Deslizar hacia abajo sobre la cabecera (o sobre el contenido ya en el inicio) cierra los ajustes
 (function () {
   const body = document.querySelector('.sheet-body'); let y0 = null, fromHead = false;
@@ -2283,18 +2334,6 @@ $('closeSheetTop').addEventListener('click', closeSettings);
   body.addEventListener('pointercancel', () => { y0 = null; });
 })();
 $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSettings(); });
-$('resetTweak').addEventListener('click', () => {
-  delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrumento restablecido');
-});
-$('resetBtns').addEventListener('click', () => {
-  state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
-  saveState(); renderPads(); toast('Botones restablecidos');
-});
-// pointerdown responde aunque otro dedo esté pulsando un acorde (en iPhone, click no)
-function onTap(el, fn) {
-  el.addEventListener('pointerdown', e => { e.preventDefault(); haptic(false); fn(); });
-  el.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
-}
 onTap($('tInv'), toolInversion);
 onTap($('tLock'), toolLock);
 onTap($('tOctDn'), () => toolOct(-1));
