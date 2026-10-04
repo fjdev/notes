@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&text=notes&display=swap" rel="stylesheet">   <!-- solo las letras de «notes»: unos pocos KB -->
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&text=ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÑ0123456789%20·/+-%23%25.:°()&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="notes">
@@ -189,6 +190,10 @@ body {
 .row .act:disabled { opacity: .35; }
 @keyframes blink { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .lp-rec.s-armed span, .lp-track.s-armed { animation: none; } }
+
+/* Manual: títulos de bloque */
+.manual h3.grp { font: 700 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--sheet-muted); margin: 26px 0 2px; padding-top: 14px; border-top: 1px solid var(--sheet-line); }
+.manual h3.grp:first-child { margin-top: 4px; border-top: 0; padding-top: 0; }
 
 /* ===== Botones de acorde ===== */
 .pads {
@@ -422,12 +427,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 @keyframes clickring { from { opacity: 1; } to { opacity: 0; transform: scale(1.25); } }
 @media (prefers-reduced-motion: reduce) { .knob.click::before { animation: none; opacity: 0; } }
 
-/* Herramientas: teclas de color secundario */
-.tools button { --k: var(--key); color: var(--key-ink); font: 700 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; border-radius: 12px; padding: 10px 4px 8px; }
-.tools button:active:not(:disabled) { background: var(--accent2); transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0,0,0,.35); color: var(--btn-ink); }
-.tools button.locked { --k: var(--key); color: var(--accent2); box-shadow: inset 0 0 0 1.5px var(--accent2), 0 2px 0 rgba(0,0,0,.35); }
-.tools button:disabled { opacity: .3; box-shadow: none; }
-.tools .target-lbl { font: 600 10px/1.2 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 
 /* Placa inferior: marca y rejillas de altavoz */
 .foot { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 2px; }
@@ -450,10 +449,77 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     box-shadow: 0 40px 80px -30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.18); }
 }
 @media (prefers-reduced-motion: reduce) { .chord.idle::after { animation: none; } }
+
+/* ==========================================================================================
+   PANTALLA INDEPENDIENTE DE LA CARCASA (fase 18): 5 carcasas × 3 pantallas.
+   La pantalla usa un solo sistema monocromo: fondo, principal, atenuado y UN color de estado.
+   ========================================================================================== */
+:root[data-screen="oled"] { --panel:#0D0E0C; --panel-ink:#ECE1C1; --panel-dim:#807C6D; --scr-active:#F0783E; --scope:#ECE1C1; --glass: transparent; --dots: 0; }   /* OLED cálida */
+:root[data-screen="lcdg"] { --panel:#182018; --panel-ink:#BED598; --panel-dim:#7C8C67; --scr-active:#E3D36B; --scope:#BED598; --glass: rgba(170,210,120,.045); --dots: 1; }   /* LCD verde */
+:root[data-screen="lcdb"] { --panel:#172023; --panel-ink:#A9D8D2; --panel-dim:#668F8D; --scr-active:#E5C452; --scope:#A9D8D2; --glass: rgba(120,200,210,.045); --dots: 1; }   /* LCD azul */
+:root { --bezel: color-mix(in srgb, var(--body) 28%, #000); --pixel: "Silkscreen", ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+.display { position: relative; display: flex; flex-direction: column; background: var(--bezel); border-radius: 12px; padding: 7px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.14), 0 8px 16px -10px rgba(0,0,0,.55); }
+.display .screen { border-radius: 6px 6px 0 0; padding: 12px 14px 10px; background: var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.035), inset 0 3px 8px rgba(0,0,0,.65), inset 0 0 36px rgba(0,0,0,.35); }
+.display .modes { margin-top: 0; border-radius: 0 0 6px 6px; padding: 5px 6px 7px; background: var(--panel);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--panel-ink) 9%, transparent), inset 0 -8px 16px rgba(0,0,0,.30); }
+/* cristal: un reflejo muy suave y una dominante de color; en las LCD, una rejilla de puntos casi invisible (sin llegar a CRT) */
+.display::after { content: ""; position: absolute; inset: 7px; border-radius: 6px; pointer-events: none; z-index: 4;
+  background: linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%), var(--glass); }
+:root[data-screen="lcdg"] .display::after, :root[data-screen="lcdb"] .display::after {
+  background: radial-gradient(circle, rgba(0,0,0,.16) .7px, transparent .9px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%), var(--glass); }
+
+/* Un solo color de estado dentro de la pantalla */
+.display .chord.idle::after { background: var(--scr-active); }
+.display .compass circle.on { fill: var(--scr-active); filter: drop-shadow(0 0 3px var(--scr-active)); }
+.display .screen-top, .display .screen-bottom { font-family: var(--pixel); font-size: 9.5px; letter-spacing: .08em; }
+.display .chip.param { border-color: color-mix(in srgb, var(--panel-dim) 55%, transparent); }
+.display .toast { background: var(--panel-ink); color: var(--panel); }   /* mensajes en vídeo inverso con los colores de la pantalla */
+
+/* ==========================================================================================
+   TECLAS LIMPIAS Y BOTONES DE ABAJO (fase 18; diseño elegido por el usuario: «balancín»), con la referencia del OP-1 de Teenage Engineering:
+   grupos pequeños y separados, una luz por función y etiquetas diminutas impresas FUERA de la tecla.
+   ========================================================================================== */
+.pads.bare .cb .num, .pads.bare .cb .cn, .pads.bare .cb .badge { display: none; }
+.tools .target-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }   /* solo para lectores de pantalla */
+
+.controls .tools { position: relative; overflow: visible; }
+.controls .tools button {
+  --k: var(--key); position: relative; display: grid; place-items: center; padding: 0; border-radius: 10px; color: var(--key-ink);
+  font: inherit; text-transform: lowercase; letter-spacing: .04em;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--k) 90%, #fff) 0%, var(--k) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 2px 0 rgba(0,0,0,.45);
+}
+.controls .tools button svg { width: 20px; height: 20px; }
+.controls .tools button span { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); font: 500 9px/1 var(--sans); color: var(--muted); white-space: nowrap; }
+.controls .tools button::before { content: ""; position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--key-ink) 20%, transparent); pointer-events: none; }   /* luz de estado */
+.controls .tools button.locked { color: var(--key-ink); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 2px 0 rgba(0,0,0,.45); }
+.controls .tools button.locked::before { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+.controls .tools button:active:not(:disabled) { background: var(--accent2); color: var(--btn-ink); transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
+.controls .tools button:disabled { opacity: .3; box-shadow: none; }
+.controls .tools.idle button { visibility: hidden; }   /* modos sin función (Drums, Ritmos, Mic, Afinador): las teclas se ocultan */
+.oct-cap { display: none; }
+
+/* Fuera de los modos de acordes (Seq, Mixer, Juego, Oído): cuatro teclas cuadradas con su etiqueta debajo, porque las funciones cambian */
+.controls .tools:not(.chord) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 24px 14px; justify-content: center; align-content: center; }
+
+/* Con acordes: INV y FIJAR sueltos y las dos octavas como un balancín de dos mitades */
+.controls .tools.chord { grid-template-columns: repeat(2, 58px); grid-template-rows: 46px 46px; gap: 22px 0; justify-content: center; align-content: center; }
+.controls .tools.chord #tInv { margin-right: 5px; } .controls .tools.chord #tLock { margin-left: 5px; }
+.controls .tools.chord #tOctDn { border-radius: 10px 3px 3px 10px; }
+.controls .tools.chord #tOctUp { border-radius: 3px 10px 10px 3px; box-shadow: inset 1px 0 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.16), 0 2px 0 rgba(0,0,0,.45); }
+.controls .tools.chord #tOctDn span, .controls .tools.chord #tOctUp span { display: none; }
+.controls .tools.chord #tOctDn::before { right: auto; left: 6px; }
+.controls .tools.chord .oct-cap { display: block; position: absolute; left: 0; right: 0; bottom: -15px; text-align: center; font: 500 9px/1 var(--sans); letter-spacing: .04em; text-transform: lowercase; color: var(--muted); pointer-events: none; }
+
+
 </style>
 </head>
 <body>
 <main class="app">
+  <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Pantalla">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
     <button class="gear" id="gear" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
@@ -471,6 +537,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   </section>
 
   <section class="modes" id="modes"></section>
+  </div>
 
   <section class="looper" id="looper" aria-label="Looper"></section>
 
@@ -478,12 +545,13 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 
   <section class="controls">
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
-    <div class="tools">
+    <div class="tools" id="tools">
       <div class="target-lbl" id="targetLbl">Botón 1</div>
       <button id="tInv" aria-label="Inversión"></button>
       <button id="tLock" aria-label="Fijar acorde"></button>
       <button id="tOctDn" aria-label="Octava abajo"></button>
       <button id="tOctUp" aria-label="Octava arriba"></button>
+      <span class="oct-cap" aria-hidden="true">octava</span>
     </div>
   </section>
   <footer class="foot" aria-hidden="true"><span class="grille"></span><span class="brand">notes</span><span class="grille"></span></footer>
@@ -498,64 +566,82 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <div class="sheet-nav" id="sheetNav"></div>
     <div id="settingsRows"></div>
     <div class="sec manual" id="manualSec" hidden>
+      <h3 class="grp">Tocar</h3>
       <h4>Acordes</h4>
       <p>Los siete botones tocan los acordes de la tonalidad: 1, 4 y 5 mayores; 2, 3 y 6 menores; 7 disminuido. Nunca suenan mal entre sí. Prueba 1 → 5 → 6 → 4.</p>
       <p>Mantén un botón y mueve el joystick: cada dirección cambia el color del acorde. Suelta y vuelve al acorde normal. En Ajustes → Acordes eliges entre cinco mapas del joystick.</p>
+      <p>La pantalla muestra el nombre del acorde que suena; si prefieres verlo también en las teclas, activa «Notas y números en las teclas» en Ajustes → Aspecto. En Ajustes → Acordes, «Bajo» añade la raíz en grave (Raíz) o te deja mantener un botón para el bajo y pulsar otro para el acorde (Slash), y «Conducción de voces» elige las inversiones por ti (entonces la tecla INV queda atenuada).</p>
+      <h4>Herramientas</h4>
+      <p>Actúan sobre el último botón tocado, que se reconoce por su luz verde. INV cambia la inversión. FIJAR deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. Las dos teclas de abajo, unidas como un balancín, suben o bajan una octava solo ese botón.</p>
+      <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Seq, Mixer, Juego y Oído las cuatro teclas cambian de función y llevan su etiqueta debajo; en Drums, Ritmos, Mic y Afinador no se usan y desaparecen.</p>
       <h4>Controles atenuados</h4>
       <p>Un botón o una herramienta atenuados no tienen función en el modo actual (por ejemplo, las pistas vacías en el Mixer) y no responden al toque.</p>
-      <h4>Herramientas</h4>
-      <p>Actúan sobre el último botón tocado. <b>Inv</b> cambia la inversión. <b>Fijar</b> deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. <b>Oct −/+</b> sube o baja una octava solo ese botón.</p>
+      <h3 class="grp">Pantalla y atajos</h3>
+      <h4>Selección rápida</h4>
+      <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). Con el joystick hacia arriba o la derecha pasas a la página siguiente; hacia abajo o la izquierda, a la anterior. La tonalidad reúne las notas naturales, las alteradas y las escalas. En el teclado: J (sonido), K (tonalidad y escala) y L (modo), mantenidas. Sonido y tonalidad no responden en Juego ni en Oído.</p>
+      <h4>Aleatorizar con la perilla</h4>
+      <p>Mantén la tonalidad, el sonido o el modo de la pantalla y, con el otro dedo, toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Tonalidad: cambia el sonido, los efectos, la tonalidad y el patrón de arpegio. Sonido: cambia solo la forma de onda y los efectos se quedan. Modo: cambia el patrón de arpegio y el de secuenciador, y el sonido se queda. No cuenta si hay un acorde pulsado ni en Juego y Oído.</p>
+      <p>En el ordenador, mantén J (sonido), K (tonalidad) o L (modo) y pulsa la barra espaciadora. Para elegir con más control, Ajustes → Presets tiene el azar con más opciones (ver «Presets y azar»).</p>
+      <h4>Teclado del ordenador</h4>
+      <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> y <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> siguiente modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> (mantenidas) selección rápida de sonido, tonalidad y modo · <span class="k">Espacio</span> con J, K o L mantenidas aleatoriza</p>
+      <h3 class="grp">Modos y ritmos</h3>
       <h4>Modos</h4>
       <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo.</p>
       <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
-      <h4>Instrumentos y biblioteca</h4>
-      <p>El desplegable de Ajustes → Sonido reúne tres tipos de sonido. Instrumentos son los sonidos base (saw, piano, cuerdas, órgano…). Biblioteca son 50 presets de la app oficial, agrupados por tipo (Analog, FM, Sample, Texture, Hybrid): cada uno combina varias capas y trae su envolvente y sus efectos, que se aplican al elegirlo. Vienen incluidos y no se pueden quitar. Importados aparece solo si cargas un archivo .json en Ajustes → Presets; ahí mismo se ve cuántos hay y se pueden quitar.</p>
+      <p>En Seq, las teclas de abajo son play y stop, quitar el último paso, borrar y la duración del paso. En Mixer, con una pista seleccionada, son solo, vol −, vol + y borrar.</p>
       <h4>Repeat: trance gate</h4>
       <p>En Repeat, mantén un acorde y se abre y se cierra al ritmo del tempo siguiendo un patrón fijo de 32 pasos, con silencios y notas ligadas, como un sintetizador de trance. El chip de la derecha cambia la velocidad del pulso (las mismas velocidades que el arpegio). El release se limita a 200 ms para que los cortes queden limpios.</p>
+      <h4>Fill</h4>
+      <p>En Beats, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
+      <h3 class="grp">Sonido</h3>
+      <h4>Instrumentos y biblioteca</h4>
+      <p>El desplegable de Ajustes → Sonido reúne tres tipos de sonido. Instrumentos son los sonidos base (saw, piano, cuerdas, órgano…). Biblioteca son 50 presets de la app oficial, agrupados por tipo (Analog, FM, Sample, Texture, Hybrid): cada uno combina varias capas y trae su envolvente y sus efectos, que se aplican al elegirlo. Vienen incluidos y no se pueden quitar. Importados aparece solo si cargas un archivo .json en Ajustes → Presets; ahí mismo se ve cuántos hay y se pueden quitar.</p>
+      <h4>Presets y azar</h4>
+      <p>En Ajustes → Presets hay cuatro ranuras (P1 a P4). Guardar escribe en la ranura el instrumento, los efectos, la tonalidad, la escala, el modo, el tempo, las octavas, las inversiones y los acordes fijados; Cargar lo restaura. Los loops, el tema y los volúmenes no se guardan.</p>
+      <p>El azar propone cosas nuevas. Sonido elige otro instrumento con efectos; Patrón cambia el patrón del modo actual (arpegio, ritmo o secuencia) y la disposición de octavas; Todo cambia además la tonalidad y el tempo.</p>
+      <p>Con la tonalidad, el sonido o el modo mantenidos, tocar la perilla del joystick aleatoriza al instante (ver «Aleatorizar con la perilla»).</p>
+      <h4>Vocoder</h4>
+      <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Micrófono (tu voz) o Pista 1 del looper (lo que grabaste en ella, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formante cambia el carácter de la voz (más aguda o más grave) y Consonantes añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
+      <h3 class="grp">Grabar y capturar</h3>
+      <h4>Looper</h4>
+      <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 esperan al inicio del siguiente loop para empezar (su botón parpadea; tócalo para cancelar) y se paran solas al terminar la vuelta.</p>
+      <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
+      <h4>Guardar audio</h4>
+      <p>El botón del círculo, junto al osciloscopio, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
+      <h4>Mic (sampler)</h4>
+      <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
+      <h4>Afinador</h4>
+      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Afinador, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya. La línea fina de abajo muestra cuánto oye el micrófono: si no se mueve cuando cantas, el sonido no está llegando.</p>
+      <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube la "Ganancia del micro" en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
+      <h4>Permiso del micrófono</h4>
+      <p>El micrófono se cierra en cuanto terminas de usarlo, así que Safari puede volver a pedir permiso cada vez. Para que no lo pida más, toca "aA" en la barra de direcciones → Ajustes del sitio web → Micrófono → Permitir; la app seguirá cerrando el micrófono al terminar. En Ajustes → Sonido, "Probar el micrófono" muestra el estado: "granted" significa que Safari ya lo recuerda y "prompt" que lo volverá a pedir.</p>
+      <p>Alternativa: activar "Mantener el micrófono abierto" en Ajustes → Sonido. El micrófono queda abierto pero mudo mientras la app esté abierta (el punto naranja del iPhone puede seguir encendido) y se libera al salir de la app o tras 15 minutos sin usarlo.</p>
+      <h4>Si el micrófono no funciona</h4>
+      <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
+      <h3 class="grp">Practicar</h3>
       <h4>Juego de acordes</h4>
       <p>Un juego de ritmo que enseña progresiones reales. Elige nivel con el chip de la derecha (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión) y pulsa "jugar". Tras una cuenta atrás de cuatro tiempos, los acordes avanzan hacia la línea de golpeo: pulsa su botón justo cuando lleguen y, si el bloque lleva una flecha, mantén también esa dirección del joystick. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
       <p>"Práctica" juega más despacio: empieza al 75 % y con "vel −" y "vel +" va del 50 al 100 %. Tras los resultados, "siguiente" pasa al nivel siguiente y "repetir" vuelve a jugar el actual. Cada nivel estrena una idea: el acorde 6 (nivel 2), el sus4 con el joystick abajo (3), cambios cada dos tiempos y anticipos (4), el iv prestado con el joystick arriba (5), la mezcla con 2 y 3 (6), séptimas (7), novenas (8), dominantes secundarias (9) y una cadena por quintas (10).</p>
       <h4>Entrenador de oído</h4>
       <p>La app toca algo y tú lo repites. Elige nivel con el chip de la derecha y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
-      <h4>Clic del joystick</h4>
-      <p>Toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Lo que hace depende de dónde estés: normalmente avanza el looper (grabar y parar, igual que el botón REC); en Seq inicia o para la secuencia; en Mixer pausa o reanuda todo; y si mantienes la tonalidad, el sonido o el modo de la pantalla, aleatoriza ese menú (tonalidad: sonido, efectos, tonalidad y patrón de arpegio; sonido: solo la forma de onda; modo: patrón de arpegio y de secuenciador). No cuenta si hay un acorde pulsado ni en Juego y Oído. En el teclado, la barra espaciadora hace lo mismo.</p>
-      <h4>Selección rápida</h4>
-      <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). Con el joystick hacia arriba o la derecha pasas a la página siguiente; hacia abajo o la izquierda, a la anterior. La tonalidad reúne las notas naturales, las alteradas y las escalas. En el teclado: J (sonido), K (tonalidad y escala) y L (modo), mantenidas. Sonido y tonalidad no responden en Juego ni en Oído.</p>
-      <h4>Fill</h4>
-      <p>En Beats, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
-      <h4>Guardar audio</h4>
-      <p>El botón del círculo, junto al osciloscopio, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
+      <h3 class="grp">Ajustes y mantenimiento</h3>
+      <h4>Aspecto</h4>
+      <p>En Ajustes → Aspecto eliges la carcasa (cinco acabados: dos oficiales, Oscuro y Claro, y tres ediciones) y, por separado, la pantalla (OLED cálida, LCD verde o LCD azul; por defecto cada carcasa trae la suya), así que hay quince combinaciones. «Automático» sigue el modo claro u oscuro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas».</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
-      <h4>Mic (sampler)</h4>
-      <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
-      <h4>Afinador</h4>
-      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Afinador, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, el punto se vuelve naranja y la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya. La línea fina de abajo muestra cuánto oye el micrófono: si no se mueve cuando cantas, el sonido no está llegando.</p>
-      <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube la "Ganancia del micro" en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
-      <h4>Vocoder</h4>
-      <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Micrófono (tu voz) o Pista 1 del looper (lo que grabaste en ella, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formante cambia el carácter de la voz (más aguda o más grave) y Consonantes añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
-      <h4>Permiso del micrófono</h4>
-      <p>El micrófono se cierra en cuanto terminas de usarlo, así que Safari puede volver a pedir permiso cada vez. Para que no lo pida más, toca "aA" en la barra de direcciones → Ajustes del sitio web → Micrófono → Permitir; la app seguirá cerrando el micrófono al terminar. En Ajustes → Sonido, "Probar el micrófono" muestra el estado: "granted" significa que Safari ya lo recuerda y "prompt" que lo volverá a pedir.</p>
-      <p>Alternativa: activar "Mantener el micrófono abierto" en Ajustes → Sonido. El micrófono queda abierto pero mudo mientras la app esté abierta (el punto naranja del iPhone puede seguir encendido) y se libera al salir de la app o tras 15 minutos sin usarlo.</p>
-      <h4>Audio y pantalla de bloqueo</h4>
-      <p>Tras 20 segundos sin tocar ni sonar nada, la app suspende el audio para no aparecer como "reproduciendo"; el primer toque lo reactiva y la primera nota puede tardar un instante. Al salir de la app o bloquear el iPhone se detiene todo, incluidos los loops.</p>
-      <h4>Si el micrófono no funciona</h4>
-      <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
-      <h4>Looper</h4>
-      <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 esperan al inicio del siguiente loop para empezar (su botón parpadea; tócalo para cancelar) y se paran solas al terminar la vuelta.</p>
-      <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
-      <h4>Presets y azar</h4>
-      <p>En Ajustes → Presets hay cuatro ranuras (P1 a P4). Guardar escribe en la ranura el instrumento, los efectos, la tonalidad, la escala, el modo, el tempo, las octavas, las inversiones y los acordes fijados; Cargar lo restaura. Los loops, el tema y los volúmenes no se guardan.</p>
-      <p>El azar propone cosas nuevas. Sonido elige otro instrumento con efectos; Patrón cambia el patrón del modo actual (arpegio, ritmo o secuencia) y la disposición de octavas; Todo cambia además la tonalidad y el tempo.</p>
       <h4>Copia de seguridad</h4>
       <p>Exportar guarda en un archivo tus ajustes, presets, sonidos importados y la última muestra del micrófono. Importar restaura esa copia y también acepta los archivos de presets de la app oficial.</p>
       <h4>Sin conexión</h4>
       <p>Abre la página una vez con internet y añádela a la pantalla de inicio (Compartir → Añadir a pantalla de inicio). Desde entonces funciona sin conexión. Las versiones nuevas se descargan al abrirla con internet.</p>
-      <h4>Teclado del ordenador</h4>
-      <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W A S D</span> y <span class="k">Q E Z C</span> joystick · <span class="k">M</span> modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava</p>
+      <h4>Audio y pantalla de bloqueo</h4>
+      <p>Tras 20 segundos sin tocar ni sonar nada, la app suspende el audio para no aparecer como "reproduciendo"; el primer toque lo reactiva y la primera nota puede tardar un instante. Al salir de la app o bloquear el iPhone se detiene todo, incluidos los loops.</p>
+      <h4>Si algo falla</h4>
+      <p>Si al pulsar un botón no suena nada, aparece un aviso con el motivo. Ajustes → Presets → Diagnóstico hace una prueba (audio, un acorde, micrófono, MIDI, estado guardado, caché y los últimos errores) y muestra un informe que puedes copiar o enviar para pedir ayuda; la línea «parámetros de audio» indica si una extensión del navegador (de privacidad o contra el rastreo) está bloqueando el audio: la app lo sortea sola.</p>
+      <p>Si algo se queda en un estado raro, «Restablecer la app», en el mismo lugar, borra los ajustes, los presets y la caché y vuelve a empezar; pide confirmar con un segundo toque. Antes puedes guardar una copia con Exportar (ver «Copia de seguridad»).</p>
       <h4>Créditos</h4>
       <p>Grabaciones: VCSL y VSCO 2 Community Edition de Versilian Studios (CC0) y FluidR3_GM a través de midi-js-soundfonts (CC BY 3.0).</p>
+    </div>
     </div>
   </div>
 </div>
@@ -915,7 +1001,7 @@ const DEFAULT_STATE = {
   cutoff:1000, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
-  theme:'auto', swipe:false, osc:false, haptics:false,
+  theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
   library:[],
   hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, earLevel:0, earBest:0,
   micGain:1, micHold:false, midi:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
@@ -2518,7 +2604,7 @@ function drawTunerMeter(cents, inTune, level) {
   g.globalAlpha = 1;
   if (cents != null) {
     const x = mid + Math.max(-50, Math.min(50, cents)) / 50 * span;
-    g.fillStyle = v('--accent'); g.beginPath(); g.arc(x, y, 7, 0, Math.PI * 2); g.fill();
+    g.fillStyle = v('--scr-active'); g.beginPath(); g.arc(x, y, 7, 0, Math.PI * 2); g.fill();
   }
 }
 function tunerLoop() {
@@ -2784,6 +2870,8 @@ function setTool(id, icon, label, opts = {}) {
 }
 function renderTools() {
   const m = state.mode;
+  $('tools').classList.toggle('chord', !['seq', 'mixer', 'hiro', 'ear', 'drum', 'beat', 'mic', 'tuner'].includes(m));
+  $('tools').classList.toggle('idle', ['drum', 'beat', 'mic', 'tuner'].includes(m));   // sin función: las teclas se ocultan
   if (m === 'seq') {
     const none = !seq.steps.length;
     setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play', { off: none });
@@ -2818,8 +2906,8 @@ function renderTools() {
   }
   const locked = !!state.locks[target];
   const canLock = locked || !!(held.includes(target) ? dirFor(target) : lastDirUsed[target]);
-  setTool('tInv', 'inv', 'inv', { off: state.vlead }); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked, off: !canLock });
-  setTool('tOctDn', 'down', 'oct −'); setTool('tOctUp', 'up', 'oct +');
+  setTool('tInv', 'inv', 'inv', { off: state.vlead, on: state.inv[target] > 0 && !state.vlead }); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked, off: !canLock });
+  setTool('tOctDn', 'down', 'oct −', { on: state.btnOct[target] < 0 }); setTool('tOctUp', 'up', 'oct +', { on: state.btnOct[target] > 0 });
   $('targetLbl').textContent = 'Botón ' + (target + 1);
 }
 
@@ -2919,6 +3007,7 @@ function renderPads() {
     const qi = quick ? quickItems()[b] : null;
     if (quick) { label = qi ? qi.label : ''; el.className = 'cb' + (qi && qi.on ? ' cur' : ''); }
     el.querySelector('.cn').textContent = label;
+    el.setAttribute('aria-label', 'Botón ' + (b + 1) + (label ? ': ' + label : ''));
     const enabled = padEnabled(b);
     el.classList.toggle('off', !enabled); el.setAttribute('aria-disabled', enabled ? 'false' : 'true');
     const badges = [];
@@ -2927,8 +3016,11 @@ function renderPads() {
     if (state.inv[b] && !state.vlead) badges.push('inv' + state.inv[b]);
     el.querySelector('.badge').textContent = quick ? '' : badges.join(' ');
   }
+  // Teclas limpias: sin notas ni números en los modos de acordes (salvo que se active la opción); en los demás modos las etiquetas son funcionales
+  $('pads').classList.toggle('bare', !(state.keyLabels || quick || !CHORD_LABEL_MODES.includes(state.mode)));
   renderTools();
 }
+const CHORD_LABEL_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat'];
 
 // Vector -> una de las 8 direcciones (o null si no supera el umbral)
 function vecToDir(dx, dy, threshold) {
@@ -2955,8 +3047,8 @@ function buildJoy() {
     $('knob').style.transform = 'translate(' + dx * k + 'px,' + dy * k + 'px)';
     setJoyDir('pad', vecToDir(dx, dy, r.width * 0.16));
   };
-  // Clic del joystick (como empujarlo hacia abajo en el aparato): toque corto sobre la perilla, sin moverla.
-  // Si el dedo cae sobre la perilla, la dirección espera a que se mueva ≥10 px; si cae fuera, funciona como siempre.
+  // Clic del joystick (como empujarlo hacia abajo en el aparato): toque corto sobre la perilla, sin moverla. Solo cuenta con una etiqueta mantenida (joyClickAction).
+  // En ese caso, si el dedo cae sobre la perilla la dirección espera a que se mueva; en cualquier otro caso la perilla es un joystick sin esperas.
   // Zona de clic = toda la perilla visible + 12 px de margen (un dedo no es preciso); se tolera el temblor y un toque algo largo.
   // Con un acorde pulsado el clic no cuenta, así que la dirección responde al instante como siempre.
   const KNOB_MARGIN = 12, TAP_MS = 400, TAP_PX = 16;
@@ -2967,7 +3059,7 @@ function buildJoy() {
     try { joy.setPointerCapture(e.pointerId); } catch (err) {}
     const r = joy.getBoundingClientRect();
     const knobR = $('knob').getBoundingClientRect().width / 2 + KNOB_MARGIN;
-    const onKnob = !held.length && Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) <= knobR;
+    const onKnob = !held.length && joyClickAction() && Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) <= knobR;
     tap = onKnob ? { t:performance.now(), x:e.clientX, y:e.clientY, moved:false } : null;
     $('knob').classList.toggle('press', onKnob);
     if (!onKnob) move(e);
@@ -3003,19 +3095,16 @@ function randomEverything() {   // «Tonalidad»: sonido, efectos, tonalidad y p
   state.arpPattern = rnd(ARP_PATTERNS)[0];
   randomize('all');
 }
+// El clic de la perilla solo sirve para aleatorizar, con la tonalidad, el sonido o el modo mantenidos. El resto de funciones (looper, Seq, Mixer) ya tienen su botón visible,
+// así que en cualquier otro caso la perilla es solo un joystick.
+function joyClickAction() { return !!quick && state.mode !== 'hiro' && state.mode !== 'ear'; }
 function joyClick() {
-  if (held.length) return;                                  // con un acorde pulsado no cuenta
-  if (state.mode === 'hiro' || state.mode === 'ear') return; // los juegos no usan el clic
+  if (held.length || !joyClickAction()) return;             // con un acorde pulsado no cuenta
   const knob = $('knob'); knob.classList.add('click'); setTimeout(() => knob.classList.remove('click'), 130);
   haptic(true);
   try {
-    if (quick) {                                            // con una etiqueta mantenida = aleatorizar ese menú
-      if (quick.group === 'sound') randomWaveOnly(); else if (quick.group === 'mode') randomArpSeq(); else randomEverything();
-      renderPads(); return;
-    }
-    if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
-    if (state.mode === 'mixer') { togglePause(); return; }
-    looperClick();
+    if (quick.group === 'sound') randomWaveOnly(); else if (quick.group === 'mode') randomArpSeq(); else randomEverything();   // aleatorizar ese menú
+    renderPads();
   } catch (e) { logErr('clic', e); errToast(e); }
 }
 function renderJoy() {
@@ -3216,6 +3305,8 @@ const pct = { to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.roun
 const opts = list => () => list;
 const DIV_OPTS = [['off','Apagado'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16 tresillo'],['1/32','1/32']];
 
+const SCREENS = [['auto','Según la carcasa'],['oled','OLED cálida'],['lcdg','LCD verde'],['lcdb','LCD azul']];
+const SCREEN_OF = { dark:'oled', light:'lcdg', olive:'lcdg', blue:'lcdb', burgundy:'oled' };   // pantalla por defecto de cada carcasa
 const THEMES = [['auto','Automático'],['dark','Oscuro · Carbon Tape'],['light','Claro · Warm Plastic'],['olive','Edición · Olive Machine'],['blue','Edición · Space Blue'],['burgundy','Edición · Burgundy']];
 const THEME_COLOR = { dark:'#151614', light:'#E9E5D9', olive:'#36392C', blue:'#CBD6D5', burgundy:'#3B2525' };
 function applyTheme() {
@@ -3224,6 +3315,7 @@ function applyTheme() {
   if (t === 'alt') t = 'blue';            // el antiguo «Petrol 78» pasa a Space Blue
   if (!THEME_COLOR[t]) t = 'dark';
   document.documentElement.dataset.theme = t;
+  document.documentElement.dataset.screen = state.screen === 'auto' || !SCREENS.some(s => s[0] === state.screen) ? SCREEN_OF[t] : state.screen;
   $('themeColor').content = THEME_COLOR[t];
 }
 
@@ -3262,7 +3354,9 @@ function setOsc(on) {
 
 const SETTINGS = [
   { section:'Aspecto' },
-  { id:'theme', label:'Tema', type:'select', options:opts(THEMES) },
+  { id:'theme', label:'Carcasa', type:'select', options:opts(THEMES) },
+  { id:'screen', label:'Pantalla', type:'select', options:opts(SCREENS) },
+  { id:'keyLabels', label:'Notas y números en las teclas', type:'check' },
   { id:'osc', label:'Osciloscopio', type:'check' },
   { id:'haptics', label:'Vibración', type:'check' },
   { id:'swipe', label:'Deslizar sobre los botones', type:'check' },
@@ -3394,7 +3488,8 @@ function onSettingChanged(id) {
   if (id === 'vocoder') { ensureAudio(); updateFx('vocoder'); vocoderSource(); }
   if (id === 'vocFormant' || id === 'vocNoise') { if (state.vocoder !== 'off') updateFx('vocoder'); }
   if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('Sin muestra grabada');
-  if (id === 'theme') applyTheme();
+  if (id === 'theme' || id === 'screen') applyTheme();
+  if (id === 'keyLabels') renderPads();
   else if (id === 'osc') setOsc(state.osc);
   else if (FX_ORDER.includes(id)) updateFx(id);
   else if (id === 'lfo') applyVibrato();
@@ -3423,6 +3518,7 @@ function tapTempo() {
 const START_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat', 'drum', 'beat'];
 function sanitizeState() {
   if (state.theme === 'alt') state.theme = 'blue';
+  delete state.toolsStyle;   // ajuste de prueba retirado en la fase 18
   // Valores de listas desplegables que ya no existen (o que están fuera de rango) vuelven al de fábrica
   for (const st of SETTINGS) {
     if (st.type !== 'select' || !st.id || !(st.id in DEFAULT_STATE) || st.id === 'sound') continue;
@@ -3895,7 +3991,7 @@ function hiroTexts() {
 }
 function hiroRender() {
   const k = gameCanvas(); if (!k) return;
-  const { g, W, H, v } = k, ink = v('--panel-ink'), faint = v('--panel-dim'), acc = v('--accent'), acc2 = v('--accent2'), bg = v('--panel');
+  const { g, W, H, v } = k, ink = v('--panel-ink'), faint = v('--panel-dim'), acc = v('--scr-active'), acc2 = v('--panel-ink'), bg = v('--panel');
   if (hiro.phase === 'result') {   // una casilla por acorde: llena = acertado, hueca = fallado
     const n = hiro.events.length, sz = Math.max(6, Math.min(18, (W - 24) / n - 3)), x0 = (W - n * (sz + 3)) / 2;
     hiro.events.forEach((ev, i) => {
@@ -4043,7 +4139,7 @@ function earTexts() {
 }
 function earRender() {
   const k = gameCanvas(); if (!k) return;
-  const { g, W, H, v } = k, ink = v('--panel-ink'), faint = v('--panel-dim'), acc = v('--accent'), acc2 = v('--accent2');
+  const { g, W, H, v } = k, ink = v('--panel-ink'), faint = v('--panel-dim'), acc = v('--scr-active'), acc2 = v('--panel-ink');
   const n = ear.q.length || EAR_LEVELS[state.earLevel].slots, r = 11, gap = 34, x0 = W / 2 - (n - 1) * gap / 2, y = H / 2;
   for (let i = 0; i < n; i++) {
     const x = x0 + i * gap, m = ear.marks[i];
