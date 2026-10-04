@@ -1840,27 +1840,49 @@ function micErrorText(e) {
     return window.isSecureContext === false ? 'La página no es segura (hace falta https)' : 'Este navegador no ofrece micrófono a las webs';
   if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') return 'Micrófono bloqueado. Actívalo en aA → Ajustes del sitio web';
   if (n === 'NotFoundError') return 'No se encuentra ningún micrófono';
+  if (n === 'InvalidStateError') return 'iOS no pudo iniciar el audio del micrófono. Cierra Safari del todo y reabre';
   if (n === 'NotReadableError' || n === 'AbortError') return 'El micrófono está ocupado por otra app';
   return 'Error del micrófono' + (n ? ' (' + n + ')' : '');
 }
+let micPending = null;
 async function micStart(user) {
   micUsers.add(user);
   ensureAudio();
   if (!micStream) {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { micLastError = micErrorText(); toast(micLastError); micUsers.delete(user); return false; }
-    // Primero sin procesado (mejor para afinar y para el vocoder); si falla por restricciones, con la configuración básica
-    for (const audio of [{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }, true]) {
-      try { micStream = await navigator.mediaDevices.getUserMedia({ audio, video:false }); micLastError = ''; break; }
-      catch (e) {
-        micLastError = micErrorText(e) + (e && e.name ? ' [' + e.name + ']' : '');
-        if (e && ['NotAllowedError', 'PermissionDeniedError', 'SecurityError', 'NotFoundError'].includes(e.name)) break;
-      }
-    }
-    if (!micStream) { toast(micLastError.replace(/ \[.*\]$/, '')); micUsers.delete(user); return false; }
-    try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
+    // Una sola petición a la vez: si ya hay una en curso, se espera a su resultado
+    if (!micPending) micPending = micOpenStream().finally(() => { micPending = null; });
+    if (!(await micPending)) { micUsers.delete(user); return false; }
   }
   micAttach();
   return true;
+}
+async function micOpenStream() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { micLastError = micErrorText(); toast(micLastError); return false; }
+  const session = t => { try { if (navigator.audioSession) navigator.audioSession.type = t; } catch (e) {} };
+  // La captura necesita la categoría play-and-record ANTES de pedir el micro; con 'playback' iOS puede negarse a arrancarlo
+  session('play-and-record');
+  const attempts = [
+    { audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }, pause:false },
+    { audio:true, pause:false },
+    { audio:true, pause:true },   // último intento con la salida de audio en pausa
+  ];
+  for (const a of attempts) {
+    try {
+      if (a.pause && ctx && ctx.state === 'running') { try { await ctx.suspend(); } catch (e) {} }
+      micStream = await navigator.mediaDevices.getUserMedia({ audio:a.audio, video:false });
+      micLastError = '';
+      if (a.pause && ctx) { try { ctx.resume(); } catch (e) {} }
+      return true;
+    } catch (e) {
+      micLastError = micErrorText(e) + (e && e.name ? ' [' + e.name + (e.message ? ': ' + e.message : '') + ']' : '');
+      if (e && ['NotAllowedError', 'PermissionDeniedError', 'SecurityError', 'NotFoundError'].includes(e.name)) break;
+      await new Promise(r => setTimeout(r, 250));
+    }
+  }
+  if (ctx) { try { ctx.resume(); } catch (e) {} }
+  session('playback');
+  toast(micLastError.replace(/ \[.*\]$/, ''));
+  return false;
 }
 function showDiag(text) {
   const row = $('set-mic_test').closest('.row'); row.classList.add('wrap');
