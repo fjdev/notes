@@ -82,13 +82,17 @@ body {
 .screen.osc .chord { font-size: 26px; margin: 2px 0; min-height: 1em; }
 .scope { display: none; width: 100%; height: 64px; margin: 2px 0 4px; }
 .screen.osc .scope { display: block; }
-.dir { font-size: 18px; color: var(--panel-ink); min-width: 1.2em; text-align: right; }
 .gear, .oscbtn {
-  font: inherit; font-size: 16px; background: none; border: 0; color: var(--panel-dim);
-  padding: 2px 4px; cursor: pointer; line-height: 1;
+  background: none; border: 0; color: var(--panel-dim); padding: 4px; cursor: pointer; line-height: 0; touch-action: manipulation;
 }
-.gear { position: absolute; top: 6px; right: 8px; }
+.gear svg, .oscbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.gear { position: absolute; top: 5px; right: 6px; }
 .oscbtn.on { color: var(--panel-ink); }
+.compass { width: 20px; height: 20px; }
+.compass circle { fill: var(--panel-dim); opacity: .45; }
+.compass circle.on { fill: var(--accent); opacity: 1; }
+.screen.intune { background: var(--panel-ink); color: var(--panel); }
+.screen.intune .screen-top, .screen.intune .screen-bottom, .screen.intune .gear, .screen.intune .oscbtn { color: var(--panel); }
 .toast {
   position: absolute; left: 14px; right: 14px; bottom: 10px; background: var(--panel);
   color: var(--panel-ink); font-size: 13px; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 2;
@@ -259,14 +263,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 <main class="app">
   <section class="screen" id="screen" aria-label="Pantalla">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
-    <button class="gear" id="gear" aria-label="Ajustes">&#9881;&#xFE0E;</button>
+    <button class="gear" id="gear" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
     <div class="chord idle" id="chordName">—</div>
     <canvas class="scope" id="scope" aria-hidden="true"></canvas>
     <div class="screen-bottom">
       <span id="sMode"></span>
       <span style="display:flex;gap:10px;align-items:center">
-        <button class="oscbtn" id="oscBtn" aria-label="Osciloscopio">&#8767;</button>
-        <span class="dir" id="sDir"></span>
+        <button class="oscbtn" id="oscBtn" aria-label="Osciloscopio"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
+        <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
       </span>
     </div>
     <div class="toast" id="toast"></div>
@@ -307,6 +311,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Modos</h4>
       <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo.</p>
       <p><b>Drums</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Beats</b> cada botón arranca un ritmo (y lo para). <b>Seq</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
+      <h4>Micrófono</h4>
+      <p><b>Mic</b>: mantén el botón 1 para grabar hasta tres segundos. La app detecta la afinación, la lleva a Do y pasa al modo Lead con el instrumento "Mic Sample", que también puedes elegir en Sonido. <b>Afinador</b>: canta o toca cerca del micro; la pantalla se invierte cuando estás afinado. <b>Vocoder</b> (en Efectos): tu voz, o la pista 1 del looper, da forma al sonido mientras mantienes un acorde. Usa auriculares.</p>
       <h4>Looper</h4>
       <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 arrancan al inicio del loop y se paran solas.</p>
       <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
@@ -571,6 +577,7 @@ const SOUNDS = [
   { id:'square',  name:'Square',    waves:['square','square'], level:0.6 },
   { id:'sawsq',   name:'SawSquare', waves:['sawtooth','square'], level:0.65 },
   { id:'ocean',   name:'Ocean',     waves:['sine','sine'], level:0.5, adsr:'LONG', noise:{ q:30, mix:2.2 } },
+  { id:'micsample', name:'Mic Sample', sample:'mic', level:1.2, adsr:'KEYS' },
 ];
 const curSound = () => SOUNDS.find(s => s.id === state.sound) || SOUNDS[0];
 
@@ -596,7 +603,8 @@ const DEFAULT_STATE = {
   cutoff:1000, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
-  theme:'auto', swipe:false, osc:false, haptics:true,
+  theme:'auto', swipe:false, osc:false, haptics:false,
+  micGain:1, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
   btnOct:[0,0,0,0,0,0,0], inv:[0,0,0,0,0,0,0], locks:[null,null,null,null,null,null,null],
@@ -646,12 +654,14 @@ function ensureAudio() {
     comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.2;
     outGain = ctx.createGain();
     master.connect(filterNode);
-    preComp = ctx.createGain(); loopBus = ctx.createGain();
+    preComp = ctx.createGain(); loopBus = ctx.createGain(); vocModIn = ctx.createGain();
     buildFxChain();
     preComp.connect(comp); loopBus.connect(comp);
     comp.connect(outGain); outGain.connect(ctx.destination);
     setupRecorder();
     for (const t of tracks) { t.gain = null; t.src = null; }
+    micCap = null; micAttach(); vocoderSource();
+    if (!sampleBuf.mic) loadMicSample();
     analyser = ctx.createAnalyser(); analyser.fftSize = 2048; outGain.connect(analyser);
     drumBus = ctx.createGain(); drumBus.gain.value = state.drumVol; drumBus.connect(preComp); driveCurves = {};
     scopeData = new Uint8Array(analyser.fftSize);
@@ -767,6 +777,7 @@ const MODES = [
   { id:'play', name:'Play' }, { id:'strum', name:'Strum' }, { id:'lead', name:'Lead' },
   { id:'drone', name:'Drone' }, { id:'arp', name:'Arp' }, { id:'repeat', name:'Repeat' },
   { id:'drum', name:'Drums' }, { id:'beat', name:'Beats' }, { id:'seq', name:'Seq' }, { id:'mixer', name:'Mixer' },
+  { id:'mic', name:'Mic' }, { id:'tuner', name:'Afinador' },
 ];
 const STRUM_MS = { slow:0.2, medium:0.08, fast:0.04 };
 const RATES = [['1/1',4],['1/2',2],['1/4',1],['1/8',0.5],['1/16',0.25],['1/16T',1/6],['1/32',0.125],['sw8',0.5,true],['sw16',0.25,true]];
@@ -846,10 +857,14 @@ function stopArp() { arpTones = []; }
 function setMode(id) {
   if (!MODES.find(m => m.id === id)) return;
   if (state.mode === 'seq' && id !== 'seq' && seq.playing) seqBounce();
+  if (state.mode === 'tuner' && id !== 'tuner') tunerStop();
+  if (state.mode === 'mic' && id !== 'mic') { if (micTake) { clearTimeout(micTake.timer); micTake = null; } micStop('sampler'); }
   for (const [k, v] of voices) if (k !== 'seq') { v.cv.releaseAll(currentEnv().r); voices.delete(k); }
   droneBtn = null; arpTones = []; clockStop(); autoUpdate();
   state.mode = id; saveState();
   renderModes(); renderScreen(false); renderPads(); syncSettings();
+  if (id === 'tuner') tunerStart();
+  if (id === 'mic') micStart('sampler');
   if (held.length) refresh();
 }
 function renderModes() {
@@ -1039,7 +1054,7 @@ function applyVoiceCount(s, n) {
 
 // ===== EFECTOS =====
 // Orden de la cadena según el manual: filtro → delay → trémolo → chorus → flanger → drive → tape → reverb
-const FX_ORDER = ['delay', 'tremolo', 'chorus', 'flanger', 'drive', 'tape', 'reverb'];
+const FX_ORDER = ['delay', 'tremolo', 'vocoder', 'chorus', 'flanger', 'drive', 'tape', 'reverb'];
 
 class FxSlot {
   constructor() { this.input = ctx.createGain(); this.output = ctx.createGain(); this.nodes = []; this.wet = null; this.input.connect(this.output); }
@@ -1164,6 +1179,7 @@ const FX_BUILD = {
       keep(src); const cg = keep(node.gain(P.crackle)); src.connect(cg); cg.connect(s.output);
     }
   },
+  vocoder(v, s, keep) { vocoderBuild(null, s, keep); },
   reverb(type, s, keep) {
     const conv = keep(ctx.createConvolver()); conv.buffer = getIR(type);
     const wet = keep(node.gain(state.reverbAmt)); s.wet = wet;
@@ -1408,31 +1424,22 @@ function ringExtract(f0, f1) {
   return buf;
 }
 
+let recWorkletLoaded = null;
 function setupRecorder() {
   ring.len = Math.round(ctx.sampleRate * RING_SEC);
   if (!ring.L || ring.L.length !== ring.len) { ring.L = new Float32Array(ring.len); ring.R = new Float32Array(ring.len); }
-  ring.written = 0; recReady = false; recNode = null;
-  const fallback = () => {
-    try {
-      const sp = ctx.createScriptProcessor(2048, 2, 1);
-      sp.onaudioprocess = e => {
-        const f = Math.round(e.playbackTime * ctx.sampleRate);
-        ringWrite(f, e.inputBuffer.getChannelData(0), e.inputBuffer.getChannelData(Math.min(1, e.inputBuffer.numberOfChannels - 1)));
-      };
-      const sink = ctx.createGain(); sink.gain.value = 0;
-      preComp.connect(sp); sp.connect(sink); sink.connect(ctx.destination);
-      recNode = sp; recReady = true;
-    } catch (e) {}
+  ring.written = 0; recReady = false; recNode = null; recWorkletLoaded = null;
+  workletReady = new Promise(r => { workletReadyResolve = r; });
+  const c = ctx;
+  const finish = () => {
+    if (ctx !== c) return;
+    try { recNode = makeCapture(preComp, ringWrite); recReady = true; } catch (e) {}
+    workletReadyResolve();
   };
-  if (ctx.audioWorklet && typeof Blob !== 'undefined') {
-    const c = ctx, url = URL.createObjectURL(new Blob([REC_WORKLET], { type:'application/javascript' }));
-    c.audioWorklet.addModule(url).then(() => {
-      if (ctx !== c) return;
-      const node = new AudioWorkletNode(c, 'rec', { numberOfInputs:1, numberOfOutputs:0, channelCount:2 });
-      node.port.onmessage = e => ringWrite(e.data.f, e.data.L, e.data.R);
-      preComp.connect(node); recNode = node; recReady = true;
-    }).catch(fallback);
-  } else fallback();
+  if (c.audioWorklet && typeof Blob !== 'undefined') {
+    const url = URL.createObjectURL(new Blob([REC_WORKLET], { type:'application/javascript' }));
+    c.audioWorklet.addModule(url).then(() => { recWorkletLoaded = c; finish(); }).catch(finish);
+  } else finish();
 }
 
 // ----- pistas -----
@@ -1457,7 +1464,10 @@ function trackGainNode(t) {
 }
 function applyMutes() {
   const anySolo = tracks.some(t => t.solo);
-  for (const t of tracks) if (t.muteG) t.muteG.gain.setTargetAtTime((t.mute || (anySolo && !t.solo)) ? 0 : 1, ctx.currentTime, 0.01);
+  for (const t of tracks) if (t.muteG) {
+    const silent = t.mute || (anySolo && !t.solo) || (t === tracks[0] && state.vocoder === 'loop');
+    t.muteG.gain.setTargetAtTime(silent ? 0 : 1, ctx.currentTime, 0.01);
+  }
 }
 function startTrackSource(t, when, offset) {
   if (!t.buffer) return;
@@ -1724,6 +1734,206 @@ function onTap(el, fn) {
   el.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
 }
 
+// ===== MICRÓFONO =====
+// Se pide solo cuando hace falta (sampler, vocoder MIC, afinador) y se suelta al salir.
+let micStream = null, micSource = null, micGain = null, micAnalyser = null, micUsers = new Set();
+let workletReadyResolve = null, workletReady = new Promise(r => { workletReadyResolve = r; });
+
+async function micStart(user) {
+  micUsers.add(user);
+  ensureAudio();
+  if (!micStream) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Este navegador no da acceso al micrófono'); return false; }
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }, video:false });
+    } catch (e) { toast('Sin permiso para usar el micrófono'); micUsers.delete(user); return false; }
+    try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
+  }
+  micAttach();
+  return true;
+}
+function micAttach() {
+  if (!ctx || !micStream) return;
+  if (!micSource || micSource.context !== ctx) {
+    micSource = ctx.createMediaStreamSource(micStream);
+    micGain = ctx.createGain(); micGain.gain.value = state.micGain;
+    micAnalyser = ctx.createAnalyser(); micAnalyser.fftSize = 2048;
+    micSource.connect(micGain); micGain.connect(micAnalyser);
+    if (vocModIn) micGain.connect(vocModIn);
+  }
+}
+function micStop(user) {
+  micUsers.delete(user);
+  if (micUsers.size) return;
+  if (micStream) { for (const t of micStream.getTracks()) t.stop(); }
+  micStream = null; micSource = null; micGain = null; micAnalyser = null;
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+}
+
+// Captura genérica (AudioWorklet con fallback) usada por el looper y por el sampler
+function makeCapture(src, onChunk) {
+  if (ctx.audioWorklet && recWorkletLoaded === ctx) {
+    const node = new AudioWorkletNode(ctx, 'rec', { numberOfInputs:1, numberOfOutputs:0, channelCount:2 });
+    node.port.onmessage = e => onChunk(e.data.f, e.data.L, e.data.R);
+    src.connect(node); return node;
+  }
+  const sp = ctx.createScriptProcessor(2048, 2, 1);
+  sp.onaudioprocess = e => onChunk(Math.round(e.playbackTime * ctx.sampleRate), e.inputBuffer.getChannelData(0), e.inputBuffer.getChannelData(Math.min(1, e.inputBuffer.numberOfChannels - 1)));
+  const sink = ctx.createGain(); sink.gain.value = 0; src.connect(sp); sp.connect(sink); sink.connect(ctx.destination);
+  return sp;
+}
+
+// ----- Detección de afinación (autocorrelación) -----
+function detectPitch(data, sr) {
+  const N = data.length; let rms = 0;
+  for (let i = 0; i < N; i++) rms += data[i] * data[i];
+  rms = Math.sqrt(rms / N); if (rms < 0.01) return null;
+  const minLag = Math.floor(sr / 1000), maxLag = Math.floor(sr / 60);
+  let best = -1, bestLag = -1;
+  const corr = new Float32Array(maxLag + 1);
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let s = 0, n1 = 0, n2 = 0;
+    for (let i = 0; i < N - lag; i++) { s += data[i] * data[i + lag]; n1 += data[i] * data[i]; n2 += data[i + lag] * data[i + lag]; }
+    corr[lag] = s / Math.sqrt(n1 * n2 + 1e-12);
+  }
+  // primer pico claro por encima del umbral (evita saltar a la octava inferior)
+  for (let lag = minLag + 1; lag < maxLag; lag++) {
+    if (corr[lag] > 0.8 && corr[lag] > corr[lag - 1] && corr[lag] >= corr[lag + 1]) { best = corr[lag]; bestLag = lag; break; }
+  }
+  if (bestLag < 0) { for (let lag = minLag; lag <= maxLag; lag++) if (corr[lag] > best) { best = corr[lag]; bestLag = lag; } if (best < 0.6) return null; }
+  // interpolación parabólica
+  const a = corr[bestLag - 1] || 0, b = corr[bestLag], c = corr[bestLag + 1] || 0;
+  const shift = (a - c) / (2 * (a - 2 * b + c) || 1);
+  const f = sr / (bestLag + shift);
+  return { freq:f, midi:69 + 12 * Math.log2(f / 440), clarity:best };
+}
+
+// ----- Sampler: mantener el pad 1 graba hasta 3 s; se afina a Do y pasa a ser un instrumento -----
+const MIC_MAX = 3.0;
+const micRing = { L:null, R:null, len:0, written:0 };
+let micCap = null, micTake = null;   // micTake = { f0, timer }
+function micRingWrite(f, L, R) {
+  if (!micRing.L) return;
+  const N = micRing.len;
+  for (let i = 0; i < L.length; i++) micRing.L[(f + i) % N] = L[i];
+  micRing.written = f + L.length;
+}
+async function micRecordStart() {
+  if (!(await micStart('sampler'))) return;
+  await workletReady;
+  if (!micCap || micCap.context !== ctx) {
+    micRing.len = Math.round(ctx.sampleRate * 8); micRing.L = new Float32Array(micRing.len);
+    micCap = makeCapture(micGain, micRingWrite);
+  }
+  if (micTake) return;
+  const t0 = ctx.currentTime + 0.02;
+  micTake = { f0:Math.round(t0 * ctx.sampleRate) };
+  micTake.timer = setTimeout(micRecordStop, MIC_MAX * 1000);
+  haptic(true); renderScreen(false); renderPads();
+}
+function micRecordStop() {
+  if (!micTake) return;
+  const take = micTake; micTake = null; clearTimeout(take.timer);
+  const f1 = Math.round(ctx.currentTime * ctx.sampleRate), n = Math.min(f1 - take.f0, Math.round(MIC_MAX * ctx.sampleRate));
+  if (n < ctx.sampleRate * 0.1) { toast('Grabación demasiado corta'); renderPads(); return; }
+  // espera a que llegue el último bloque
+  setTimeout(() => {
+    const sr = ctx.sampleRate, data = new Float32Array(n);
+    for (let i = 0; i < n; i++) data[i] = micRing.L[(take.f0 + i) % micRing.len];
+    // recorta el silencio inicial y normaliza
+    let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(data[i]));
+    if (peak < 0.005) { toast('No se ha captado sonido: sube la ganancia del micro'); renderPads(); return; }
+    let s = 0; while (s < n && Math.abs(data[s]) < peak * 0.05) s++; s = Math.max(0, s - Math.round(sr * 0.005));
+    const trimmed = data.subarray(s); const g = 0.9 / peak;
+    const buf = ctx.createBuffer(1, trimmed.length, sr), ch = buf.getChannelData(0);
+    for (let i = 0; i < trimmed.length; i++) ch[i] = trimmed[i] * g;
+    // afinación: ventana en la zona más estable (tras el ataque)
+    const w0 = Math.min(trimmed.length - 4096, Math.round(sr * 0.15)), win = ch.subarray(Math.max(0, w0), Math.max(0, w0) + 4096);
+    const p = win.length >= 2048 ? detectPitch(win, sr) : null;
+    buf._root = p ? Math.round(p.midi) : 60; buf._start = 0;
+    sampleBuf.mic = buf; micSample = { root:buf._root, detected:!!p };
+    saveMicSample(ch, sr, buf._root);
+    toast(p ? 'Afinado a Do (era ' + midiName(buf._root) + ')' : 'No se detectó afinación; se usa tal cual');
+    state.sound = 'micsample'; saveState(); syncSettings();
+    setMode('lead'); micStop('sampler');
+  }, 120);
+  renderPads();
+}
+let micSample = null;
+// La última toma sobrevive al cierre: se guarda como WAV de 16 bits en base64
+function saveMicSample(ch, sr, root) {
+  try {
+    const n = ch.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt '); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, ch[i])) * 32767, true);
+    let bin = ''; const bytes = new Uint8Array(buf); for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    localStorage.setItem('notes-mic-v1', JSON.stringify({ root, b64:btoa(bin) }));
+  } catch (e) {}
+}
+function loadMicSample() {
+  try {
+    const raw = localStorage.getItem('notes-mic-v1'); if (!raw || !ctx) return;
+    const m = JSON.parse(raw), bin = atob(m.b64), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const done = buf => { buf._root = m.root; buf._start = 0; sampleBuf.mic = buf; micSample = { root:m.root, detected:true }; syncSettings(); };
+    const p = ctx.decodeAudioData(bytes.buffer, done, () => {}); if (p && p.then) p.then(done, () => {});
+  } catch (e) {}
+}
+
+// ----- Vocoder de 12 bandas: la voz (o la pista 1) da forma al sintetizador -----
+let vocModIn = null;
+const VOC_BANDS = Array.from({ length:12 }, (_, i) => 160 * Math.pow(2, i * 0.55));   // 160 Hz – 11 kHz
+function vocoderBuild(src, s, keep) {
+  const formant = Math.pow(2, state.vocFormant / 12), q = state.vocQ;
+  for (const fc of VOC_BANDS) {
+    const cb = keep(node.filter('bandpass', fc, 1.4 * q)), vca = keep(node.gain(0));
+    s.input.connect(cb); cb.connect(vca); vca.connect(s.output);
+    const mb = keep(node.filter('bandpass', Math.min(fc * formant, 16000), 1.4 * q));
+    const rect = keep(node.shaper(curveFrom(x => Math.abs(x)))), env = keep(node.filter('lowpass', 1000 / Math.max(state.vocRelease, 1) + 20));
+    const amt = keep(node.gain(6));
+    vocModIn.connect(mb); mb.connect(rect); rect.connect(env); env.connect(amt); amt.connect(vca.gain);
+  }
+  // consonantes: ruido modulado por las frecuencias altas de la voz
+  if (state.vocNoise > 0) {
+    const n = ctx.createBufferSource(); n.buffer = noiseBuf; n.loop = true; n.start(); keep(n);
+    const hp = keep(node.filter('highpass', 5000)), nv = keep(node.gain(0));
+    n.connect(hp); hp.connect(nv); nv.connect(s.output);
+    const mh = keep(node.filter('highpass', 5000)), rect = keep(node.shaper(curveFrom(x => Math.abs(x)))), env = keep(node.filter('lowpass', 40)), amt = keep(node.gain(4 * state.vocNoise));
+    vocModIn.connect(mh); mh.connect(rect); rect.connect(env); env.connect(amt); amt.connect(nv.gain);
+  }
+}
+function vocoderSource() {
+  // conecta la fuente elegida al modulador
+  if (!vocModIn) return;
+  try { vocModIn.disconnect(); } catch (e) {}
+  if (state.vocoder === 'mic') { micStart('vocoder').then(ok => { if (ok && micGain) { try { micGain.connect(vocModIn); } catch (e) {} } }); }
+  else micStop('vocoder');
+  if (state.vocoder === 'loop') { const t = tracks[0]; if (t.gain && t.gain.context === ctx) { t.gain.connect(vocModIn); } }
+  applyMutesSafe();
+}
+
+// ----- Afinador -----
+let tunerRaf = null, tunerBuf = null;
+function tunerStart() { micStart('tuner').then(ok => { if (ok && !tunerRaf) tunerLoop(); }); }
+function tunerStop() { micStop('tuner'); if (tunerRaf) cancelAnimationFrame(tunerRaf); tunerRaf = null; $('screen').classList.remove('intune'); }
+function tunerLoop() {
+  tunerRaf = null;
+  if (state.mode !== 'tuner' || !micAnalyser) return;
+  if (!tunerBuf) tunerBuf = new Float32Array(2048);
+  let p = null;
+  if (micAnalyser.getFloatTimeDomainData) { micAnalyser.getFloatTimeDomainData(tunerBuf); p = detectPitch(tunerBuf, ctx.sampleRate); }
+  const cn = $('chordName');
+  if (p) {
+    const m = Math.round(p.midi), cents = Math.round((p.midi - m) * 100);
+    cn.textContent = midiName(m) + (cents >= 0 ? ' +' : ' ') + cents;
+    cn.classList.remove('idle'); $('screen').classList.toggle('intune', Math.abs(cents) <= 5);
+  } else { cn.textContent = '—'; cn.classList.add('idle'); $('screen').classList.remove('intune'); }
+  tunerRaf = requestAnimationFrame(tunerLoop);
+}
+
 // ===== HÁPTICOS =====
 // Android: navigator.vibrate. iOS: Safari no vibra, pero un interruptor (input switch) cambiado
 // dentro de un gesto del usuario produce un toque háptico en iOS 18+.
@@ -1762,7 +1972,7 @@ function dirFor(btn) {
 
 function refresh() {
   const mode = state.mode, sounding = [];
-  if (mode === 'drum' || mode === 'beat' || mode === 'seq' || mode === 'mixer') {
+  if (mode === 'drum' || mode === 'beat' || mode === 'seq' || mode === 'mixer' || mode === 'mic' || mode === 'tuner') {
     for (const [k, v] of voices) if (k !== 'seq') { v.cv.releaseAll(currentEnv().r); voices.delete(k); }
     clockStop();
     renderScreen(false); renderPads(); return;
@@ -1831,12 +2041,14 @@ function press(btn) {
   }
   if (state.mode === 'seq') seqAdd(btn);
   if (state.mode === 'mixer') mixerPress(btn);
+  if (state.mode === 'mic' && btn === 0) micRecordStart();
   refresh();
 }
 function release(btn) {
   const i = held.indexOf(btn);
   if (i >= 0) held.splice(i, 1);
   if (state.mode === 'drum') autoUpdate();
+  if (state.mode === 'mic' && btn === 0) micRecordStop();
   refresh();
 }
 
@@ -1857,8 +2069,9 @@ function setJoyDir(source, dir) {
 }
 
 // ===== HERRAMIENTAS POR BOTÓN =====
+const NO_TOOLS = ['drum', 'beat', 'mic', 'tuner'];
 function toolInversion() {
-  if (state.mode === 'drum' || state.mode === 'beat') return;
+  if (NO_TOOLS.includes(state.mode)) return;
   if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
   if (state.mode === 'mixer') { mixerTool('solo'); return; }
   state.inv[target] = (state.inv[target] + 1) % 3; saveState();
@@ -1867,7 +2080,7 @@ function toolInversion() {
   if (held.length) refresh(); else renderPads();
 }
 function toolLock() {
-  if (state.mode === 'drum' || state.mode === 'beat') return;
+  if (NO_TOOLS.includes(state.mode)) return;
   if (state.mode === 'seq') { seq.steps.pop(); renderModes(); renderScreen(false); toast('Último paso quitado'); return; }
   if (state.mode === 'mixer') { mixerTool('down'); return; }
   if (state.locks[target]) {
@@ -1885,7 +2098,7 @@ function toolLock() {
 }
 let clearArm = null;
 function toolOct(d) {
-  if (state.mode === 'drum' || state.mode === 'beat') return;
+  if (NO_TOOLS.includes(state.mode)) return;
   if (state.mode === 'seq') {
     if (d < 0) { seqStop(); seq.steps = []; renderModes(); renderScreen(false); toast('Secuencia borrada'); }
     else { const L = [1, 2, 4]; seq.stepLen = L[(L.indexOf(seq.stepLen) + 1) % L.length]; renderPads(); toast('Paso: ' + (seq.stepLen === 4 ? '1 compás' : seq.stepLen + (seq.stepLen === 1 ? ' tiempo' : ' tiempos'))); }
@@ -1940,10 +2153,10 @@ function renderTools() {
     setTool('tOctDn', 'volUp', 'vol +'); setTool('tOctUp', 'trash', 'borrar', { off: !t.buffer });
     $('targetLbl').textContent = 'Pista ' + (target + 1); return;
   }
-  if (m === 'drum' || m === 'beat') {
+  if (m === 'drum' || m === 'beat' || m === 'mic' || m === 'tuner') {
     setTool('tInv', 'none', '', { off:true }); setTool('tLock', 'none', '', { off:true });
     setTool('tOctDn', 'none', '', { off:true }); setTool('tOctUp', 'none', '', { off:true });
-    $('targetLbl').textContent = m === 'drum' ? 'Pads' : 'Ritmos'; return;
+    $('targetLbl').textContent = { drum:'Pads', beat:'Ritmos', mic:'Sampler', tuner:'Afinador' }[m]; return;
   }
   const locked = !!state.locks[target];
   setTool('tInv', 'inv', 'inv'); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked });
@@ -1967,21 +2180,18 @@ function renderScreen(active) {
   $('sSound').textContent = sound ? sound.name : '';
   const p = modeParam();
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
-  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : '';
+  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : ' mantén el 1') : '';
   $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
     + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '');
   const cn = $('chordName');
   if (lastDisplay) cn.textContent = lastDisplay.name;
   cn.classList.toggle('idle', !active);
   const d = padDir || keyDir || (held.length ? dirFor(held[held.length - 1]) : null);
-  $('sDir').textContent = d ? DIR_ARROWS[d] : '';
-}
-
-function quality(btn) {
-  const c = degreeChord(SCALES[state.scale].steps, btn);
-  if (c.third === 3 && c.fifth === 6) return 'q-dim';
-  if (c.third === 3) return 'q-min';
-  return '';
+  if (!$('sDir').childElementCount) {
+    $('sDir').innerHTML = DIRS.map(k => '<circle data-d="' + k + '" cx="' + (10 + DIR_VEC[k][0] * 7) + '" cy="' + (10 + DIR_VEC[k][1] * 7) + '" r="1.6"/>').join('');
+  }
+  $('sDir').querySelectorAll('circle').forEach(c => c.classList.toggle('on', c.dataset.d === d));
+  if (state.mode === 'tuner') return;
 }
 
 let padEls = [];
@@ -2022,7 +2232,7 @@ function renderPads() {
     const el = padEls[b];
     const beatOn = state.mode === 'beat' && beat.style === BEAT_STYLES[b][0];
     const on = held.includes(b) || (state.mode === 'drone' && droneBtn === b) || beatOn;
-    el.className = 'cb ' + quality(b) + (on ? ' held' : '') + (b === target && state.mode !== 'beat' && state.mode !== 'drum' ? ' target' : '');
+    el.className = 'cb' + (on ? ' held' : '') + (b === target && state.mode !== 'beat' && state.mode !== 'drum' ? ' target' : '');
     let label = resolveChord(state, b, null).name;
     if (state.mode === 'drum') label = PAD_NAMES[b];
     else if (state.mode === 'beat') label = BEAT_STYLES[b][1];
@@ -2030,6 +2240,8 @@ function renderPads() {
       if (b === 6) label = loop.metro ? 'metro on' : 'metro off';
       else { const t = tracks[b]; label = !t.buffer ? 'vacía' : t.mute ? 'mute' : t.solo ? 'solo' : Math.round(t.vol * 100) + '%'; }
     } else if (state.mode === 'seq' && seq.playing && seq.steps[seq.cur] && seq.steps[seq.cur].btn === b) el.classList.add('held');
+    else if (state.mode === 'mic') { label = b === 0 ? (micTake ? 'grabando' : 'mantén: grabar') : ''; if (b === 0 && micTake) el.classList.add('held'); }
+    else if (state.mode === 'tuner') label = '';
     if (state.mode === 'mixer') { const t = tracks[b]; if (b < 6 && t.buffer && !t.mute) el.classList.add('held'); if (b === 6 && loop.metro) el.classList.add('held'); }
     el.querySelector('.cn').textContent = label;
     const badges = [];
@@ -2192,6 +2404,7 @@ const SETTINGS = [
   { id:'cutoff', label:'Filtro', type:'range', min:0, max:1000, to:v => v, from:v => v,
     fmt:v => v >= 1000 ? 'abierto' : Math.round(cutoffHz(v)) + ' Hz' },
   { id:'volume', label:'Volumen', type:'range', min:0, max:100, ...pct },
+  { id:'micGain', label:'Ganancia del micro', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
   { section:'Editor del instrumento' },
   { id:'tw_level', label:'Nivel', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
   { id:'tw_detune', label:'Desafinado del par', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
@@ -2211,6 +2424,9 @@ const SETTINGS = [
   { id:'drive', label:'Drive', type:'select', options:opts([['off','Apagado'],['tube','Tube'],['drive','Drive'],['dist','Dist'],['fuzz','Fuzz']]) },
   { id:'tape', label:'Tape', type:'select', options:opts([['off','Apagado'],['lofi','Lo-fi'],['vinyl','Vinilo'],['tape','Cinta']]) },
   { id:'tremolo', label:'Trémolo', type:'select', options:opts(DIV_OPTS) },
+  { id:'vocoder', label:'Vocoder', type:'select', options:opts([['off','Apagado'],['mic','Micrófono'],['loop','Pista 1 del looper']]) },
+  { id:'vocFormant', label:'Vocoder: formante', type:'range', min:-12, max:12, to:v => v, from:v => v, fmt:v => (v > 0 ? '+' : '') + v + ' st' },
+  { id:'vocNoise', label:'Vocoder: consonantes', type:'range', min:0, max:100, ...pct },
   { section:'Modos' },
   { id:'mode', label:'Modo', type:'select', options:() => MODES.map(m => [m.id, m.name]) },
   { id:'strumSpeed', label:'Strum: velocidad', type:'select', options:opts([['slow','Lento (200 ms)'],['medium','Medio (80 ms)'],['fast','Rápido (40 ms)']]) },
@@ -2243,6 +2459,10 @@ function onSettingChanged(id) {
   if (id === 'mode') { const m = state.mode; state.mode = 'play'; setMode(m); }
   if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id)) renderModes();
   if (id === 'drumVol' && ctx && drumBus) drumBus.gain.setTargetAtTime(state.drumVol, ctx.currentTime, 0.02);
+  if (id === 'micGain' && micGain) micGain.gain.setTargetAtTime(state.micGain, ctx.currentTime, 0.02);
+  if (id === 'vocoder') { ensureAudio(); updateFx('vocoder'); vocoderSource(); }
+  if (id === 'vocFormant' || id === 'vocNoise') { if (state.vocoder !== 'off') updateFx('vocoder'); }
+  if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('Graba una muestra en el modo Mic');
   if (id === 'theme') applyTheme();
   else if (id === 'osc') setOsc(state.osc);
   else if (FX_ORDER.includes(id)) updateFx(id);
@@ -2374,7 +2594,12 @@ $('oscBtn').addEventListener('click', () => setOsc(!state.osc));
 applyTheme();
 if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
 setOsc(state.osc);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && state.osc && !scopeRaf) drawScope(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (state.osc && !scopeRaf) drawScope();
+  if (state.mode === 'tuner') tunerStart();
+  if (state.vocoder === 'mic') vocoderSource();
+});
 onTap($('closeSheetTop'), closeSettings);
 // Deslizar hacia abajo sobre la cabecera (o sobre el contenido ya en el inicio) cierra los ajustes
 (function () {
@@ -2399,6 +2624,9 @@ function goneToBackground() {
   renderJoy(); $('knob').style.transform = '';
   for (const [, v] of voices) v.cv.releaseAll(0.01);
   voices.clear(); droneBtn = null; arpTones = []; clockStop(); beatStop(); seqStop(); looperSuspend();
+  if (micTake) { clearTimeout(micTake.timer); micTake = null; }
+  if (tunerRaf) { cancelAnimationFrame(tunerRaf); tunerRaf = null; }
+  micUsers.clear(); micStop('all');
   if (auto.timer) { clearInterval(auto.timer); auto.timer = null; }
   needsRebuild = true;
 }
