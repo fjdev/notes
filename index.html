@@ -156,6 +156,7 @@ body {
   font: inherit; touch-action: none; padding: 4px; position: relative;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,.18); transition: transform .05s, box-shadow .05s;
 }
+.cb.off { opacity: .3; box-shadow: none; }
 .cb.held { box-shadow: inset 0 2px 3px rgba(0,0,0,.35); transform: translateY(1px) scale(.985); }
 .cb:nth-child(n+5) { grid-column: span 4; }
 .cb .num { font-family: var(--serif); font-size: 40px; line-height: 1; }
@@ -309,6 +310,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Acordes</h4>
       <p>Los siete botones tocan los acordes de la tonalidad: 1, 4 y 5 mayores; 2, 3 y 6 menores; 7 disminuido. Nunca suenan mal entre sí. Prueba 1 → 5 → 6 → 4.</p>
       <p>Mantén un botón y mueve el joystick: cada dirección cambia el color del acorde. Suelta y vuelve al acorde normal. En Ajustes → Acordes eliges entre cinco mapas del joystick.</p>
+      <h4>Controles atenuados</h4>
+      <p>Un botón o una herramienta atenuados no tienen función en el modo actual (por ejemplo, las pistas vacías en el Mixer) y no responden al toque.</p>
       <h4>Herramientas</h4>
       <p>Actúan sobre el último botón tocado. <b>Inv</b> cambia la inversión. <b>Fijar</b> deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. <b>Oct −/+</b> sube o baja una octava solo ese botón.</p>
       <h4>Modos</h4>
@@ -317,7 +320,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Biblioteca de sonidos</h4>
       <p>En Ajustes → Sonido, el grupo "Biblioteca" contiene 50 presets construidos como los de fábrica de la app oficial: cada voz con su propio motor, y su envolvente y efectos, que se aplican al elegirlos. Puedes importar un archivo .json exportado desde la app oficial y sus presets aparecerán en "Importados".</p>
       <h4>Micrófono</h4>
-      <p><b>Mic</b>: mantén el botón 1 para grabar hasta tres segundos. La app detecta la afinación, la lleva a Do y pasa al modo Lead con el instrumento "Mic Sample", que también puedes elegir en Sonido. <b>Afinador</b>: canta o toca cerca del micro; la pantalla se invierte cuando estás afinado. <b>Vocoder</b> (en Efectos): tu voz, o la pista 1 del looper, da forma al sonido mientras mantienes un acorde. Usa auriculares.</p>
+      <p><b>Mic</b>: mantén el botón 1 para grabar hasta tres segundos; es el único que funciona en este modo. Al soltar, la app detecta la afinación, la lleva a Do y pasa al modo Lead con el instrumento "Mic Sample", que también puedes elegir en Sonido. <b>Afinador</b>: canta o toca cerca del micro; la pantalla se invierte cuando estás afinado. <b>Vocoder</b> (en Efectos): tu voz, o la pista 1 del looper, da forma al sonido mientras mantienes un acorde. Usa auriculares.</p>
       <h4>Looper</h4>
       <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 arrancan al inicio del loop y se paran solas.</p>
       <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Beats sonando lo pasa a la pista.</p>
@@ -1754,7 +1757,7 @@ function seqAdd(btn) {
   seq.steps.push({ btn, dir: dirFor(btn) || null }); haptic(false); renderScreen(false); renderModes();
 }
 function seqStart() {
-  if (!seq.steps.length) { toast('Añade pasos pulsando los botones'); return; }
+  if (!seq.steps.length) return;
   ensureAudio(); seq.playing = true; seq.pos = 0; seq.next = ctx.currentTime + 0.05;
   if (!seq.timer) seq.timer = setInterval(seqTick, 25);
   renderModes(); renderScreen(false);
@@ -2184,6 +2187,7 @@ function refresh() {
 }
 
 function press(btn) {
+  if (!padEnabled(btn)) return;
   ensureAudio(); haptic(true); hapticLater();
   if (!held.includes(btn)) held.push(btn);
   target = btn; lastDirUsed[btn] = null;
@@ -2296,15 +2300,16 @@ function setTool(id, icon, label, opts = {}) {
 function renderTools() {
   const m = state.mode;
   if (m === 'seq') {
-    setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play');
-    setTool('tLock', 'minus', 'quitar'); setTool('tOctDn', 'trash', 'borrar');
+    const none = !seq.steps.length;
+    setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play', { off: none });
+    setTool('tLock', 'minus', 'quitar', { off: none }); setTool('tOctDn', 'trash', 'borrar', { off: none });
     setTool('tOctUp', 'step', 'paso ×' + seq.stepLen);
     $('targetLbl').textContent = 'Secuencia'; return;
   }
   if (m === 'mixer') {
     const t = tracks[target] || {};
-    setTool('tInv', 'solo', 'solo', { on: !!t.solo }); setTool('tLock', 'volDn', 'vol −');
-    setTool('tOctDn', 'volUp', 'vol +'); setTool('tOctUp', 'trash', 'borrar', { off: !t.buffer });
+    setTool('tInv', 'solo', 'solo', { on: !!t.solo, off: !t.buffer }); setTool('tLock', 'volDn', 'vol −', { off: !t.buffer });
+    setTool('tOctDn', 'volUp', 'vol +', { off: !t.buffer }); setTool('tOctUp', 'trash', 'borrar', { off: !t.buffer });
     $('targetLbl').textContent = 'Pista ' + (target + 1); return;
   }
   if (m === 'drum' || m === 'beat' || m === 'mic' || m === 'tuner') {
@@ -2334,7 +2339,7 @@ function renderScreen(active) {
   $('sSound').textContent = sound ? sound.name : '';
   const p = modeParam();
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
-  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : ' mantén el 1') : '';
+  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : '') : '';
   $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
     + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '');
   const cn = $('chordName');
@@ -2359,6 +2364,7 @@ function buildPads() {
     pads.appendChild(el); padEls.push(el);
     el.addEventListener('pointerdown', e => {
       e.preventDefault();
+      if (!padEnabled(b)) return;
       try { el.setPointerCapture(e.pointerId); } catch (err) {}
       pointers.set(e.pointerId, { btn:b, x0:e.clientX, y0:e.clientY, dir:null });
       press(b);
@@ -2381,23 +2387,34 @@ function buildPads() {
   }
 }
 
+// Un botón sin función en el modo actual se atenúa y no responde
+function padEnabled(b) {
+  const m = state.mode;
+  if (m === 'mic') return b === 0;
+  if (m === 'tuner') return false;
+  if (m === 'mixer') return b === 6 || !!tracks[b].buffer;
+  return true;
+}
+
 function renderPads() {
   for (let b = 0; b < 7; b++) {
     const el = padEls[b];
     const beatOn = state.mode === 'beat' && beat.style === BEAT_STYLES[b][0];
     const on = held.includes(b) || (state.mode === 'drone' && droneBtn === b) || beatOn;
-    el.className = 'cb' + (on ? ' held' : '') + (b === target && state.mode !== 'beat' && state.mode !== 'drum' ? ' target' : '');
+    el.className = 'cb' + (on ? ' held' : '') + (b === target && !NO_TOOLS.includes(state.mode) ? ' target' : '');
     let label = resolveChord(state, b, null).name;
     if (state.mode === 'drum') label = PAD_NAMES[b];
     else if (state.mode === 'beat') label = BEAT_STYLES[b][1];
     else if (state.mode === 'mixer') {
       if (b === 6) label = loop.metro ? 'metro on' : 'metro off';
-      else { const t = tracks[b]; label = !t.buffer ? 'vacía' : t.mute ? 'mute' : t.solo ? 'solo' : Math.round(t.vol * 100) + '%'; }
+      else { const t = tracks[b]; label = !t.buffer ? '' : t.mute ? 'mute' : t.solo ? 'solo' : Math.round(t.vol * 100) + '%'; }
     } else if (state.mode === 'seq' && seq.playing && seq.steps[seq.cur] && seq.steps[seq.cur].btn === b) el.classList.add('held');
-    else if (state.mode === 'mic') { label = b === 0 ? (micTake ? 'grabando' : 'mantén: grabar') : ''; if (b === 0 && micTake) el.classList.add('held'); }
+    else if (state.mode === 'mic') { label = ''; if (b === 0 && micTake) el.classList.add('held'); }
     else if (state.mode === 'tuner') label = '';
     if (state.mode === 'mixer') { const t = tracks[b]; if (b < 6 && t.buffer && !t.mute) el.classList.add('held'); if (b === 6 && loop.metro) el.classList.add('held'); }
     el.querySelector('.cn').textContent = label;
+    const enabled = padEnabled(b);
+    el.classList.toggle('off', !enabled); el.setAttribute('aria-disabled', enabled ? 'false' : 'true');
     const badges = [];
     if (state.locks[b]) badges.push('●');
     if (state.btnOct[b]) badges.push((state.btnOct[b] > 0 ? '+' : '') + state.btnOct[b]);
