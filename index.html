@@ -539,6 +539,26 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 
 <script src="samples.js"></script>
 <script>
+// Algunas extensiones del navegador (privacidad / anti-huella) dejan AudioParam.value en solo lectura: entonces fallan las voces y,
+// en silencio, volúmenes y filtros. Defensa doble: (1) si se puede, se devuelve un setter equivalente; (2) toda asignación pasa por pv().
+let apStatus = 'normal';
+(function repairAudioParam() {
+  try {
+    if (typeof AudioParam === 'undefined') return;
+    const d = Object.getOwnPropertyDescriptor(AudioParam.prototype, 'value');
+    if (!d || d.set || !d.get) return;
+    apStatus = 'bloqueado por una extensión (sorteado)';
+    if (!d.configurable) return;
+    Object.defineProperty(AudioParam.prototype, 'value', { configurable:true, enumerable:d.enumerable, get:d.get,
+      set(v) { try { this.setValueAtTime(v, (typeof ctx !== 'undefined' && ctx) ? ctx.currentTime : 0); } catch (e) {} } });
+    apStatus = 'bloqueado por una extensión (reparado)';
+  } catch (e) {}
+})();
+function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (la especificación lo define como setValueAtTime en el instante actual)
+  'use strict';
+  try { p.value = v; return; } catch (e) {}
+  try { p.setValueAtTime(v, (typeof ctx !== 'undefined' && ctx) ? ctx.currentTime : 0); } catch (e) {}
+}
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
 function logErr(src, e) {
@@ -967,9 +987,9 @@ function ensureAudio() {
     audioAsleep = false; applySession();
     waveCache = {}; irCache = {}; fxSlots = {};
     master = ctx.createGain();
-    filterNode = ctx.createBiquadFilter(); filterNode.type = 'lowpass'; filterNode.Q.value = 0.7;
+    filterNode = ctx.createBiquadFilter(); filterNode.type = 'lowpass'; pv(filterNode.Q, 0.7);
     comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.2;
+    pv(comp.threshold, -14); pv(comp.ratio, 4); pv(comp.attack, 0.003); pv(comp.release, 0.2);
     outGain = ctx.createGain();
     master.connect(filterNode);
     preComp = ctx.createGain(); loopBus = ctx.createGain(); vocModIn = ctx.createGain();
@@ -981,11 +1001,11 @@ function ensureAudio() {
     micCap = null; micAttach(); vocoderSource();
     if (!sampleBuf.mic) loadMicSample();
     analyser = ctx.createAnalyser(); analyser.fftSize = 2048; outGain.connect(analyser);
-    drumBus = ctx.createGain(); drumBus.gain.value = state.drumVol; drumBus.connect(preComp); driveCurves = {};
+    drumBus = ctx.createGain(); pv(drumBus.gain, state.drumVol); drumBus.connect(preComp); driveCurves = {};
     scopeData = new Uint8Array(analyser.fftSize);
     // Vibrato compartido por todas las voces
-    vibLfo = ctx.createOscillator(); vibLfo.frequency.value = 5.5;
-    vibGain = ctx.createGain(); vibGain.gain.value = VIB_DEPTH[state.lfo] || 0;
+    vibLfo = ctx.createOscillator(); pv(vibLfo.frequency, 5.5);
+    vibGain = ctx.createGain(); pv(vibGain.gain, VIB_DEPTH[state.lfo] || 0);
     vibLfo.connect(vibGain); vibLfo.start();
     noiseBuf = makeNoise(2, 0);
     loadAllSamples();
@@ -1075,13 +1095,13 @@ function cutoffHz(v) { return 20 * Math.pow(1000, v / 1000); }
 function applyFilter(now) {
   if (!ctx) return;
   const hz = state.cutoff >= 1000 ? 22000 : cutoffHz(state.cutoff);
-  if (now) filterNode.frequency.value = hz;
+  if (now) pv(filterNode.frequency, hz);
   else filterNode.frequency.setTargetAtTime(hz, ctx.currentTime, 0.02);
 }
 function applyVolume(now) {
   if (!ctx) return;
   const g = state.volume * state.volume;
-  if (now) outGain.gain.value = g; else outGain.gain.setTargetAtTime(g, ctx.currentTime, 0.02);
+  if (now) pv(outGain.gain, g); else outGain.gain.setTargetAtTime(g, ctx.currentTime, 0.02);
 }
 function applyVibrato() {
   if (ctx && vibGain) vibGain.gain.setTargetAtTime(VIB_DEPTH[state.lfo] || 0, ctx.currentTime, 0.05);
@@ -1253,10 +1273,10 @@ class SlotVoice {
     midi += eng.offset;
     const f = mtof(midi);
     const from = (gtc && lastSlotMidi[slot] != null) ? mtof(lastSlotMidi[slot] + eng.offset) : f;
-    const slide = (param, a, b) => { param.value = a; if (a !== b) param.setTargetAtTime(b, t, gtc); };
+    const slide = (param, a, b) => { pv(param, a); if (a !== b) param.setTargetAtTime(b, t, gtc); };
     this.sound = sound; this.eng = eng; this.oscs = []; this.mods = []; this.srcs = []; this.bps = []; this.rates = [];
-    this.env = ctx.createGain(); this.env.gain.value = 0;
-    this.out = ctx.createGain(); this.out.gain.value = 0.11 * eng.gain * sound.level * tw.level;
+    this.env = ctx.createGain(); pv(this.env.gain, 0);
+    this.out = ctx.createGain(); pv(this.out.gain, 0.11 * eng.gain * sound.level * tw.level);
     this.env.connect(this.out); this.out.connect(opts.dest || master);
     const pan = opts.mono ? 0 : (opts.pan != null ? opts.pan : (state.stereo ? eng.pan : 0));
     const det = opts.mono ? 0 : tw.detune / 2;
@@ -1265,28 +1285,28 @@ class SlotVoice {
     for (let k = 0; k < 2; k++) {
       let dest = this.env;
       if (ctx.createStereoPanner) {
-        const p = ctx.createStereoPanner(); p.pan.value = k === 0 ? pan : -pan;
+        const p = ctx.createStereoPanner(); pv(p.pan, k === 0 ? pan : -pan);
         p.connect(this.env); dest = p;
       }
       if (tw.bright < 1000) {
-        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoffHz(tw.bright);
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; pv(lp.frequency, cutoffHz(tw.bright));
         lp.connect(dest); dest = lp;
       }
       if (eng.filter) {
         // Filtro con envolvente (bajos sintéticos, golpes): abre y se cierra rápido
-        const fe = ctx.createBiquadFilter(); fe.type = 'lowpass'; fe.Q.value = eng.filter.q;
+        const fe = ctx.createBiquadFilter(); fe.type = 'lowpass'; pv(fe.Q, eng.filter.q);
         fe.frequency.setValueAtTime(eng.filter.f0, t);
         fe.frequency.setTargetAtTime(eng.filter.f1, t, eng.filter.decay / 3);
         fe.connect(dest); dest = fe;
       }
-      const g = ctx.createGain(); g.gain.value = 0.5; g.connect(dest);
+      const g = ctx.createGain(); pv(g.gain, 0.5); g.connect(dest);
       const detune = k === 0 ? -det : det;
       if (eng.noise) {
         // Capa de ruido sin afinar (texturas): blanco, o rosa aproximado con un paso bajo
         if (k === 1) continue;
         const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
         let nd = g;
-        if (eng.noiseLp) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = eng.noiseLp; lp.Q.value = 0.4; lp.connect(g); nd = lp; }
+        if (eng.noiseLp) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; pv(lp.frequency, eng.noiseLp); pv(lp.Q, 0.4); lp.connect(g); nd = lp; }
         src.connect(nd); src.start(t, Math.random() * 1.5); this.srcs.push(src);
         continue;
       }
@@ -1295,7 +1315,7 @@ class SlotVoice {
         const src = ctx.createBufferSource(); src.buffer = buf;
         const r0 = from / mtof(buf._root), r1 = f / mtof(buf._root);
         slide(src.playbackRate, r0, r1);
-        src.detune.value = detune; vibGain.connect(src.detune);
+        pv(src.detune, detune); vibGain.connect(src.detune);
         if (buf._loopStart != null) { src.loop = true; src.loopStart = buf._loopStart; src.loopEnd = buf._loopEnd; }
         src.connect(g); src.start(t, buf._start);
         this.srcs.push(src); this.rates.push(src);
@@ -1304,7 +1324,7 @@ class SlotVoice {
       const o = ctx.createOscillator();
       if (eng.periodic) o.setPeriodicWave(getWave(eng.periodic)); else o.type = eng.waves[k];
       slide(o.frequency, from, f);
-      o.detune.value = detune;
+      pv(o.detune, detune);
       vibGain.connect(o.detune);
       o.connect(g);
       eng.fm.forEach((spec0, idx) => {
@@ -1315,7 +1335,7 @@ class SlotVoice {
           decay: tw.fmDecay != null ? tw.fmDecay : spec0.decay }) : spec0;
         const m = ctx.createOscillator(); m.type = 'sine';
         slide(m.frequency, from * spec.ratio, f * spec.ratio);
-        m.detune.value = o.detune.value; vibGain.connect(m.detune);
+        pv(m.detune, o.detune.value); vibGain.connect(m.detune);
         const md = ctx.createGain(), depth = f * spec.ratio;
         md.gain.setValueAtTime(spec.i0 * depth, t);
         md.gain.setTargetAtTime(spec.i1 * depth, t, spec.decay / 3);
@@ -1327,9 +1347,9 @@ class SlotVoice {
     if (eng.pnoise) {
       // Ruido afinado: ruido blanco por un filtro muy estrecho en la nota
       const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = eng.pnoise.q;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; pv(bp.Q, eng.pnoise.q);
       slide(bp.frequency, from, f);
-      const ng = ctx.createGain(); ng.gain.value = eng.pnoise.mix;
+      const ng = ctx.createGain(); pv(ng.gain, eng.pnoise.mix);
       src.connect(bp); bp.connect(ng); ng.connect(this.env);
       src.start(t, Math.random() * 1.5);
       this.srcs.push(src); this.bps.push(bp);
@@ -1378,7 +1398,7 @@ class ChordVoice {
   constructor() {
     this.slots = [null, null, null, null, null, null];
     this.gate = ctx.createGain(); this.gate.connect(master);
-    if (state.mode === 'repeat') this.gate.gain.value = 0;   // en Repeat la compuerta empieza cerrada
+    if (state.mode === 'repeat') pv(this.gate.gain, 0);   // en Repeat la compuerta empieza cerrada
   }
   apply(notes, opts = {}) {
     const t0 = ctx.currentTime;
@@ -1462,11 +1482,11 @@ function updateFx(id) {
 }
 
 const node = {
-  gain: v => { const g = ctx.createGain(); g.gain.value = v; return g; },
-  delay: (max, t) => { const d = ctx.createDelay(max); d.delayTime.value = t; return d; },
-  filter: (type, f, q) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; if (q != null) b.Q.value = q; return b; },
-  lfo: (rate, type) => { const o = ctx.createOscillator(); o.type = type || 'sine'; o.frequency.value = rate; o.start(); return o; },
-  pan: v => { const p = ctx.createStereoPanner(); p.pan.value = v; return p; },
+  gain: v => { const g = ctx.createGain(); pv(g.gain, v); return g; },
+  delay: (max, t) => { const d = ctx.createDelay(max); pv(d.delayTime, t); return d; },
+  filter: (type, f, q) => { const b = ctx.createBiquadFilter(); b.type = type; pv(b.frequency, f); if (q != null) pv(b.Q, q); return b; },
+  lfo: (rate, type) => { const o = ctx.createOscillator(); o.type = type || 'sine'; pv(o.frequency, rate); o.start(); return o; },
+  pan: v => { const p = ctx.createStereoPanner(); pv(p.pan, v); return p; },
   shaper: curve => { const w = ctx.createWaveShaper(); w.curve = curve; w.oversample = '4x'; return w; },
 };
 function curveFrom(fn) {
@@ -1541,7 +1561,7 @@ const FX_BUILD = {
       const lfo = keep(node.lfo(m[0])), lg = keep(node.gain(m[1]));
       lfo.connect(lg); lg.connect(d.delayTime);
     }
-    if (p === 'tape') { const ls = keep(node.filter('lowshelf', 150)); ls.gain.value = 3; chain(ls); }
+    if (p === 'tape') { const ls = keep(node.filter('lowshelf', 150)); pv(ls.gain, 3); chain(ls); }
     chain(keep(node.filter('highpass', P.hp)));
     chain(keep(node.filter('lowpass', P.lp)));
     last.connect(s.output);
@@ -1607,7 +1627,7 @@ let drumBus = null, driveCurves = {};
 function drumOut(kit, t, dur) {
   // Cada golpe: ganancia propia → filtro del kit → bus de batería
   const g = ctx.createGain();
-  if (kit.lp < 18000) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = kit.lp; g.connect(lp); lp.connect(drumBus); }
+  if (kit.lp < 18000) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; pv(lp.frequency, kit.lp); g.connect(lp); lp.connect(drumBus); }
   else g.connect(drumBus);
   setTimeout(() => { try { g.disconnect(); } catch (e) {} }, (t - ctx.currentTime + dur) * 1000 + 300);
   return g;
@@ -1622,7 +1642,7 @@ function noiseSrc(t, dur) {
   s.start(t, Math.random() * 1.5); s.stop(t + dur + 0.05); return s;
 }
 function osc(type, f, t, dur) {
-  const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.start(t); o.stop(t + dur + 0.05); return o;
+  const o = ctx.createOscillator(); o.type = type; pv(o.frequency, f); o.start(t); o.stop(t + dur + 0.05); return o;
 }
 
 function drumHit(kitId, pad, t, vel) {
@@ -1641,28 +1661,28 @@ function drumHit(kitId, pad, t, vel) {
     }
     o.connect(dest);
     if (k.click > 0) {
-      const n = noiseSrc(t, 0.03), hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500;
+      const n = noiseSrc(t, 0.03), hp = ctx.createBiquadFilter(); hp.type = 'highpass'; pv(hp.frequency, 1500);
       const cg = ctx.createGain(); envGain(cg, t, 0.6 * k.click * vel, 0.02);
       n.connect(hp); hp.connect(cg); cg.connect(out);
     }
   } else if (pad === 2) {
     const s = kit.snare, dur = Math.max(s.tdec, s.ndec) + 0.1;
-    const out = drumOut(kit, t, dur); out.gain.value = 0.9 * vel;
+    const out = drumOut(kit, t, dur); pv(out.gain, 0.9 * vel);
     const o = osc('triangle', s.tone, t, dur), tg = ctx.createGain(); envGain(tg, t, 0.7, s.tdec);
     o.frequency.exponentialRampToValueAtTime(s.tone * 0.6, t + s.tdec);
     o.connect(tg); tg.connect(out);
-    const n = noiseSrc(t, dur), bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = s.bp; bp.Q.value = s.q;
+    const n = noiseSrc(t, dur), bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; pv(bp.frequency, s.bp); pv(bp.Q, s.q);
     const ng = ctx.createGain(); envGain(ng, t, s.nmix, s.ndec);
     n.connect(bp); bp.connect(ng); ng.connect(out);
   } else if (pad === 3 || pad === 6) {
     const h = pad === 3 ? kit.hat : kit.ohat, dec = (pad === 6 && !kit.bell && kitId !== 'lynn') ? h.dec * 1.8 : h.dec, dur = dec + 0.1;
     const out = drumOut(kit, t, dur); envGain(out, t, (pad === 3 ? 0.5 : 0.45) * vel, dec);
-    const n = noiseSrc(t, dur), hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = h.hp;
-    const pk = ctx.createBiquadFilter(); pk.type = 'peaking'; pk.frequency.value = 9500; pk.Q.value = 1.2; pk.gain.value = 6;
+    const n = noiseSrc(t, dur), hp = ctx.createBiquadFilter(); hp.type = 'highpass'; pv(hp.frequency, h.hp);
+    const pk = ctx.createBiquadFilter(); pk.type = 'peaking'; pv(pk.frequency, 9500); pv(pk.Q, 1.2); pv(pk.gain, 6);
     n.connect(hp); hp.connect(pk); pk.connect(out);
     if (h.metal) {
       for (const r of [1, 1.42, 1.73]) {
-        const o = osc('square', 3200 * r, t, dur), mg = ctx.createGain(); mg.gain.value = 0.18;
+        const o = osc('square', 3200 * r, t, dur), mg = ctx.createGain(); pv(mg.gain, 0.18);
         o.connect(mg); mg.connect(hp);
       }
     }
@@ -1675,14 +1695,14 @@ function drumHit(kitId, pad, t, vel) {
     if (kit.bell) {
       // Cencerro: dos cuadradas pasadas por un paso banda
       const dur = 0.35, out = drumOut(kit, t, dur); envGain(out, t, 0.5 * vel, 0.3);
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = 2; bp.connect(out);
-      for (const f of [587, 845]) { const o = osc('square', f, t, dur), g = ctx.createGain(); g.gain.value = 0.5; o.connect(g); g.connect(bp); }
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; pv(bp.frequency, 700); pv(bp.Q, 2); bp.connect(out);
+      for (const f of [587, 845]) { const o = osc('square', f, t, dur), g = ctx.createGain(); pv(g.gain, 0.5); o.connect(g); g.connect(bp); }
     } else {
       // Ride: ruido agudo + dos cuadradas inarmónicas con cola larga
       const dur = 0.9, out = drumOut(kit, t, dur); envGain(out, t, 0.35 * vel, 0.8);
-      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 4500; hp.connect(out);
-      const n = noiseSrc(t, dur), ng = ctx.createGain(); ng.gain.value = 0.5; n.connect(ng); ng.connect(hp);
-      for (const f of [2370, 3615]) { const o = osc('square', f, t, dur), g = ctx.createGain(); g.gain.value = 0.12; o.connect(g); g.connect(hp); }
+      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; pv(hp.frequency, 4500); hp.connect(out);
+      const n = noiseSrc(t, dur), ng = ctx.createGain(); pv(ng.gain, 0.5); n.connect(ng); ng.connect(hp);
+      for (const f of [2370, 3615]) { const o = osc('square', f, t, dur), g = ctx.createGain(); pv(g.gain, 0.12); o.connect(g); g.connect(hp); }
     }
   }
 }
@@ -1838,7 +1858,7 @@ function trackGainNode(t) {
   if (!t.gain || t.gain.context !== ctx) {
     t.gain = ctx.createGain(); t.muteG = ctx.createGain(); t.gain.connect(t.muteG); t.muteG.connect(loopBus);
   }
-  t.gain.gain.value = t.vol; applyMutes();
+  pv(t.gain.gain, t.vol); applyMutes();
   return t.gain;
 }
 function applyMutes() {
@@ -1860,14 +1880,14 @@ loop.metroNodes = [];
 function metroCancel() {
   if (!ctx) { loop.metroNodes = []; return; }
   const now = ctx.currentTime;
-  for (const n of loop.metroNodes) { try { if (n.t > now) { n.g.gain.cancelScheduledValues(0); n.g.gain.value = 0; n.o.stop(); } } catch (e) {} }
+  for (const n of loop.metroNodes) { try { if (n.t > now) { n.g.gain.cancelScheduledValues(0); pv(n.g.gain, 0); n.o.stop(); } } catch (e) {} }
   loop.metroNodes = [];
 }
 function click(t, accent) {
   if (!loop.metro) return;
   const o = ctx.createOscillator(), g = ctx.createGain();
   loop.metroNodes.push({ t, o, g });
-  o.frequency.value = accent ? 1600 : 1100; o.connect(g); g.connect(outGain);
+  pv(o.frequency, accent ? 1600 : 1100); o.connect(g); g.connect(outGain);
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(accent ? 0.5 : 0.3, t + 0.002);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05); o.start(t); o.stop(t + 0.07);
 }
@@ -2231,6 +2251,7 @@ async function runDiag() {
   } catch (e) { c = 'FALLA → ' + (e.message || e); logErr('diag-acorde', e); }
   try { releaseInner(0); } catch (e) {}
   t('acorde de prueba', c);
+  t('parámetros de audio', apStatus);
   t('worklet', ctx && ctx.audioWorklet ? (recWorkletLoaded === ctx ? 'cargado' : 'no cargado (usa la alternativa)') : 'no disponible');
   t('muestras', typeof SAMPLE_DATA === 'undefined' ? 'samples.js NO cargó' : Object.keys(SAMPLE_DATA).length + ' definidas, ' + Object.keys(sampleBuf).length + ' listas');
   t('MIDI', (navigator.requestMIDIAccess ? 'disponible' : 'no disponible') + ' · ajuste ' + (state.midi ? 'ACTIVADO' : 'apagado') + (midiAcc ? ' · entradas ' + midiAcc.inputs.size + ', salidas ' + midiAcc.outputs.size : ''));
@@ -2265,10 +2286,10 @@ function micAttach() {
   if (!ctx || !micStream) return;
   if (!micSource || micSource.context !== ctx) {
     micSource = ctx.createMediaStreamSource(micStream);
-    micGain = ctx.createGain(); micGain.gain.value = state.micGain;
+    micGain = ctx.createGain(); pv(micGain.gain, state.micGain);
     micAnalyser = ctx.createAnalyser(); micAnalyser.fftSize = 2048;
     micSource.connect(micGain); micGain.connect(micAnalyser);
-    micSink = ctx.createGain(); micSink.gain.value = 0; micAnalyser.connect(micSink); micSink.connect(ctx.destination);   // el analizador se procesa siempre
+    micSink = ctx.createGain(); pv(micSink.gain, 0); micAnalyser.connect(micSink); micSink.connect(ctx.destination);   // el analizador se procesa siempre
     if (vocModIn) micGain.connect(vocModIn);
     if (micCap) { try { micGain.connect(micCap); } catch (e) {} }   // la grabadora debe seguir al micrófono nuevo
   }
@@ -2299,7 +2320,7 @@ function makeCapture(src, onChunk) {
   }
   const sp = ctx.createScriptProcessor(2048, 2, 1);
   sp.onaudioprocess = e => onChunk(Math.round(e.playbackTime * ctx.sampleRate), e.inputBuffer.getChannelData(0), e.inputBuffer.getChannelData(Math.min(1, e.inputBuffer.numberOfChannels - 1)));
-  const sink = ctx.createGain(); sink.gain.value = 0; src.connect(sp); sp.connect(sink); sink.connect(ctx.destination);
+  const sink = ctx.createGain(); pv(sink.gain, 0); src.connect(sp); sp.connect(sink); sink.connect(ctx.destination);
   return sp;
 }
 
@@ -2444,12 +2465,12 @@ let tunerRaf = null, tunerBuf = null, tunerFrame = 0, tunerPitch = null, tunerMi
 function tunerStart() {
   micStart('tuner').then(ok => {
     if (!ok) return;
-    if (micGain) micGain.gain.value = state.micGain * 4;   // el afinador necesita más señal que el sampler
+    if (micGain) pv(micGain.gain, state.micGain * 4);   // el afinador necesita más señal que el sampler
     if (!tunerRaf) tunerLoop();
   });
 }
 function tunerStop() {
-  if (micGain) micGain.gain.value = state.micGain;
+  if (micGain) pv(micGain.gain, state.micGain);
   micStop('tuner'); if (tunerRaf) cancelAnimationFrame(tunerRaf); tunerRaf = null; tunerPitch = null; tunerLevel = 0;
   $('screen').classList.remove('intune');
 }
@@ -3569,8 +3590,8 @@ function reapplyAll() {
   if (ctx) {
     for (const id of FX_ORDER) updateFx(id);
     applyFilter(true); applyVolume(true); applyVibrato();
-    if (drumBus) drumBus.gain.value = state.drumVol;
-    if (micGain) micGain.gain.value = state.micGain;
+    if (drumBus) pv(drumBus.gain, state.drumVol);
+    if (micGain) pv(micGain.gain, state.micGain);
   }
   rebuildSoundOptions(); syncSettings();
   const m = state.mode; state.mode = 'play'; setMode(m);
@@ -3771,7 +3792,7 @@ function hiroPrepare() {
 }
 function hiroBeep(t, accent) {   // pitido de la cuenta atrás
   const o = ctx.createOscillator(), g = ctx.createGain();
-  o.frequency.value = accent ? 1500 : 1000; o.connect(g); g.connect(outGain);
+  pv(o.frequency, accent ? 1500 : 1000); o.connect(g); g.connect(outGain);
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
   o.start(t); o.stop(t + 0.09);
 }
