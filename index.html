@@ -248,6 +248,8 @@ body {
 .row .tap { font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--sheet-line); background: var(--field); color: var(--sheet-ink); touch-action: manipulation; }
 .row .tap:active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .row .file { font: inherit; font-size: 12px; max-width: 58%; color: var(--sheet-muted); }
+.row.wrap { flex-wrap: wrap; }
+.row .diag { flex: 0 0 100%; font-size: 12px; line-height: 1.5; color: var(--sheet-muted); }
 .row .code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; max-width: 60%; text-align: left; }
 .sheet .help { font-size: 13px; color: var(--sheet-muted); line-height: 1.5; margin: 14px 0; }
 .sheet .actions { display: flex; gap: 8px; margin-top: 12px; }
@@ -1831,18 +1833,51 @@ function onTap(el, fn) {
 let micStream = null, micSource = null, micGain = null, micAnalyser = null, micUsers = new Set();
 let workletReadyResolve = null, workletReady = new Promise(r => { workletReadyResolve = r; });
 
+let micLastError = '';
+function micErrorText(e) {
+  const n = e && e.name;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+    return window.isSecureContext === false ? 'La página no es segura (hace falta https)' : 'Este navegador no ofrece micrófono a las webs';
+  if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') return 'Micrófono bloqueado. Actívalo en aA → Ajustes del sitio web';
+  if (n === 'NotFoundError') return 'No se encuentra ningún micrófono';
+  if (n === 'NotReadableError' || n === 'AbortError') return 'El micrófono está ocupado por otra app';
+  return 'Error del micrófono' + (n ? ' (' + n + ')' : '');
+}
 async function micStart(user) {
   micUsers.add(user);
   ensureAudio();
   if (!micStream) {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Este navegador no da acceso al micrófono'); return false; }
-    try {
-      micStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }, video:false });
-    } catch (e) { toast('Sin permiso para usar el micrófono'); micUsers.delete(user); return false; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { micLastError = micErrorText(); toast(micLastError); micUsers.delete(user); return false; }
+    // Primero sin procesado (mejor para afinar y para el vocoder); si falla por restricciones, con la configuración básica
+    for (const audio of [{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }, true]) {
+      try { micStream = await navigator.mediaDevices.getUserMedia({ audio, video:false }); micLastError = ''; break; }
+      catch (e) {
+        micLastError = micErrorText(e) + (e && e.name ? ' [' + e.name + ']' : '');
+        if (e && ['NotAllowedError', 'PermissionDeniedError', 'SecurityError', 'NotFoundError'].includes(e.name)) break;
+      }
+    }
+    if (!micStream) { toast(micLastError.replace(/ \[.*\]$/, '')); micUsers.delete(user); return false; }
     try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
   }
   micAttach();
   return true;
+}
+function showDiag(text) {
+  const row = $('set-mic_test').closest('.row'); row.classList.add('wrap');
+  let d = row.querySelector('.diag'); if (!d) { d = document.createElement('div'); d.className = 'diag'; row.appendChild(d); }
+  d.textContent = text;
+}
+async function runMicTest() {
+  const out = [];
+  out.push('https: ' + (window.isSecureContext ? 'sí' : 'no'));
+  out.push('pantalla de inicio: ' + (navigator.standalone ? 'sí' : 'no'));
+  out.push('API del micrófono: ' + (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? 'sí' : 'no'));
+  try { const p = await navigator.permissions.query({ name:'microphone' }); out.push('permiso: ' + p.state); } catch (e) { out.push('permiso: no consultable'); }
+  showDiag(out.join(' · ') + ' · probando…');
+  const ok = await micStart('test');
+  out.push('resultado: ' + (ok ? 'el micrófono funciona' : (micLastError || 'falló')));
+  if (ok) micStop('test');
+  showDiag(out.join(' · '));
 }
 function micAttach() {
   if (!ctx || !micStream) return;
@@ -2511,6 +2546,7 @@ const SETTINGS = [
     fmt:v => v >= 1000 ? 'abierto' : Math.round(cutoffHz(v)) + ' Hz' },
   { id:'volume', label:'Volumen', type:'range', min:0, max:100, ...pct },
   { id:'micGain', label:'Ganancia del micro', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
+  { id:'mic_test', label:'Probar el micrófono', type:'button', text:'Probar', run:() => onActivation(runMicTest) },
   { section:'Editor del instrumento' },
   { id:'tw_level', label:'Nivel', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
   { id:'tw_detune', label:'Desafinado del par', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
