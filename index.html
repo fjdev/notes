@@ -129,7 +129,11 @@ body {
 .lp-track.s-armed { border-style: dashed; animation: blink 1s infinite; }
 .lp-track.muted { opacity: .4; }
 .lp-track.solo::after { content: "S"; position: absolute; top: 1px; right: 5px; font-family: var(--sans); font-size: 9px; }
-.lp-track.hold { transform: scale(.92); }
+.lp-track { touch-action: none; overflow: hidden; }
+.lp-track::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); opacity: .55; }
+.lp-track.hold::before { animation: holdfill .7s linear forwards; }
+@keyframes holdfill { to { width: 100%; } }
+.lp-transport svg { width: 16px; height: 16px; fill: currentColor; stroke: none; display: block; margin: 0 auto; }
 .lp-transport { width: 42px; height: 36px; border-radius: 8px; border: 1.5px solid var(--ctl-line); background: var(--ctl); color: var(--ctl-ink); font-size: 16px; flex: 0 0 auto; }
 .lp-transport:disabled, .lp-bars:disabled { opacity: .35; }
 .lp-bars { min-width: 46px; height: 36px; border-radius: 8px; border: 1.5px dashed var(--ctl-line); background: var(--ctl); color: var(--ctl-ink); font-size: 11px; flex: 0 0 auto; }
@@ -184,6 +188,8 @@ body {
 .tools button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tools button:active { background: var(--accent2); border-color: var(--accent2); color: #1a1a1a; transform: translateY(1px); box-shadow: none; }
 .tools button.locked { background: var(--sel); color: var(--sel-ink); border-color: var(--sel); }
+.tools button:disabled { opacity: .3; box-shadow: none; }
+.tools button svg.f { fill: currentColor; stroke: none; }
 
 /* ===== Ajustes ===== */
 .sheet {
@@ -276,10 +282,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
     <div class="tools">
       <div class="target-lbl" id="targetLbl">Botón 1</div>
-      <button id="tInv" aria-label="Inversión"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h10"/><path d="M19 5v14M16 8l3-3 3 3"/></svg><span id="tInvLbl">inv</span></button>
-      <button id="tLock" aria-label="Fijar acorde"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0" id="lockShackle"/></svg><span id="tLockLbl">fijar</span></button>
-      <button id="tOctDn" aria-label="Octava abajo"><svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg><span id="tOctDnLbl">oct −</span></button>
-      <button id="tOctUp" aria-label="Octava arriba"><svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg><span id="tOctUpLbl">oct +</span></button>
+      <button id="tInv" aria-label="Inversión"></button>
+      <button id="tLock" aria-label="Fijar acorde"></button>
+      <button id="tOctDn" aria-label="Octava abajo"></button>
+      <button id="tOctUp" aria-label="Octava arriba"></button>
     </div>
   </section>
 </main>
@@ -852,7 +858,7 @@ function renderModes() {
     if (el.dataset.m === 'mixer') el.hidden = !loopHasAudio() && state.mode !== 'mixer';
   });
   const p = modeParam(), el = $('modeParam');
-  if (state.mode === 'seq') { el.disabled = false; el.textContent = (seq.playing ? '■ ' : '▶ ') + seq.steps.length + (seq.steps.length === 1 ? ' paso' : ' pasos'); return; }
+  if (state.mode === 'seq') { el.disabled = false; el.textContent = (seq.playing ? 'parar' : 'tocar') + ' · ' + seq.steps.length + (seq.steps.length === 1 ? ' paso' : ' pasos'); return; }
   el.disabled = !p; el.textContent = p ? p.names[state[p.key]] : 'ajuste';
 }
 function buildModes() {
@@ -1601,7 +1607,8 @@ function buildLooper() {
       }
     });
     const end = () => { if (hold) clearTimeout(hold); hold = null; c.classList.remove('hold'); };
-    c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end); c.addEventListener('pointerleave', end);
+    c.addEventListener('pointerdown', e => { try { c.setPointerCapture(e.pointerId); } catch (err) {} });
+    c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
     wrap.appendChild(c);
   }
   const tr = document.createElement('button'); tr.className = 'lp-transport'; tr.id = 'lpTransport'; tr.setAttribute('aria-label', 'Reproducir o pausar');
@@ -1625,13 +1632,13 @@ function renderLooper() {
   }
   const rec = $('lpRec'), cur = tracks[loop.cur];
   rec.className = 'lp-rec s-' + cur.state;
-  const tr = $('lpTransport'); tr.textContent = loop.paused ? '▶' : '⏸'; tr.disabled = !loopHasAudio();
+  const tr = $('lpTransport'); tr.innerHTML = loop.paused || !loopHasAudio() ? I.play : I.pause; tr.disabled = !loopHasAudio();
   $('lpBars').textContent = loop.bars ? loop.bars + 'c' : 'libre'; $('lpBars').disabled = !!loop.len;
 }
 function looperStatus() {
   const rec = tracks.find(t => t.state === 'rec' || (t.state === 'armed' && t.countdown));
-  if (rec) return (rec.state === 'rec' ? '● ' : '◌ ') + (tracks.indexOf(rec) + 1);
-  if (loop.len) return (loop.paused ? '⏸ ' : '▶ ') + loop.len.toFixed(1) + 's';
+  if (rec) return (rec.state === 'rec' ? 'rec ' : 'espera ') + (tracks.indexOf(rec) + 1);
+  if (loop.len) return (loop.paused ? 'pausa ' : 'loop ') + loop.len.toFixed(1) + 's';
   return '';
 }
 
@@ -1851,6 +1858,7 @@ function setJoyDir(source, dir) {
 
 // ===== HERRAMIENTAS POR BOTÓN =====
 function toolInversion() {
+  if (state.mode === 'drum' || state.mode === 'beat') return;
   if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
   if (state.mode === 'mixer') { mixerTool('solo'); return; }
   state.inv[target] = (state.inv[target] + 1) % 3; saveState();
@@ -1859,6 +1867,7 @@ function toolInversion() {
   if (held.length) refresh(); else renderPads();
 }
 function toolLock() {
+  if (state.mode === 'drum' || state.mode === 'beat') return;
   if (state.mode === 'seq') { seq.steps.pop(); renderModes(); renderScreen(false); toast('Último paso quitado'); return; }
   if (state.mode === 'mixer') { mixerTool('down'); return; }
   if (state.locks[target]) {
@@ -1874,17 +1883,72 @@ function toolLock() {
   }
   if (held.length) refresh(); else renderPads();
 }
+let clearArm = null;
 function toolOct(d) {
+  if (state.mode === 'drum' || state.mode === 'beat') return;
   if (state.mode === 'seq') {
     if (d < 0) { seqStop(); seq.steps = []; renderModes(); renderScreen(false); toast('Secuencia borrada'); }
     else { const L = [1, 2, 4]; seq.stepLen = L[(L.indexOf(seq.stepLen) + 1) % L.length]; renderPads(); toast('Paso: ' + (seq.stepLen === 4 ? '1 compás' : seq.stepLen + (seq.stepLen === 1 ? ' tiempo' : ' tiempos'))); }
     return;
   }
-  if (state.mode === 'mixer') { if (d > 0) mixerTool('up'); else toast('Mantén pulsada la pista en el looper para borrarla'); return; }
+  if (state.mode === 'mixer') {
+    if (d < 0) { mixerTool('up'); return; }
+    const t = tracks[target]; if (!t.buffer) return;
+    if (clearArm === target) { clearArm = null; clearTrack(target); toast('Pista ' + (target + 1) + ' borrada'); renderPads(); }
+    else { clearArm = target; toast('Vuelve a pulsar para borrar la pista ' + (target + 1)); setTimeout(() => { if (clearArm === target) clearArm = null; }, 2500); }
+    return;
+  }
   const v = Math.max(-2, Math.min(2, state.btnOct[target] + d));
   state.btnOct[target] = v; saveState();
   toast('Botón ' + (target + 1) + ': octava ' + (v > 0 ? '+' + v : v));
   if (held.length) refresh(); else renderPads();
+}
+
+// ===== ICONOS (SVG propios, nunca emojis) =====
+const I = {
+  inv:    '<svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h10"/><path d="M19 5v14M16 8l3-3 3 3"/></svg>',
+  lock:   '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  unlock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0"/></svg>',
+  down:   '<svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg>',
+  up:     '<svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg>',
+  play:   '<svg viewBox="0 0 24 24" class="f"><path d="M7 5l12 7-12 7z"/></svg>',
+  stop:   '<svg viewBox="0 0 24 24" class="f"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>',
+  pause:  '<svg viewBox="0 0 24 24" class="f"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+  minus:  '<svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg>',
+  trash:  '<svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>',
+  step:   '<svg viewBox="0 0 24 24"><path d="M4 16h4v-4H4zM10 12h4V8h-4zM16 8h4V4h-4z"/><path d="M4 20h16"/></svg>',
+  solo:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M14.5 9.5a2.5 2.5 0 0 0-5 0c0 2.5 5 2.5 5 5a2.5 2.5 0 0 1-5 0"/></svg>',
+  volDn:  '<svg viewBox="0 0 24 24"><path d="M4 10v4h3l4 3V7l-4 3z"/><path d="M15 12h5"/></svg>',
+  volUp:  '<svg viewBox="0 0 24 24"><path d="M4 10v4h3l4 3V7l-4 3z"/><path d="M15 12h5M17.5 9.5v5"/></svg>',
+  none:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.2"/></svg>',
+};
+function setTool(id, icon, label, opts = {}) {
+  const b = $(id); b.innerHTML = I[icon] + '<span>' + label + '</span>';
+  b.disabled = !!opts.off; b.classList.toggle('locked', !!opts.on);
+}
+function renderTools() {
+  const m = state.mode;
+  if (m === 'seq') {
+    setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play');
+    setTool('tLock', 'minus', 'quitar'); setTool('tOctDn', 'trash', 'borrar');
+    setTool('tOctUp', 'step', 'paso ×' + seq.stepLen);
+    $('targetLbl').textContent = 'Secuencia'; return;
+  }
+  if (m === 'mixer') {
+    const t = tracks[target] || {};
+    setTool('tInv', 'solo', 'solo', { on: !!t.solo }); setTool('tLock', 'volDn', 'vol −');
+    setTool('tOctDn', 'volUp', 'vol +'); setTool('tOctUp', 'trash', 'borrar', { off: !t.buffer });
+    $('targetLbl').textContent = 'Pista ' + (target + 1); return;
+  }
+  if (m === 'drum' || m === 'beat') {
+    setTool('tInv', 'none', '', { off:true }); setTool('tLock', 'none', '', { off:true });
+    setTool('tOctDn', 'none', '', { off:true }); setTool('tOctUp', 'none', '', { off:true });
+    $('targetLbl').textContent = m === 'drum' ? 'Pads' : 'Ritmos'; return;
+  }
+  const locked = !!state.locks[target];
+  setTool('tInv', 'inv', 'inv'); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked });
+  setTool('tOctDn', 'down', 'oct −'); setTool('tOctUp', 'up', 'oct +');
+  $('targetLbl').textContent = 'Botón ' + (target + 1);
 }
 
 // ===== RENDER =====
@@ -1965,7 +2029,7 @@ function renderPads() {
     else if (state.mode === 'mixer') {
       if (b === 6) label = loop.metro ? 'metro on' : 'metro off';
       else { const t = tracks[b]; label = !t.buffer ? 'vacía' : t.mute ? 'mute' : t.solo ? 'solo' : Math.round(t.vol * 100) + '%'; }
-    } else if (state.mode === 'seq' && seq.playing && seq.steps[seq.cur] && seq.steps[seq.cur].btn === b) label = '▶ ' + label;
+    } else if (state.mode === 'seq' && seq.playing && seq.steps[seq.cur] && seq.steps[seq.cur].btn === b) el.classList.add('held');
     if (state.mode === 'mixer') { const t = tracks[b]; if (b < 6 && t.buffer && !t.mute) el.classList.add('held'); if (b === 6 && loop.metro) el.classList.add('held'); }
     el.querySelector('.cn').textContent = label;
     const badges = [];
@@ -1974,17 +2038,7 @@ function renderPads() {
     if (state.inv[b] && !state.vlead) badges.push('inv' + state.inv[b]);
     el.querySelector('.badge').textContent = badges.join(' ');
   }
-  const seqMode = state.mode === 'seq', mixMode = state.mode === 'mixer';
-  $('targetLbl').textContent = mixMode ? 'Pista ' + (target + 1) : seqMode ? 'Secuencia' : 'Botón ' + (target + 1);
-  $('tInvLbl').textContent = seqMode ? (seq.playing ? 'stop' : 'play') : mixMode ? 'solo' : 'inv';
-  $('tOctDnLbl').textContent = seqMode ? 'borrar' : mixMode ? 'borrar' : 'oct −';
-  $('tOctUpLbl').textContent = seqMode ? 'paso ×' + seq.stepLen : mixMode ? 'vol +' : 'oct +';
-  if (seqMode) { $('tLockLbl').textContent = 'quitar'; $('tLock').classList.remove('locked'); return; }
-  if (mixMode) { $('tLockLbl').textContent = 'vol −'; $('tLock').classList.remove('locked'); return; }
-  const locked = !!state.locks[target];
-  $('tLockLbl').textContent = locked ? 'liberar' : 'fijar';
-  $('tLock').classList.toggle('locked', locked);
-  $('lockShackle').setAttribute('d', locked ? 'M8 11V8a4 4 0 0 1 8 0v3' : 'M8 11V8a4 4 0 0 1 8 0');
+  renderTools();
 }
 
 // Vector -> una de las 8 direcciones (o null si no supera el umbral)
