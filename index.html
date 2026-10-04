@@ -329,10 +329,15 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Mic (sampler)</h4>
       <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
       <h4>Afinador</h4>
-      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Afinador, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, el punto se vuelve naranja y la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya.</p>
+      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Afinador, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, el punto se vuelve naranja y la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya. La línea fina de abajo muestra cuánto oye el micrófono: si no se mueve cuando cantas, el sonido no está llegando.</p>
       <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube la "Ganancia del micro" en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
       <h4>Vocoder</h4>
       <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Micrófono (tu voz) o Pista 1 del looper (lo que grabaste en ella, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formante cambia el carácter de la voz (más aguda o más grave) y Consonantes añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
+      <h4>Permiso del micrófono</h4>
+      <p>El micrófono se cierra en cuanto terminas de usarlo, así que Safari puede volver a pedir permiso cada vez. Para que no lo pida más, toca "aA" en la barra de direcciones → Ajustes del sitio web → Micrófono → Permitir; la app seguirá cerrando el micrófono al terminar. En Ajustes → Sonido, "Probar el micrófono" muestra el estado: "granted" significa que Safari ya lo recuerda y "prompt" que lo volverá a pedir.</p>
+      <p>Alternativa: activar "Mantener el micrófono abierto" en Ajustes → Sonido. El micrófono queda abierto pero mudo mientras la app esté abierta (el punto naranja del iPhone puede seguir encendido) y se libera al salir de la app o tras 15 minutos sin usarlo.</p>
+      <h4>Audio y pantalla de bloqueo</h4>
+      <p>Tras 20 segundos sin tocar ni sonar nada, la app suspende el audio para no aparecer como "reproduciendo"; el primer toque lo reactiva y la primera nota puede tardar un instante. Al salir de la app o bloquear el iPhone se detiene todo, incluidos los loops.</p>
       <h4>Si el micrófono no funciona</h4>
       <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
       <h4>Looper</h4>
@@ -681,7 +686,7 @@ const DEFAULT_STATE = {
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', swipe:false, osc:false, haptics:false,
   library:[],
-  micGain:1, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
+  micGain:1, micHold:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
   btnOct:[0,0,0,0,0,0,0], inv:[0,0,0,0,0,0,0], locks:[null,null,null,null,null,null,null],
@@ -711,6 +716,30 @@ let waveCache = {}, irCache = {}, fxSlots = {};
 // En iPhone, al salir de la app el audio se congela y a veces vuelve "mudo".
 // Por eso, tras volver, se reconstruye el motor de audio en el siguiente toque.
 let needsRebuild = false, justBuilt = false;
+// Sesión de audio de iOS: «playback» solo mientras suena; en reposo «ambient», que hace que iOS retire el aviso de «reproduciendo»
+let audioAsleep = false, lastBusy = Date.now();
+function setSession(t) { try { if (navigator.audioSession && navigator.audioSession.type !== t) navigator.audioSession.type = t; } catch (e) {} }
+function applySession() { setSession((audioAsleep || !ctx) ? 'ambient' : (micStream ? 'play-and-record' : 'playback')); }
+function audioBusy() {
+  return held.length > 0 || voices.size > 0 || !!beat.style || !!clock.timer || !!auto.timer || seq.playing || micUsers.size > 0 ||
+    droneBtn != null || !!micTake || tracks.some(t => t.state === 'rec' || t.state === 'armed' || t.state === 'finishing' || (t.buffer && !loop.paused));
+}
+function audioSleep() {
+  if (!ctx || audioAsleep) return;
+  audioAsleep = true;
+  try { ctx.suspend(); } catch (e) {}
+  applySession();
+}
+function audioIdleCheck() {   // tras 20 s sin sonar ni tocar, el audio se suspende
+  if (!ctx || audioAsleep) return;
+  if (audioBusy()) { lastBusy = Date.now(); return; }
+  if (Date.now() - lastBusy > 20000) audioSleep();
+}
+// Pausa o parada desde la pantalla de bloqueo o el Centro de control: se detiene todo de verdad
+function registerMediaSession() {
+  if (!navigator.mediaSession) return;
+  for (const act of ['pause', 'stop']) { try { navigator.mediaSession.setActionHandler(act, goneToBackground); } catch (e) {} }
+}
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const SLOT_PAN = [0, -14 / 64, 16 / 64, -30 / 64, 32 / 64, -48 / 64];
 const SLOT_GAIN = [116, 110, 104, 99, 93, 86].map(v => v / 127);
@@ -725,7 +754,7 @@ function ensureAudio() {
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     ctx = new AC({ latencyHint:'interactive' });
-    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    audioAsleep = false; applySession();
     waveCache = {}; irCache = {}; fxSlots = {};
     master = ctx.createGain();
     filterNode = ctx.createBiquadFilter(); filterNode.type = 'lowpass'; filterNode.Q.value = 0.7;
@@ -753,6 +782,8 @@ function ensureAudio() {
     applyFilter(true); applyVolume(true);
     justBuilt = true;
   }
+  lastBusy = Date.now();
+  if (audioAsleep) { audioAsleep = false; applySession(); }
   if (ctx.state !== 'running') {
     try { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
   }
@@ -762,6 +793,7 @@ function ensureAudio() {
 // no al apoyarlo. Aquí se reanuda en esos momentos y se "desbloquea" con un sonido vacío.
 function unlockAudio() {
   if (!ctx) return;
+  if (audioAsleep) { audioAsleep = false; lastBusy = Date.now(); applySession(); }
   if (ctx.state !== 'running' || justBuilt) {
     try {
       const b = ctx.createBuffer(1, 1, 22050), src = ctx.createBufferSource();
@@ -1869,6 +1901,7 @@ let micStream = null, micSource = null, micGain = null, micAnalyser = null, micU
 let workletReadyResolve = null, workletReady = new Promise(r => { workletReadyResolve = r; });
 
 let micLastError = '';
+let micSink = null, micIdleTimer = null;
 function micErrorText(e) {
   const n = e && e.name;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
@@ -1883,11 +1916,13 @@ let micPending = null;
 async function micStart(user) {
   micUsers.add(user);
   ensureAudio();
+  clearTimeout(micIdleTimer); micIdleTimer = null;
+  if (micStream && micStream.getTracks().every(t => t.readyState === 'ended')) micRelease();
   if (!micStream) {
     // Una sola petición a la vez: si ya hay una en curso, se espera a su resultado
     if (!micPending) micPending = micOpenStream().finally(() => { micPending = null; });
     if (!(await micPending)) { micUsers.delete(user); return false; }
-  }
+  } else for (const t of micStream.getTracks()) t.enabled = true;   // se reutiliza: iOS no vuelve a pedir permiso
   micAttach();
   return true;
 }
@@ -1915,7 +1950,7 @@ async function micOpenStream() {
     }
   }
   if (ctx) { try { ctx.resume(); } catch (e) {} }
-  session('playback');
+  applySession();
   toast(micLastError.replace(/ \[.*\]$/, ''));
   return false;
 }
@@ -1943,16 +1978,26 @@ function micAttach() {
     micGain = ctx.createGain(); micGain.gain.value = state.micGain;
     micAnalyser = ctx.createAnalyser(); micAnalyser.fftSize = 2048;
     micSource.connect(micGain); micGain.connect(micAnalyser);
+    micSink = ctx.createGain(); micSink.gain.value = 0; micAnalyser.connect(micSink); micSink.connect(ctx.destination);   // el analizador se procesa siempre
     if (vocModIn) micGain.connect(vocModIn);
     if (micCap) { try { micGain.connect(micCap); } catch (e) {} }   // la grabadora debe seguir al micrófono nuevo
   }
 }
+function micRelease() {   // cierra el micrófono de verdad
+  clearTimeout(micIdleTimer); micIdleTimer = null;
+  try { if (micSource) micSource.disconnect(); if (micGain) micGain.disconnect(); if (micSink) micSink.disconnect(); } catch (e) {}
+  if (micStream) { for (const t of micStream.getTracks()) t.stop(); }
+  micStream = null; micSource = null; micGain = null; micAnalyser = null; micSink = null;
+  applySession();
+}
 function micStop(user) {
   micUsers.delete(user);
   if (micUsers.size) return;
-  if (micStream) { for (const t of micStream.getTracks()) t.stop(); }
-  micStream = null; micSource = null; micGain = null; micAnalyser = null;
-  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  if (!state.micHold || user === 'all') { micRelease(); return; }
+  if (!micStream) return;
+  // Se deja abierto pero mudo: iOS no vuelve a pedir permiso mientras la app esté abierta; se libera tras 15 min sin usar
+  for (const t of micStream.getTracks()) t.enabled = false;
+  clearTimeout(micIdleTimer); micIdleTimer = setTimeout(micRelease, 15 * 60 * 1000);
 }
 
 // Captura genérica (AudioWorklet con fallback) usada por el looper y por el sampler
@@ -1970,24 +2015,28 @@ function makeCapture(src, onChunk) {
 
 // ----- Detección de afinación (autocorrelación) -----
 function detectPitch(data, sr) {
-  const N = data.length; let rms = 0;
-  for (let i = 0; i < N; i++) rms += data[i] * data[i];
+  const N = data.length; let mean = 0;
+  for (let i = 0; i < N; i++) mean += data[i];
+  mean /= N;
+  const x = new Float32Array(N); let rms = 0;
+  for (let i = 0; i < N; i++) { x[i] = data[i] - mean; rms += x[i] * x[i]; }
   rms = Math.sqrt(rms / N); if (rms < 0.004) return null;
-  const minLag = Math.floor(sr / 1000), maxLag = Math.floor(sr / 60);
-  let best = -1, bestLag = -1;
-  const corr = new Float32Array(maxLag + 1);
-  for (let lag = minLag; lag <= maxLag; lag++) {
+  const minLag = Math.floor(sr / 1000), maxLag = Math.min(Math.floor(sr / 60), (N >> 1) - 2);
+  const corr = new Float32Array(maxLag + 2);
+  for (let lag = minLag - 1; lag <= maxLag + 1; lag++) {
     let s = 0, n1 = 0, n2 = 0;
-    for (let i = 0; i < N - lag; i++) { s += data[i] * data[i + lag]; n1 += data[i] * data[i]; n2 += data[i + lag] * data[i + lag]; }
+    for (let i = 0; i < N - lag; i++) { const a = x[i], b = x[i + lag]; s += a * b; n1 += a * a; n2 += b * b; }
     corr[lag] = s / Math.sqrt(n1 * n2 + 1e-12);
   }
-  // primer pico claro por encima del umbral (evita saltar a la octava inferior)
-  for (let lag = minLag + 1; lag < maxLag; lag++) {
-    if (corr[lag] > 0.8 && corr[lag] > corr[lag - 1] && corr[lag] >= corr[lag + 1]) { best = corr[lag]; bestLag = lag; break; }
+  let best = -1, bestLag = -1;
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    if (corr[lag] > corr[lag - 1] && corr[lag] >= corr[lag + 1] && corr[lag] > best) { best = corr[lag]; bestLag = lag; }
   }
-  if (bestLag < 0) { for (let lag = minLag; lag <= maxLag; lag++) if (corr[lag] > best) { best = corr[lag]; bestLag = lag; } if (best < 0.6) return null; }
-  // interpolación parabólica
-  const a = corr[bestLag - 1] || 0, b = corr[bestLag], c = corr[bestLag + 1] || 0;
+  if (bestLag < 0 || best < 0.5) return null;
+  for (let lag = minLag; lag < bestLag; lag++) {   // el periodo más corto casi tan fuerte evita errores de octava
+    if (corr[lag] > corr[lag - 1] && corr[lag] >= corr[lag + 1] && corr[lag] >= 0.9 * best) { bestLag = lag; best = corr[lag]; break; }
+  }
+  const a = corr[bestLag - 1], b = corr[bestLag], c = corr[bestLag + 1];
   const shift = (a - c) / (2 * (a - 2 * b + c) || 1);
   const f = sr / (bestLag + shift);
   return { freq:f, midi:69 + 12 * Math.log2(f / 440), clarity:best };
@@ -2101,24 +2150,36 @@ function vocoderSource() {
 }
 
 // ----- Afinador -----
-let tunerRaf = null, tunerBuf = null, tunerFrame = 0, tunerPitch = null, tunerMiss = 0, meterCents = 0;
-function tunerStart() { micStart('tuner').then(ok => { if (ok && !tunerRaf) tunerLoop(); }); }
-function tunerStop() { micStop('tuner'); if (tunerRaf) cancelAnimationFrame(tunerRaf); tunerRaf = null; tunerPitch = null; $('screen').classList.remove('intune'); }
-// Escala de ±50 cents con un punto que marca la desviación
-function drawTunerMeter(cents, inTune) {
+let tunerRaf = null, tunerBuf = null, tunerFrame = 0, tunerPitch = null, tunerMiss = 0, meterCents = 0, tunerLevel = 0;
+function tunerStart() {
+  micStart('tuner').then(ok => {
+    if (!ok) return;
+    if (micGain) micGain.gain.value = state.micGain * 4;   // el afinador necesita más señal que el sampler
+    if (!tunerRaf) tunerLoop();
+  });
+}
+function tunerStop() {
+  if (micGain) micGain.gain.value = state.micGain;
+  micStop('tuner'); if (tunerRaf) cancelAnimationFrame(tunerRaf); tunerRaf = null; tunerPitch = null; tunerLevel = 0;
+  $('screen').classList.remove('intune');
+}
+// Escala de ±50 cents con un punto que marca la desviación, y una línea fina con el nivel que oye el micrófono
+function drawTunerMeter(cents, inTune, level) {
   const c = $('scope'), g = c.getContext && c.getContext('2d'); if (!g) return;
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
   const ink = inTune ? v('--panel') : v('--panel-ink'), faint = inTune ? v('--panel') : v('--panel-dim');
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-  const mid = W / 2, span = W / 2 - 14, y = H / 2;
+  const mid = W / 2, span = W / 2 - 14, y = H / 2 - 4;
   g.lineWidth = 1.5; g.lineCap = 'round';
   for (let k = -50; k <= 50; k += 10) {
     const x = mid + k / 50 * span, h = k === 0 ? 18 : (k % 50 === 0 ? 12 : 6);
     g.strokeStyle = k === 0 ? ink : faint; g.globalAlpha = k === 0 ? 1 : 0.7;
     g.beginPath(); g.moveTo(x, y - h); g.lineTo(x, y + h); g.stroke();
   }
+  g.globalAlpha = 0.8; g.strokeStyle = faint; g.lineWidth = 3;
+  if (level > 0.01) { g.beginPath(); g.moveTo(mid - level * span, H - 5); g.lineTo(mid + level * span, H - 5); g.stroke(); }
   g.globalAlpha = 1;
   if (cents != null) {
     const x = mid + Math.max(-50, Math.min(50, cents)) / 50 * span;
@@ -2130,8 +2191,11 @@ function tunerLoop() {
   if (state.mode !== 'tuner' || !micAnalyser || !ctx) return;
   if (!tunerBuf) tunerBuf = new Float32Array(2048);
   if ((tunerFrame++ % 3) === 0) {   // la detección es costosa: unas 20 veces por segundo
+    if (ctx.state === 'suspended') { try { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
     if (micAnalyser.getFloatTimeDomainData) micAnalyser.getFloatTimeDomainData(tunerBuf);
     else { const bb = new Uint8Array(2048); micAnalyser.getByteTimeDomainData(bb); for (let i = 0; i < 2048; i++) tunerBuf[i] = (bb[i] - 128) / 128; }
+    let rms = 0; for (let i = 0; i < 2048; i += 4) rms += tunerBuf[i] * tunerBuf[i];
+    tunerLevel += (Math.min(1, Math.sqrt(rms / 512) * 6) - tunerLevel) * 0.4;
     const p = detectPitch(tunerBuf, ctx.sampleRate);
     if (p) { if (!tunerPitch) meterCents = Math.round((p.midi - Math.round(p.midi)) * 100); tunerPitch = p; tunerMiss = 0; }
     else if (++tunerMiss > 8) tunerPitch = null;
@@ -2145,7 +2209,7 @@ function tunerLoop() {
     cn.classList.remove('idle');
   } else { cn.textContent = '—'; cn.classList.add('idle'); }
   $('screen').classList.toggle('intune', inTune);
-  drawTunerMeter(tunerPitch ? meterCents : null, inTune);
+  drawTunerMeter(tunerPitch ? meterCents : null, inTune, tunerLevel);
   tunerRaf = requestAnimationFrame(tunerLoop);
 }
 
@@ -2649,6 +2713,7 @@ const SETTINGS = [
   { id:'volume', label:'Volumen', type:'range', min:0, max:100, ...pct },
   { id:'micGain', label:'Ganancia del micro', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
   { id:'mic_test', label:'Probar el micrófono', type:'button', text:'Probar', run:() => onActivation(runMicTest) },
+  { id:'micHold', label:'Mantener el micrófono abierto', type:'check' },
   { section:'Editor del instrumento' },
   { id:'tw_level', label:'Nivel', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
   { id:'tw_detune', label:'Desafinado del par', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
@@ -2730,6 +2795,7 @@ function onSettingChanged(id) {
   if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id)) renderModes();
   if (id === 'drumVol' && ctx && drumBus) drumBus.gain.setTargetAtTime(state.drumVol, ctx.currentTime, 0.02);
   if (id === 'micGain' && micGain) micGain.gain.setTargetAtTime(state.micGain, ctx.currentTime, 0.02);
+  if (id === 'micHold' && !state.micHold && !micUsers.size) micRelease();
   if (id === 'vocoder') { ensureAudio(); updateFx('vocoder'); vocoderSource(); }
   if (id === 'vocFormant' || id === 'vocNoise') { if (state.vocoder !== 'off') updateFx('vocoder'); }
   if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('Sin muestra grabada');
@@ -3041,10 +3107,10 @@ function goneToBackground() {
   if (micTake) { clearTimeout(micTake.timer); micTake = null; }
   if (tunerRaf) { cancelAnimationFrame(tunerRaf); tunerRaf = null; }
   micUsers.clear(); micStop('all');
-  // Cerrar el motor de audio: así iOS libera la sesión y la pantalla de bloqueo deja de mostrar «reproduciendo»
-  if (ctx) { try { ctx.close(); } catch (e) {} ctx = null; }
-  try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch (e) {}
-  try { if (navigator.mediaSession) { navigator.mediaSession.playbackState = 'none'; navigator.mediaSession.metadata = null; } } catch (e) {}
+  // No se cierra el contexto (en iOS cerrarlo al ocultar la página puede dejar el audio atascado): se suspende y la
+  // sesión pasa a «ambient»; el siguiente toque lo reconstruye (needsRebuild)
+  if (ctx) { try { ctx.suspend(); } catch (e) {} }
+  audioAsleep = true; applySession();
   if (auto.timer) { clearInterval(auto.timer); auto.timer = null; }
   needsRebuild = true;
 }
@@ -3053,6 +3119,7 @@ window.addEventListener('pagehide', goneToBackground);
 window.addEventListener('pageshow', e => { if (e.persisted) needsRebuild = true; });
 renderPads(); renderScreen(false); renderJoy();
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+setInterval(audioIdleCheck, 2000); registerMediaSession();
 </script>
 </body>
 </html>
