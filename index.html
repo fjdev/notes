@@ -117,6 +117,7 @@ body {
 .sheet h3 { font-size: 15px; font-weight: 600; margin: 18px 0 2px; color: var(--muted); }
 .row .tap { font: inherit; font-size: 15px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff; touch-action: manipulation; }
 .row .tap:active { background: var(--hold); color: #fff; }
+.row .code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; max-width: 60%; text-align: left; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #dde3e8; }
 .row label { font-size: 15px; }
 .row select, .row input[type=range] { font: inherit; font-size: 15px; max-width: 58%; }
@@ -170,13 +171,18 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       Teclado del ordenador: 1–7 tocan los acordes; W, A, S, D (y Q, E, Z, C en diagonal) mueven el joystick;
       I cambia la inversión, F fija el acorde, coma y punto cambian la octava del botón.
     </p>
+    <p class="help">
+      Instrumentos grabados: VCSL y VSCO 2 Community Edition de Versilian Studios (CC0) y FluidR3_GM a través de midi-js-soundfonts (CC BY 3.0).
+    </p>
     <div class="actions">
+      <button id="resetTweak">Restablecer instrumento</button>
       <button id="resetBtns">Restablecer botones</button>
       <button class="primary" id="closeSheet">Cerrar</button>
     </div>
   </div>
 </div>
 
+<script src="samples.js"></script>
 <script>
 // ===== THEORY (lógica musical pura, sin audio ni DOM) =====
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
@@ -391,35 +397,43 @@ function midiName(m) { return NOTE_NAMES[((m % 12) + 12) % 12] + (Math.floor(m /
 
 // ===== SONIDOS Y ENVOLVENTES =====
 // Armónicos para ondas a medida (órganos, clarinete, flauta)
-const WAVES = {
-  organ:    [0, 1, .75, .55, .45, 0, .28, 0, .22],
-  buzzorg:  [0, 1, .3, .33, .15, .2, .1, .14, .08, .11, .05, .09, 0, .07, 0, .06],
-  clarinet: [0, 1, 0, .75, 0, .5, 0, .14, 0, .5, 0, .12, 0, .17],
-  flute:    [0, 1, .22, .08, .03],
-};
+const WAVES = {};
 
 const SOUNDS = [
-  { id:'saw',     name:'Saw',        waves:['sawtooth','sawtooth'], level:0.75 },
-  { id:'sawbass', name:'Saw Bass',   waves:['sawtooth','sawtooth'], level:0.7, subOctave:true, glide:'medium' },
-  { id:'tineep',  name:'Tine EP',    waves:['sine','sine'], level:1.1, adsr:'KEYS',
-    fm:[{ ratio:1, i0:1.6, i1:0.25, decay:0.9 }, { ratio:14, i0:0.9, i1:0, decay:0.12 }] },
-  { id:'retroep', name:'Retro EP',   waves:['sine','sine'], level:1.0, adsr:'KEYS',
-    fm:[{ ratio:1, i0:3.2, i1:0.9, decay:0.5 }] },
-  { id:'organ',   name:'Organ',      waves:['custom','custom'], periodic:'organ', level:0.75 },
-  { id:'buzzorg', name:'Buzz Org',   waves:['custom','custom'], periodic:'buzzorg', level:0.7 },
-  { id:'clarinet',name:'Clarinet',   waves:['custom','custom'], periodic:'clarinet', level:0.85 },
-  { id:'flute',   name:'Flute',      waves:['custom','custom'], periodic:'flute', level:1.1, noise:{ q:18, mix:0.5 } },
-  { id:'vibraph', name:'Vibraph',    waves:['sine','sine'], level:1.0, adsr:'KEYS',
-    fm:[{ ratio:4, i0:2.2, i1:0.2, decay:0.6 }] },
-  { id:'fmep',    name:'FM EPiano',  waves:['sine','sine'], level:1.1, adsr:'KEYS',
+  { id:'saw',     name:'Saw',       waves:['sawtooth','sawtooth'], level:0.75 },
+  { id:'sawbass', name:'Saw Bass',  waves:['sawtooth','sawtooth'], level:0.7, subOctave:true, glide:'medium' },
+  { id:'piano',   name:'Piano',     sample:'piano',    level:1.2, adsr:'KEYS' },
+  { id:'tineep',  name:'Tine EP',   sample:'tineep',   level:1.1, adsr:'KEYS' },
+  { id:'organ',   name:'Organ',     sample:'organ',    level:1.0 },
+  { id:'strings', name:'Strings',   sample:'strings',  level:1.3, adsr:'SWELL' },
+  { id:'horns',   name:'Horns',     sample:'horns',    level:1.0 },
+  { id:'brass',   name:'Brass',     sample:'brass',    level:0.9 },
+  { id:'eguitar', name:'E Guitar',  sample:'eguitar',  level:1.3, adsr:'KEYS' },
+  { id:'clarinet',name:'Clarinet',  sample:'clarinet', level:1.0 },
+  { id:'flute',   name:'Flute',     sample:'flute',    level:0.9 },
+  { id:'grandpno',name:'GrandPno',  sample:'grandpno', level:1.2, adsr:'KEYS' },
+  { id:'retroep', name:'Retro EP',  sample:'retroep',  level:1.2, adsr:'KEYS' },
+  { id:'voxahh',  name:'Vox Ahh',   sample:'voxahh',   level:1.3 },
+  { id:'vibraph', name:'Vibraph',   sample:'vibraph',  level:0.9, adsr:'KEYS' },
+  { id:'fmep',    name:'FM EPiano', waves:['sine','sine'], level:1.1, adsr:'KEYS',
     fm:[{ ratio:1, i0:2.4, i1:0.35, decay:1.1 }] },
-  { id:'sine',    name:'Sine',       waves:['sine','sine'], level:1.3 },
-  { id:'fmbell',  name:'FM Wow',     waves:['sine','sine'], level:1.0, adsr:'KEYS',
+  { id:'hx7',     name:'HX7 Piano', waves:['sine','sine'], level:1.0, adsr:'KEYS',
+    fm:[{ ratio:1, i0:3.4, i1:0.5, decay:0.7 }, { ratio:7, i0:0.6, i1:0.05, decay:0.25 }] },
+  { id:'acoustic',name:'Acoustic',  sample:'acoustic', level:1.3, adsr:'KEYS' },
+  { id:'harp',    name:'Harp',      sample:'harp',     level:1.0, adsr:'KEYS' },
+  { id:'buzzorg', name:'Buzz Org',  sample:'buzzorg',  level:1.0 },
+  { id:'humming', name:'Humming',   sample:'humming',  level:1.2 },
+  { id:'sine',    name:'Sine',      waves:['sine','sine'], level:1.3 },
+  { id:'fmbell',  name:'FM Wow',    waves:['sine','sine'], level:1.0, adsr:'KEYS',
     fm:[{ ratio:3.5, i0:4.0, i1:0.6, decay:1.8 }] },
-  { id:'tri',     name:'Triangle',   waves:['triangle','triangle'], level:1.2 },
-  { id:'square',  name:'Square',     waves:['square','square'], level:0.6 },
-  { id:'sawsq',   name:'SawSquare',  waves:['sawtooth','square'], level:0.65 },
-  { id:'ocean',   name:'Ocean',      waves:['sine','sine'], level:0.5, adsr:'LONG', noise:{ q:30, mix:2.2 } },
+  { id:'robbo',   name:'Robbo',     waves:['sawtooth','square'], level:0.9, adsr:'TOUCH', subOctave:true,
+    filter:{ f0:3200, f1:380, decay:0.22, q:4 } },
+  { id:'shutter', name:'Shutter',   waves:['square','square'], level:0.8, adsr:'PLUCK',
+    filter:{ f0:5000, f1:250, decay:0.05, q:2 }, noise:{ q:3, mix:1.6 } },
+  { id:'tri',     name:'Triangle',  waves:['triangle','triangle'], level:1.2 },
+  { id:'square',  name:'Square',    waves:['square','square'], level:0.6 },
+  { id:'sawsq',   name:'SawSquare', waves:['sawtooth','square'], level:0.65 },
+  { id:'ocean',   name:'Ocean',     waves:['sine','sine'], level:0.5, adsr:'LONG', noise:{ q:30, mix:2.2 } },
 ];
 const curSound = () => SOUNDS.find(s => s.id === state.sound) || SOUNDS[0];
 
@@ -444,7 +458,7 @@ const DEFAULT_STATE = {
   attack:ADSR.TOUCH.a, release:ADSR.TOUCH.r, bass:'off', vlead:false, stereo:true,
   cutoff:1000, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
-  drive:'off', tape:'off', tremolo:'off',
+  drive:'off', tape:'off', tremolo:'off', tweaks:{},
   btnOct:[0,0,0,0,0,0,0], inv:[0,0,0,0,0,0,0], locks:[null,null,null,null,null,null,null],
 };
 const STORE_KEY = 'notes-state-v1';
@@ -499,6 +513,7 @@ function ensureAudio() {
     vibGain = ctx.createGain(); vibGain.gain.value = VIB_DEPTH[state.lfo] || 0;
     vibLfo.connect(vibGain); vibLfo.start();
     noiseBuf = makeNoise(2, 0);
+    loadAllSamples();
     applyFilter(true); applyVolume(true);
     justBuilt = true;
   }
@@ -526,6 +541,34 @@ function unlockAudio() {
   }
 }
 ['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlockAudio, true));
+
+// Grabaciones: se decodifican una vez y se reutilizan aunque se reconstruya el motor
+const sampleBuf = {}, sampleLoading = {};
+function loadSample(id) {
+  if (sampleBuf[id] || sampleLoading[id] || typeof SAMPLE_DATA === 'undefined' || !SAMPLE_DATA[id]) return;
+  sampleLoading[id] = true;
+  const m = SAMPLE_DATA[id], bin = atob(m.b64), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const done = buf => {
+    // El códec puede desplazar el inicio: se busca dónde empieza el sonido de verdad
+    const d = buf.getChannelData(0); let i = 0;
+    while (i < d.length && Math.abs(d[i]) < 0.01) i++;
+    const shift = i / buf.sampleRate - m.onset;
+    buf._start = i / buf.sampleRate;
+    if (m.loopStart != null) { buf._loopStart = m.loopStart + shift; buf._loopEnd = m.loopEnd + shift; }
+    buf._root = m.root; sampleBuf[id] = buf; sampleLoading[id] = false;
+  };
+  try {
+    const p = ctx.decodeAudioData(bytes.buffer, done, () => { sampleLoading[id] = false; });
+    if (p && p.then) p.then(done, () => { sampleLoading[id] = false; });
+  } catch (e) { sampleLoading[id] = false; }
+}
+function loadAllSamples() { if (typeof SAMPLE_DATA !== 'undefined') for (const id in SAMPLE_DATA) loadSample(id); }
+
+// Ajustes finos por instrumento (editor de sonido)
+function tweak(sound) {
+  return Object.assign({ level:1, detune:10, bright:1000, fmRatio:null, fmIndex:null, fmDecay:null }, state.tweaks[sound.id] || {});
+}
 
 function makeNoise(seconds, crackle) {
   const sr = ctx.sampleRate, len = Math.floor(sr * seconds);
@@ -578,28 +621,58 @@ function glideTc() {
 // Una voz (de las 6) con su pareja desafinada panoramizada al lado contrario
 class SlotVoice {
   constructor(slot, midi) {
-    const sound = curSound(), env = currentEnv(), t = ctx.currentTime, f = mtof(midi), gtc = glideTc();
+    const sound = curSound(), tw = tweak(sound), env = currentEnv(), t = ctx.currentTime, f = mtof(midi), gtc = glideTc();
     const from = (gtc && lastSlotMidi[slot] != null) ? mtof(lastSlotMidi[slot]) : f;
     const slide = (param, a, b) => { param.value = a; if (a !== b) param.setTargetAtTime(b, t, gtc); };
-    this.sound = sound; this.oscs = []; this.mods = []; this.srcs = []; this.bps = [];
+    this.sound = sound; this.oscs = []; this.mods = []; this.srcs = []; this.bps = []; this.rates = [];
     this.env = ctx.createGain(); this.env.gain.value = 0;
-    this.out = ctx.createGain(); this.out.gain.value = (slot === 3 ? 0.15 : 0.1) * sound.level;
+    this.out = ctx.createGain(); this.out.gain.value = (slot === 3 ? 0.15 : 0.1) * sound.level * tw.level;
     this.env.connect(this.out); this.out.connect(master);
-    const pan = state.stereo ? SLOT_PAN[slot] : 0;
+    const pan = state.stereo ? SLOT_PAN[slot] : 0, det = tw.detune / 2;
+    const buf = sound.sample ? sampleBuf[sound.sample] : null;
+    if (sound.sample && !buf) { loadSample(sound.sample); }
     for (let k = 0; k < 2; k++) {
       let dest = this.env;
       if (ctx.createStereoPanner) {
         const p = ctx.createStereoPanner(); p.pan.value = k === 0 ? pan : -pan;
         p.connect(this.env); dest = p;
       }
+      if (tw.bright < 1000) {
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoffHz(tw.bright);
+        lp.connect(dest); dest = lp;
+      }
+      if (sound.filter) {
+        // Filtro con envolvente (bajos sintéticos, golpes): abre y se cierra rápido
+        const fe = ctx.createBiquadFilter(); fe.type = 'lowpass'; fe.Q.value = sound.filter.q;
+        fe.frequency.setValueAtTime(sound.filter.f0, t);
+        fe.frequency.setTargetAtTime(sound.filter.f1, t, sound.filter.decay / 3);
+        fe.connect(dest); dest = fe;
+      }
       const g = ctx.createGain(); g.gain.value = 0.5; g.connect(dest);
+      const detune = k === 0 ? -det : det;
+      if (sound.sample) {
+        if (!buf) continue;
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        const r0 = from / mtof(buf._root), r1 = f / mtof(buf._root);
+        slide(src.playbackRate, r0, r1);
+        src.detune.value = detune; vibGain.connect(src.detune);
+        if (buf._loopStart != null) { src.loop = true; src.loopStart = buf._loopStart; src.loopEnd = buf._loopEnd; }
+        src.connect(g); src.start(t, buf._start);
+        this.srcs.push(src); this.rates.push(src);
+        continue;
+      }
       const o = ctx.createOscillator();
       if (sound.periodic) o.setPeriodicWave(getWave(sound.periodic)); else o.type = sound.waves[k];
       slide(o.frequency, from, f);
-      o.detune.value = k === 0 ? -4 : 4;
+      o.detune.value = detune;
       vibGain.connect(o.detune);
       o.connect(g);
-      for (const spec of (sound.fm || [])) {
+      (sound.fm || []).forEach((spec0, idx) => {
+        const spec = idx === 0 ? Object.assign({}, spec0, {
+          ratio: tw.fmRatio != null ? tw.fmRatio : spec0.ratio,
+          i0: tw.fmIndex != null ? tw.fmIndex : spec0.i0,
+          i1: tw.fmIndex != null ? spec0.i1 * (tw.fmIndex / Math.max(spec0.i0, 0.01)) : spec0.i1,
+          decay: tw.fmDecay != null ? tw.fmDecay : spec0.decay }) : spec0;
         const m = ctx.createOscillator(); m.type = 'sine';
         slide(m.frequency, from * spec.ratio, f * spec.ratio);
         m.detune.value = o.detune.value; vibGain.connect(m.detune);
@@ -608,7 +681,7 @@ class SlotVoice {
         md.gain.setTargetAtTime(spec.i1 * depth, t, spec.decay / 3);
         m.connect(md); md.connect(o.frequency); m.start(t);
         this.mods.push({ m, md, spec });
-      }
+      });
       o.start(t); this.oscs.push(o);
     }
     if (sound.noise) {
@@ -632,6 +705,7 @@ class SlotVoice {
     const t = ctx.currentTime, f = mtof(midi), tc = glideTc() || 0.006;
     for (const o of this.oscs) o.frequency.setTargetAtTime(f, t, tc);
     for (const bp of this.bps) bp.frequency.setTargetAtTime(f, t, tc);
+    for (const s of this.rates) s.playbackRate.setTargetAtTime(f / mtof(s.buffer._root), t, tc);
     for (const { m, md, spec } of this.mods) {
       m.frequency.setTargetAtTime(f * spec.ratio, t, tc);
       md.gain.cancelScheduledValues(t);
@@ -647,11 +721,12 @@ class SlotVoice {
     const stopAt = t + rel * 1.6 + 0.05;
     for (const o of this.oscs) o.stop(stopAt);
     for (const { m } of this.mods) m.stop(stopAt);
-    for (const s of this.srcs) s.stop(stopAt);
+    for (const s of this.srcs) { try { s.stop(stopAt); } catch (e) {} }
     const vg = vibGain;
     setTimeout(() => {
       try { this.out.disconnect(); } catch (e) {}
       for (const o of this.oscs) { try { vg.disconnect(o.detune); } catch (e) {} }
+      for (const s of this.rates) { try { vg.disconnect(s.detune); } catch (e) {} }
       for (const { m } of this.mods) { try { vg.disconnect(m.detune); } catch (e) {} }
     }, (stopAt - t) * 1000 + 200);
   }
@@ -1133,6 +1208,14 @@ const SETTINGS = [
   { id:'cutoff', label:'Filtro', type:'range', min:0, max:1000, to:v => v, from:v => v,
     fmt:v => v >= 1000 ? 'abierto' : Math.round(cutoffHz(v)) + ' Hz' },
   { id:'volume', label:'Volumen', type:'range', min:0, max:100, ...pct },
+  { section:'Editor del instrumento' },
+  { id:'tw_level', label:'Nivel', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
+  { id:'tw_detune', label:'Desafinado del par', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
+  { id:'tw_bright', label:'Brillo', type:'range', min:300, max:1000, tweak:'bright', to:v => v, from:v => v, fmt:v => v >= 1000 ? 'completo' : Math.round(cutoffHz(v)) + ' Hz' },
+  { id:'tw_fmRatio', label:'FM: relación', type:'range', min:1, max:32, tweak:'fmRatio', fmOnly:true, to:v => v / 2, from:v => Math.round(v * 2), fmt:v => v + 'x' },
+  { id:'tw_fmIndex', label:'FM: cantidad', type:'range', min:0, max:80, tweak:'fmIndex', fmOnly:true, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) },
+  { id:'tw_fmDecay', label:'FM: caída', type:'range', min:5, max:300, tweak:'fmDecay', fmOnly:true, to:v => v / 100, from:v => Math.round(v * 100), fmt:v => v.toFixed(2) + ' s' },
+  { id:'tw_code', label:'Código del instrumento', type:'code' },
   { section:'Efectos' },
   { id:'reverb', label:'Reverb', type:'select', options:opts([['off','Apagada'],['room','Room'],['hall','Hall'],['plate','Plate'],['spring','Spring'],['ambient','Ambient']]) },
   { id:'reverbAmt', label:'Cantidad de reverb', type:'range', min:0, max:100, ...pct },
@@ -1204,12 +1287,24 @@ function buildSettings() {
       input = document.createElement('input'); input.type = 'range'; input.min = s.min; input.max = s.max;
       const out = document.createElement('output');
       input.addEventListener('input', () => {
-        state[s.id] = s.to(Number(input.value)); out.textContent = s.fmt(state[s.id]);
+        const v = s.to(Number(input.value)); out.textContent = s.fmt(v);
+        if (s.tweak) {
+          const snd = curSound(); if (!state.tweaks[snd.id]) state.tweaks[snd.id] = {};
+          state.tweaks[snd.id][s.tweak] = v;
+        } else state[s.id] = v;
         onSettingChanged(s.id); saveState();
         if (s.id === 'bpm') renderScreen(held.length > 0);
       });
       w.appendChild(input); w.appendChild(out); row.appendChild(w);
       input._out = out;
+    } else if (s.type === 'code') {
+      input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Mostrar';
+      const out = document.createElement('output'); out.className = 'code'; out.hidden = true;
+      input.addEventListener('click', () => {
+        const snd = curSound(); out.textContent = snd.id + ' ' + JSON.stringify(state.tweaks[snd.id] || {});
+        out.hidden = false;
+      });
+      row.appendChild(input); row.appendChild(out);
     } else if (s.type === 'tap') {
       input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Toca al ritmo';
       input.addEventListener('pointerdown', e => { e.preventDefault(); tapTempo(); });
@@ -1227,7 +1322,16 @@ function buildSettings() {
 
 function syncSettings() {
   for (const s of SETTINGS) {
-    if (!s.el || s.type === 'tap') continue;
+    if (!s.el || s.type === 'tap' || s.type === 'code') continue;
+    if (s.tweak) {
+      const snd = curSound(), tw = tweak(snd), row = s.el.closest('.row');
+      row.hidden = !!s.fmOnly && !snd.fm;
+      let v = tw[s.tweak];
+      if (v == null && snd.fm) v = s.tweak === 'fmRatio' ? snd.fm[0].ratio : s.tweak === 'fmIndex' ? snd.fm[0].i0 : snd.fm[0].decay;
+      if (v == null) v = 0;
+      s.el.value = s.from(v); s.el._out.textContent = s.fmt(v);
+      continue;
+    }
     if (s.type === 'select') s.el.value = String(state[s.id]);
     else if (s.type === 'range') { s.el.value = s.from(state[s.id]); s.el._out.textContent = s.fmt(state[s.id]); }
     else s.el.checked = !!state[s.id];
@@ -1248,6 +1352,9 @@ buildPads(); buildJoy(); buildSettings();
 $('screen').addEventListener('click', openSettings);
 $('closeSheet').addEventListener('click', closeSettings);
 $('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSettings(); });
+$('resetTweak').addEventListener('click', () => {
+  delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrumento restablecido');
+});
 $('resetBtns').addEventListener('click', () => {
   state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
   saveState(); renderPads(); toast('Botones restablecidos');
