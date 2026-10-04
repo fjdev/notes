@@ -95,6 +95,7 @@ body {
 .gear svg, .oscbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .gear { position: absolute; top: 5px; right: 6px; }
 .oscbtn.on { color: var(--panel-ink); }
+#wavBtn.on circle { fill: currentColor; }
 .compass { width: 20px; height: 20px; }
 .compass circle { fill: var(--panel-dim); opacity: .45; }
 .compass circle.on { fill: var(--accent); opacity: 1; }
@@ -291,6 +292,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     <div class="screen-bottom">
       <span id="sMode"></span>
       <span style="display:flex;gap:10px;align-items:center">
+        <button class="oscbtn" id="wavBtn" aria-label="Guardar audio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button>
         <button class="oscbtn" id="oscBtn" aria-label="Osciloscopio"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
         <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
       </span>
@@ -349,6 +351,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). Con el joystick hacia arriba o la derecha pasas a la página siguiente; hacia abajo o la izquierda, a la anterior. La tonalidad reúne las notas naturales, las alteradas y las escalas. En el teclado: J (sonido), K (tonalidad y escala) y L (modo), mantenidas. Sonido y tonalidad no responden en Juego ni en Oído.</p>
       <h4>Fill</h4>
       <p>En Beats, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
+      <h4>Guardar audio</h4>
+      <p>El botón del círculo, junto al osciloscopio, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas. En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Mic (sampler)</h4>
@@ -736,6 +740,7 @@ function loadState() {
 let gameLock = false;
 let quick = null, quickPtr = null; const quickSwallow = new Set();
 let midiAcc = null, midiSent = new Set();
+let wavRec = null, wavTimer = null; const WAV_MAX = 240;   // guardar audio: máximo 4 min
 function saveState() {
   if (gameLock) return;
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
@@ -752,7 +757,7 @@ let audioAsleep = false, lastBusy = Date.now();
 function setSession(t) { try { if (navigator.audioSession && navigator.audioSession.type !== t) navigator.audioSession.type = t; } catch (e) {} }
 function applySession() { setSession((audioAsleep || !ctx) ? 'ambient' : (micStream ? 'play-and-record' : 'playback')); }
 function audioBusy() {
-  return held.length > 0 || voices.size > 0 || !!beat.style || !!clock.timer || !!auto.timer || seq.playing || micUsers.size > 0 ||
+  return (!!wavRec && !wavRec.full) || held.length > 0 || voices.size > 0 || !!beat.style || !!clock.timer || !!auto.timer || seq.playing || micUsers.size > 0 ||
     droneBtn != null || !!micTake || hiro.phase === 'count' || hiro.phase === 'play' || ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback' || tracks.some(t => t.state === 'rec' || t.state === 'armed' || t.state === 'finishing' || (t.buffer && !loop.paused));
 }
 function audioSleep() {
@@ -812,6 +817,7 @@ function ensureAudio() {
     loadAllSamples();
     applyFilter(true); applyVolume(true);
     justBuilt = true;
+    if (wavRec) wavAttach();   // si el contexto se reconstruyó durante una grabación de audio, se reengancha
   }
   lastBusy = Date.now();
   if (audioAsleep) { audioAsleep = false; applySession(); }
@@ -2578,7 +2584,7 @@ function renderScreen(active) {
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
   const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : '') : '';
   $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
-    + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '');
+    + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '') + (wavRec ? ' · audio ' + wavClock() : '');
   const cn = $('chordName');
   if (lastDisplay && !OWN_TITLE.includes(state.mode)) cn.textContent = lastDisplay.name;
   if (!OWN_TITLE.includes(state.mode)) cn.classList.toggle('idle', !active);
@@ -2830,6 +2836,62 @@ function midiSetup() {
     .catch(() => { state.midi = false; saveState(); syncSettings(); toast('MIDI no disponible'); });
 }
 if (state.midi) midiSetup();
+
+// ===== GUARDAR AUDIO (WAV) =====
+// Graba lo que sale por los altavoces (acordes, batería, loops, vocoder) en WAV estéreo de 16 bits.
+// Se codifica al instante al parar, dentro del toque, para que iOS permita compartirlo (Guardar en Archivos).
+function wavClock() { const t = Math.floor(wavRec.frames / wavRec.sr); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+function wavAttach() {
+  if (!wavRec || !ctx || !outGain || ctx.sampleRate !== wavRec.sr) return;
+  try { wavRec.node = makeCapture(outGain, (f, L, R) => wavChunk(L, R)); } catch (e) { wavRec.node = null; }
+}
+function wavChunk(L, R) {
+  const w = wavRec; if (!w) return;
+  const room = WAV_MAX * w.sr - w.frames;
+  if (room <= 0) { w.full = true; return; }
+  const n = Math.min(L.length, room), out = new Int16Array(n * 2);
+  for (let i = 0; i < n; i++) {
+    const a = Math.max(-1, Math.min(1, L[i])), b = Math.max(-1, Math.min(1, R[i]));
+    out[2 * i] = a < 0 ? a * 32768 : a * 32767; out[2 * i + 1] = b < 0 ? b * 32768 : b * 32767;
+  }
+  w.chunks.push(out); w.frames += n;
+  if (w.frames >= WAV_MAX * w.sr) w.full = true;
+}
+function wavEncode(w) {
+  const n = w.frames, buf = new ArrayBuffer(44 + n * 4), v = new DataView(buf);
+  const str = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n * 4, true); str(8, 'WAVE'); str(12, 'fmt '); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 2, true); v.setUint32(24, w.sr, true); v.setUint32(28, w.sr * 4, true);
+  v.setUint16(32, 4, true); v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, n * 4, true);
+  const out = new Int16Array(buf, 44); let o = 0;
+  for (const c of w.chunks) { out.set(c, o); o += c.length; }
+  return new Blob([buf], { type:'audio/wav' });
+}
+async function wavToggle() {
+  if (!wavRec) {
+    ensureAudio();
+    wavRec = { chunks:[], frames:0, sr:ctx.sampleRate, node:null, full:false };
+    wavAttach();
+    if (!wavRec.node) { wavRec = null; toast('No se pudo grabar el audio'); return; }
+    wavTimer = setInterval(() => renderScreen(held.length > 0), 500);
+    $('wavBtn').classList.add('on'); renderScreen(held.length > 0); return;
+  }
+  const w = wavRec; wavRec = null; clearInterval(wavTimer); wavTimer = null;
+  $('wavBtn').classList.remove('on');
+  try { if (w.node) { if (w.node.port) w.node.port.onmessage = null; else w.node.onaudioprocess = null; if (outGain) outGain.disconnect(w.node); w.node.disconnect(); } } catch (e) {}
+  renderScreen(held.length > 0);
+  if (!w.frames) return;
+  const blob = wavEncode(w), d = new Date(), z = x => String(x).padStart(2, '0');
+  const name = 'notes-' + d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + '.wav';
+  try {
+    const file = new File([blob], name, { type:'audio/wav' });
+    if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:name }); toast('Audio guardado'); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  toast('Audio guardado');
+}
+$('wavBtn').addEventListener('click', wavToggle);
 
 // ===== AJUSTES =====
 const fmtMs = s => (s < 0.01 ? (s * 1000).toFixed(1) : Math.round(s * 1000)) + ' ms';
