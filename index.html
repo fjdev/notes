@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="lunar" data-screen="ember">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -11,66 +11,79 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&text=notes&display=swap" rel="stylesheet">   <!-- solo las letras de «notes»: unos pocos KB -->
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen&text=ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÑ0123456789%20·/+-%23%25.:°()&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500&display=swap" rel="stylesheet">   <!-- acorde en las pantallas LCD (MATRIX, MOSS) -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="notes">
 <title>notes</title>
 <style>
 /* ===== Paletas ===== */
-:root, [data-theme="light"] {   /* Warm Plastic · claro */
-  --body: #E9E5D9; --panel: #181916; --panel-ink: #F3EFE4; --panel-dim: #A3A196;
-  --tray: #2A2A27; --well: #242522; --key: #343531; --key-ink: #F3EFE4; --key2: #D9AA30; --key2-ink: #20211F;
-  --accent: #E7592F; --accent2: #D9AA30; --accent3: #708F87; --on-accent: #1B1B19;
-  --ink: #20211F; --muted: #67655D; --line: #C5C2B9;
-  --btn: #F8F3E7; --btn-ink: #20211F; --btn-muted: #6F6E68; --btn-line: transparent;
-  --ctl: #343531; --ctl-ink: #F3EFE4; --ctl-line: #C5C2B9;
-  --scope: #708F87;
-  --sel: #343531; --sel-ink: #F3EFE4;
-  --sheet: #F3EFE4; --sheet-ink: #20211F; --sheet-muted: #67655D; --sheet-line: #C5C2B9; --field: #E9E5D9;
+/* ===== CARCASAS (fase 26): un solo aparato, seis ediciones físicas. Lo que cambia es el color, el material y el acabado. ===== */
+:root, [data-theme="lunar"] {   /* LUNAR */
+  --body: #ECE9E2; --tray: #1E1F21; --well: #17181A; --bezel: #111213;
+  --key: #232427; --key-ink: #EFECE5; --key2: #2B2C2F; --key2-ink: #F6F4EE;
+  --btn: #F6F4EE; --btn-ink: #1E1F21; --btn-muted: #6E6E6C; --btn-line: transparent;
+  --accent: #E2602B; --accent2: #2B2C2F; --press-ink: #F6F4EE; --accent3: #EFECE5; --state-ink: #1E1F21; --led: #E2602B; --on-accent: #1B1B19;
+  --ink: #1E1F21; --muted: #6A6761; --line: #C4C3BF;
+  --ctl: #232427; --ctl-ink: #EFECE5; --ctl-line: #C4C3BF;
+  --sel: #1E1F21; --sel-ink: #F3F1EB;
+  --sheet: #F3F1EB; --sheet-ink: #1E1F21; --sheet-muted: #67645E; --sheet-line: #C4C3BF; --field: #E6E3DC;
+  --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
-[data-theme="dark"] {   /* Carbon Tape · oscuro */
-  --body: #151614; --panel: #0C0D0B; --panel-ink: #EFEADD; --panel-dim: #96978E;
-  --tray: #2C2D29; --well: #272826; --key: #383936; --key-ink: #EFEADD; --key2: #D4B438; --key2-ink: #20211E;
-  --accent: #F26A32; --accent2: #D4B438; --accent3: #85A69B; --on-accent: #1B1B19;
-  --ink: #EFEADD; --muted: #96978E; --line: #4E4D48;
-  --btn: #DDD5C4; --btn-ink: #20211E; --btn-muted: #5D5C54; --btn-line: transparent;
-  --ctl: #383936; --ctl-ink: #EFEADD; --ctl-line: #4E4D48;
-  --scope: #85A69B;
-  --sel: #EFEADD; --sel-ink: #151614;
-  --sheet: #20211E; --sheet-ink: #EFEADD; --sheet-muted: #96978E; --sheet-line: #4E4D48; --field: #2C2D29;
+[data-theme="carbon"] {   /* CARBON */
+  --body: #141516; --tray: #09090A; --well: #070708; --bezel: #08090A;
+  --key: #2B2C2E; --key-ink: #E9E6DF; --key2: #E9E6DF; --key2-ink: #141516;
+  --btn: #3D3E42; --btn-ink: #ECE9E2; --btn-muted: #ACABA8; --btn-line: transparent;
+  --accent: #E4542C; --accent2: #E9E6DF; --press-ink: #141516; --accent3: #E9E6DF; --state-ink: #141516; --led: #E4542C; --on-accent: #1B1B19;
+  --ink: #E9E6DF; --muted: #8E8C86; --line: #484848;
+  --ctl: #2B2C2E; --ctl-ink: #E9E6DF; --ctl-line: #484848;
+  --sel: #E9E6DF; --sel-ink: #141516;
+  --sheet: #1B1C1E; --sheet-ink: #E9E6DF; --sheet-muted: #8E8C86; --sheet-line: #484848; --field: #232427;
+  --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
-[data-theme="olive"] {   /* Olive Machine · edición */
-  --body: #36392C; --panel: #1B1D15; --panel-ink: #F0E8D4; --panel-dim: #AEAD96;
-  --tray: #5B5D46; --well: #1D1E18; --key: #292B23; --key-ink: #F0E8D4; --key2: #D9C256; --key2-ink: #292B23;
-  --accent: #EE7B35; --accent2: #D9C256; --accent3: #A7B382; --on-accent: #1B1B19;
-  --ink: #F0E8D4; --muted: #BDBBA4; --line: #6D6E5A;
-  --btn: #E0D8BF; --btn-ink: #292B23; --btn-muted: #5E5D51; --btn-line: transparent;
-  --ctl: #292B23; --ctl-ink: #F0E8D4; --ctl-line: #6D6E5A;
-  --scope: #A7B382;
-  --sel: #F0E8D4; --sel-ink: #36392C;
-  --sheet: #484B38; --sheet-ink: #F0E8D4; --sheet-muted: #BDBBA4; --sheet-line: #6D6E5A; --field: #3B3E2E;
+[data-theme="vertex"] {   /* VERTEX */
+  --body: #4B4E53; --tray: #2F3135; --well: #26282B; --bezel: #2A2C30;
+  --key: #63666B; --key-ink: #F2F2EE; --key2: #F2B705; --key2-ink: #2A2C2F;
+  --btn: #CFCCC5; --btn-ink: #2A2C2F; --btn-muted: #545555; --btn-line: transparent;
+  --accent: #D8262E; --accent2: #F2B705; --press-ink: #2A2C2F; --accent3: #1E9E4A; --state-ink: #0C2414; --led: #3A6FD8; --on-accent: #1B1B19;
+  --ink: #EEEEEA; --muted: #C0C2C4; --line: #636669;
+  --ctl: #63666B; --ctl-ink: #F2F2EE; --ctl-line: #636669;
+  --sel: #F2B705; --sel-ink: #2A2C2F;
+  --sheet: #3C3F44; --sheet-ink: #EEEEEA; --sheet-muted: #C0C2C4; --sheet-line: #636669; --field: #33363A;
+  --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
-[data-theme="blue"] {   /* Space Blue · edición */
-  --body: #CBD6D5; --panel: #161B1C; --panel-ink: #EEEBDD; --panel-dim: #9DB0B0;
-  --tray: #262B2D; --well: #222627; --key: #303638; --key-ink: #EEEBDD; --key2: #D3B744; --key2-ink: #202728;
-  --accent: #E95C3B; --accent2: #D3B744; --accent3: #488C9D; --on-accent: #1B1B19;
-  --ink: #202728; --muted: #515C5D; --line: #B3BAB8;
-  --btn: #EEEBDD; --btn-ink: #202728; --btn-muted: #666966; --btn-line: transparent;
-  --ctl: #303638; --ctl-ink: #EEEBDD; --ctl-line: #B3BAB8;
-  --scope: #488C9D;
-  --sel: #303638; --sel-ink: #EEEBDD;
-  --sheet: #DCE4E1; --sheet-ink: #202728; --sheet-muted: #515C5D; --sheet-line: #B3BAB8; --field: #CBD6D5;
+[data-theme="pocket"] {   /* POCKET */
+  --body: #C3C1BA; --tray: #9A9892; --well: #4A4B51; --bezel: #565965;
+  --key: #45464C; --key-ink: #ECEAE4; --key2: #45464C; --key2-ink: #ECEAE4;
+  --btn: #DEDCD6; --btn-ink: #2F3036; --btn-muted: #5F5F62; --btn-line: transparent;
+  --accent: #8A2C5C; --accent2: #45464C; --press-ink: #ECEAE4; --accent3: #E2E0DA; --state-ink: #2F3036; --led: #8A2C5C; --on-accent: #1B1B19;
+  --ink: #2B2C31; --muted: #4F4E4D; --line: #AEADA9;
+  --ctl: #45464C; --ctl-ink: #ECEAE4; --ctl-line: #AEADA9;
+  --sel: #45464C; --sel-ink: #ECEAE4;
+  --sheet: #D3D1CB; --sheet-ink: #2B2C31; --sheet-muted: #4F4E4D; --sheet-line: #AEADA9; --field: #C7C5BF;
+  --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
-[data-theme="burgundy"] {   /* Burgundy · edición */
-  --body: #3B2525; --panel: #1A1111; --panel-ink: #F2E7D8; --panel-dim: #B89D91;
-  --tray: #68413D; --well: #201D1B; --key: #2D2927; --key-ink: #F2E7D8; --key2: #DCBA58; --key2-ink: #2D2927;
-  --accent: #F09255; --accent2: #DCBA58; --accent3: #A78A8B; --on-accent: #1B1B19;
-  --ink: #F2E7D8; --muted: #B99E92; --line: #745854;
-  --btn: #E4D6C6; --btn-ink: #2D2927; --btn-muted: #635C56; --btn-line: transparent;
-  --ctl: #2D2927; --ctl-ink: #F2E7D8; --ctl-line: #745854;
-  --scope: #A78A8B;
-  --sel: #F2E7D8; --sel-ink: #3B2525;
-  --sheet: #50302F; --sheet-ink: #F2E7D8; --sheet-muted: #B99E92; --sheet-line: #745854; --field: #452B2A;
+[data-theme="amber"] {   /* AMBER */
+  --body: #1D1C1A; --tray: #2A2825; --well: #121110; --bezel: #0E0D0C;
+  --key: #34322E; --key-ink: #EDE5D3; --key2: #CDA034; --key2-ink: #23211E;
+  --btn: #E8DECA; --btn-ink: #23211E; --btn-muted: #666158; --btn-line: transparent;
+  --accent: #D0562B; --accent2: #CDA034; --press-ink: #23211E; --accent3: #EDE5D3; --state-ink: #23211E; --led: #CDA034; --on-accent: #1B1B19;
+  --ink: #EDE5D3; --muted: #A39C8D; --line: #524E48;
+  --ctl: #34322E; --ctl-ink: #EDE5D3; --ctl-line: #524E48;
+  --sel: #EDE5D3; --sel-ink: #1D1C1A;
+  --sheet: #262421; --sheet-ink: #EDE5D3; --sheet-muted: #A39C8D; --sheet-line: #524E48; --field: #302D29;
+  --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
+}
+[data-theme="ghost"] {   /* GHOST */
+  --body: #56635F; --tray: rgba(16,24,23,.55); --well: rgba(10,16,15,.62); --bezel: rgba(10,16,15,.78);
+  --key: #2D3534; --key-ink: #E3EAE8; --key2: #9CC3BB; --key2-ink: #1F2726;
+  --btn: #D3DAD8; --btn-ink: #1F2726; --btn-muted: #575F5D; --btn-line: transparent;
+  --accent: #E0663A; --accent2: #9CC3BB; --press-ink: #1F2726; --accent3: #CFE3DE; --state-ink: #1F2726; --led: #8FD6CB; --on-accent: #1B1B19;
+  --ink: #F0F4F2; --muted: #D6DFDC; --line: #59615F;
+  --ctl: #2D3534; --ctl-ink: #E3EAE8; --ctl-line: #59615F;
+  --sel: #D3DAD8; --sel-ink: #1F2726;
+  --sheet: #2E3836; --sheet-ink: #F0F4F2; --sheet-muted: #D6DFDC; --sheet-line: #59615F; --field: #263030;
+  --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 
 /* ===== Base ===== */
@@ -383,8 +396,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .lp-rec { --k: var(--key); width: 40px; height: 38px; }
 .lp-rec span { box-shadow: 0 0 8px var(--accent); }
 .lp-rec.s-rec, .lp-rec.s-finishing { --k: var(--accent); }
-.looper .lp-track { --k: var(--key); height: 38px; color: color-mix(in srgb, var(--key-ink) 80%, transparent); font: 600 13px/1 var(--mono); border-radius: 8px; }
-.lp-track.s-play { --k: var(--accent3); color: var(--panel); background-color: var(--accent3); }
+.looper .lp-track { --k: var(--key); height: 38px; color: var(--key-ink); font: 600 13px/1 var(--mono); border-radius: 8px; }
+.lp-track.s-play { --k: var(--accent3); color: var(--state-ink); background-color: var(--accent3); }
 .lp-track.s-rec, .lp-track.s-finishing { --k: var(--accent); color: var(--on-accent); }
 .lp-track.s-armed { box-shadow: inset 0 0 0 1.5px var(--accent), 0 2px 0 rgba(0,0,0,.35) !important; }
 .lp-track.cur { box-shadow: 0 0 0 2px var(--body), 0 0 0 4px var(--accent2), 0 2px 0 rgba(0,0,0,.35); }
@@ -400,11 +413,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .cb .num { position: absolute; top: 9px; left: 11px; font-family: var(--mono); font-size: 13px; font-weight: 600; line-height: 1; color: var(--btn-muted); }
 .cb .cn { font: 600 clamp(15px, 4.6vw, 20px)/1.1 var(--sans); color: var(--btn-ink); margin: 0; letter-spacing: -.01em; text-align: left; }
 .cb .badge { top: 10px; left: auto; right: 24px; font-family: var(--mono); }
-.cb.target::after { top: 11px; right: 10px; width: 7px; height: 7px; background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
-.cb.held { --k: var(--accent2); color: var(--btn-ink); transform: translateY(1px);
+.cb.target::after { top: 11px; right: 10px; width: 7px; height: 7px; background: var(--led); box-shadow: 0 0 6px var(--led); }
+.cb.held { --k: var(--accent2); color: var(--press-ink); transform: translateY(1px);
   background: linear-gradient(180deg, color-mix(in srgb, var(--k) 86%, #fff) 0%, var(--k) 42%, color-mix(in srgb, var(--k) 88%, #000) 100%);
   box-shadow: inset 0 2px 6px rgba(0,0,0,.28), 0 0 22px -4px color-mix(in srgb, var(--accent2) 85%, transparent); }
-.cb.held .num, .cb.held .cn, .cb.held .badge { color: var(--btn-ink); }
+.cb.held .num, .cb.held .cn, .cb.held .badge { color: var(--press-ink); }
 .cb.cur { --k: var(--panel); }
 .cb.cur .cn, .cb.cur .num { color: var(--panel-ink); }
 .cb.off { opacity: .28; box-shadow: none; }
@@ -442,7 +455,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 /* En el PC: el dispositivo sobre la mesa */
 @media (hover: hover) and (pointer: fine) { .modes { align-items: flex-start; } .modes .chip.param { margin-top: 1px; } }
 @media (min-width: 700px) and (min-height: 700px) {
-  html { background: color-mix(in srgb, var(--body) 72%, #000); }
+  html { background: color-mix(in srgb, var(--color, var(--body)) 72%, #000); }
   body { background: transparent; }
   .app { height: calc(100% - 40px); max-width: 470px; margin: 20px auto; padding: 22px 22px 16px; border-radius: 40px; background: var(--body);
     box-shadow: 0 40px 80px -30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.18); }
@@ -453,10 +466,36 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
    PANTALLA INDEPENDIENTE DE LA CARCASA (fase 18): 5 carcasas × 3 pantallas.
    La pantalla usa un solo sistema monocromo: fondo, principal, atenuado y UN color de estado.
    ========================================================================================== */
-:root[data-screen="oled"] { --panel:#0D0E0C; --panel-ink:#ECE1C1; --panel-dim:#807C6D; --scr-active:#F0783E; --scope:#ECE1C1; --glass: transparent; --dots: 0; }   /* OLED cálida */
-:root[data-screen="lcdg"] { --panel:#182018; --panel-ink:#BED598; --panel-dim:#7C8C67; --scr-active:#E3D36B; --scope:#BED598; --glass: rgba(170,210,120,.045); --dots: 1; }   /* LCD verde */
-:root[data-screen="lcdb"] { --panel:#172023; --panel-ink:#A9D8D2; --panel-dim:#668F8D; --scr-active:#E5C452; --scope:#A9D8D2; --glass: rgba(120,200,210,.045); --dots: 1; }   /* LCD azul */
-:root { --bezel: color-mix(in srgb, var(--body) 28%, #000); --pixel: "Silkscreen", ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+/* ===== PANTALLAS (fase 26): cuatro tecnologías físicas; el mismo contenido, representado de otra manera ===== */
+:root[data-screen="ember"] {   /* EMBER: OLED cálida, negro absoluto que se funde con el marco; nítida, sin textura, brillo mínimo */
+  --panel:#0B0C0B; --panel-ink:#EDE4CF; --panel-dim:#8A8475; --scr-active:#E0702F; --scope:#EDE4CF; --bezel:#08090A;
+  --scr-glow: 0 0 6px rgba(237,228,207,.16); --chip-glow: 0 0 8px -3px rgba(237,228,207,.35); --chord-font: var(--mono);
+  --scr-inset: inset 0 0 0 1px rgba(255,255,255,.02); --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.035) 0%, rgba(255,255,255,0) 30%);
+}
+:root[data-screen="matrix"] {   /* MATRIX: LCD monocroma industrial; gris carbón verdoso, menos contraste, sin brillo, matriz apagada apenas visible */
+  --panel:#1A1E1B; --panel-ink:#B4BEB2; --panel-dim:#7F897E; --scr-active:#D7E0D2; --scope:#B4BEB2;
+  --scr-glow: none; --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
+  --scr-inset: inset 0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
+  --scr-overlay: radial-gradient(circle, rgba(200,214,196,.055) .7px, transparent .95px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 32%);
+}
+:root[data-screen="moss"] {   /* MOSS: LCD portátil verdosa de cuatro tonos; todo dibujado por la propia matriz, sin blanco ni brillo */
+  --panel:#A8B062; --panel-ink:#202817; --panel-dim:#384125; --scr-active:#202817; --scope:#202817;
+  --scr-glow: 1px 1px 0 rgba(32,40,23,.18); --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
+  --scr-inset: inset 0 2px 5px rgba(32,40,23,.35), inset 0 0 0 1px rgba(32,40,23,.25);
+  --scr-overlay: radial-gradient(circle, rgba(32,40,23,.10) .7px, transparent .95px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 35%);
+}
+:root[data-screen="phosphor"] {   /* PHOSPHOR: tubo de osciloscopio de laboratorio; verde fósforo contenido, rejilla y líneas mínimas, brillo muy suave */
+  --panel:#07100B; --panel-ink:#7CD39B; --panel-dim:#4E8F66; --scr-active:#B5EDC6; --scope:#7CD39B;
+  --scr-glow: 0 0 7px rgba(124,211,155,.22); --chip-glow: 0 0 9px -3px rgba(124,211,155,.4); --chord-font: var(--mono);
+  --scr-inset: inset 0 3px 10px rgba(0,0,0,.7), inset 0 0 30px rgba(0,0,0,.45);
+  --scr-overlay: repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px), linear-gradient(rgba(124,211,155,.06) 1px, transparent 1px) 0 0 / 100% 14px, linear-gradient(90deg, rgba(124,211,155,.06) 1px, transparent 1px) 0 0 / 14px 100%;
+}
+:root[data-screen] .display::after { background: var(--scr-overlay); }
+.display .screen { box-shadow: var(--scr-inset); }
+.display .chord:not(.idle) { text-shadow: var(--scr-glow); }
+.display .chord { font-family: var(--chord-font, var(--mono)); }
+.display .chip.on { box-shadow: var(--chip-glow); }
+:root { --pixel: "Silkscreen", ui-monospace, "SF Mono", Menlo, Consolas, monospace; }   /* el marco (--bezel) lo define cada carcasa; EMBER lo funde con su negro */
 
 .display { position: relative; display: flex; flex-direction: column; background: var(--bezel); border-radius: 12px; padding: 7px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.14), 0 8px 16px -10px rgba(0,0,0,.55); }
@@ -467,7 +506,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 /* cristal: un reflejo muy suave y una dominante de color; en las LCD, una rejilla de puntos casi invisible (sin llegar a CRT) */
 .display::after { content: ""; position: absolute; inset: 7px; border-radius: 6px; pointer-events: none; z-index: 4;
   background: linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%), var(--glass); }
-:root[data-screen="lcdg"] .display::after, :root[data-screen="lcdb"] .display::after {
+.display.__old::after {
   background: radial-gradient(circle, rgba(0,0,0,.16) .7px, transparent .9px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%), var(--glass); }
 
 /* Un solo color de estado dentro de la pantalla */
@@ -512,6 +551,21 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .sheet-head { flex-wrap: wrap; row-gap: 0; }
 .sheet-head .sheet-nav { flex: 0 0 100%; order: 3; }
 
+
+/* GHOST: la carcasa es plástico ahumado (no vidrio): grosor en los bordes, tornillos y pistas de la placa insinuados detrás; teclas y controles opacos */
+[data-theme="ghost"] .app {
+  background:
+    radial-gradient(circle at 16px 16px, rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) 16px, rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px),
+    radial-gradient(circle at 16px calc(100% - 16px), rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) calc(100% - 16px), rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px),
+    linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 38%, rgba(0,0,0,.12) 100%),
+    linear-gradient(to bottom, rgba(86,99,95,0) 0%, rgba(86,99,95,.25) 55%, rgba(86,99,95,.7) 100%),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27180%27%20height%3D%27180%27%20viewBox%3D%270%200%20180%20180%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27rgba%28214%2C236%2C228%2C0.15%29%27%20stroke-width%3D%271.2%27%3E%20%3Cpath%20d%3D%27M0%2046H64V96H180%27/%3E%3Cpath%20d%3D%27M22%200V30H118V180%27/%3E%3Cpath%20d%3D%27M140%200V58H180%27/%3E%3Cpath%20d%3D%27M0%20150H70V122H118%27/%3E%3Cpath%20d%3D%27M84%20180V140%27/%3E%3C/g%3E%20%3Cg%20fill%3D%27rgba%28214%2C236%2C228%2C0.20%29%27%3E%3Ccircle%20cx%3D%2764%27%20cy%3D%2746%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%27118%27%20cy%3D%2730%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%27140%27%20cy%3D%2758%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%2770%27%20cy%3D%27122%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%2784%27%20cy%3D%27140%27%20r%3D%272.4%27/%3E%3C/g%3E%20%3Crect%20x%3D%27126%27%20y%3D%27108%27%20width%3D%2734%27%20height%3D%2722%27%20rx%3D%272%27%20fill%3D%27rgba%2810%2C18%2C16%2C0.22%29%27%20stroke%3D%27rgba%28214%2C236%2C228%2C0.12%29%27/%3E%3C/svg%3E") 0 0 / 180px 180px,
+    var(--body);
+  box-shadow: inset 0 0 0 1px rgba(232,244,240,.24), inset 0 2px 0 rgba(255,255,255,.22), inset 0 -4px 12px rgba(0,0,0,.28);
+}
+[data-theme="ghost"] body { background: var(--body); }
+[data-theme="ghost"] .pads, [data-theme="ghost"] .joy, [data-theme="ghost"] .wheel { backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
+
 /* Rueda del canto superior (fase 24): se ve el borde estriado de una rueda a través de una ranura; al girarla, las estrías se desplazan */
 .topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 24px; margin: -6px 2px -4px; }
 .wheel-lbl { font: 500 9px/1 var(--sans); letter-spacing: .06em; text-transform: lowercase; color: var(--muted); }
@@ -539,7 +593,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .controls .tools button span { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); font: 500 9px/1 var(--sans); color: var(--muted); white-space: nowrap; }
 .controls .tools button::before { content: ""; position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--key-ink) 20%, transparent); pointer-events: none; }   /* luz de estado */
 .controls .tools button.locked { color: var(--key-ink); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 2px 0 rgba(0,0,0,.45); }
-.controls .tools button.locked::before { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+.controls .tools button.locked::before { background: var(--led); box-shadow: 0 0 6px var(--led); }
 .controls .tools button:active:not(:disabled) { background: var(--accent2); color: var(--btn-ink); transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.4); }
 .controls .tools button:disabled { opacity: .3; box-shadow: none; }
 .controls .tools.idle button { visibility: hidden; }   /* modos sin función (Drums, Ritmos, Mic, Afinador): las teclas se ocultan */
@@ -675,7 +729,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
       <h3 class="grp">Ajustes y mantenimiento</h3>
       <h4>Aspecto</h4>
-      <p>En Ajustes → Aspecto eliges la carcasa (cinco acabados: dos oficiales, Oscuro y Claro, y tres ediciones) y, por separado, la pantalla (OLED cálida, LCD verde o LCD azul; por defecto cada carcasa trae la suya), así que hay quince combinaciones. «Automático» sigue el modo claro u oscuro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
+      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro contemporáneo), LUNAR (blanco limpio), VERTEX (gris de consola de los 90), POCKET (portátil monocroma), AMBER (cálida, de sintetizador boutique) y GHOST (plástico translúcido ahumado). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (LCD industrial), MOSS (LCD verdosa de cuatro tonos) y PHOSPHOR (tubo de osciloscopio). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Copia de seguridad</h4>
@@ -1396,7 +1450,7 @@ function buildModes() {
   scroll.className = 'modes-scroll'; scroll.id = 'modeScroll'; wrap.appendChild(scroll);
   for (const m of MODES) {
     const b = document.createElement('button'); b.className = 'chip'; b.dataset.m = m.id; b.textContent = m.name;
-    onTap(b, () => setMode(m.id)); scroll.appendChild(b);
+    onChipTap(b, () => setMode(m.id), scroll); scroll.appendChild(b);
   }
   const arrow = (dir) => {   // solo con ratón: desplazan la franja una página
     const a = document.createElement('button'); a.className = 'modes-arrow'; a.setAttribute('aria-label', dir < 0 ? 'Modos anteriores' : 'Modos siguientes');
@@ -2335,6 +2389,20 @@ function mixerTool(which) {
 }
 
 // pointerdown responde aunque otro dedo esté pulsando un acorde (en iPhone, click no)
+// Listas que se deslizan (franja de modos, pestañas de Ajustes): eligen al LEVANTAR el dedo y solo si no se ha deslizado,
+// como cualquier lista del iPhone. Si el navegador empieza a desplazar la lista, cancela el toque (pointercancel) y no se elige nada.
+function onChipTap(el, fn, scroller) {
+  let st = null;
+  el.addEventListener('pointerdown', e => { st = { id:e.pointerId, x:e.clientX, y:e.clientY, sl:scroller ? scroller.scrollLeft : 0, moved:false }; });
+  el.addEventListener('pointermove', e => { if (st && e.pointerId === st.id && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 8) st.moved = true; });
+  el.addEventListener('pointercancel', () => { st = null; });
+  el.addEventListener('pointerup', e => {
+    if (!st || e.pointerId !== st.id) return;
+    const moved = st.moved || (scroller && Math.abs(scroller.scrollLeft - st.sl) > 4); st = null;
+    if (!moved) { haptic(false); fn(); }
+  });
+  el.addEventListener('click', e => { if (e.detail === 0) fn(); });   // teclado
+}
 function onTap(el, fn) {
   el.addEventListener('pointerdown', e => { e.preventDefault(); haptic(false); fn(); });
   el.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
@@ -3425,17 +3493,20 @@ const pct = { to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.roun
 const opts = list => () => list;
 const DIV_OPTS = [['off','Off'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16T'],['1/32','1/32']];
 
-const SCREENS = [['auto','Según la carcasa'],['oled','OLED cálida'],['lcdg','LCD verde'],['lcdb','LCD azul']];
-const SCREEN_OF = { dark:'oled', light:'lcdg', olive:'lcdg', blue:'lcdb', burgundy:'oled' };   // pantalla por defecto de cada carcasa
-const THEMES = [['auto','Automático'],['dark','Oscuro · Carbon Tape'],['light','Claro · Warm Plastic'],['olive','Edición · Olive Machine'],['blue','Edición · Space Blue'],['burgundy','Edición · Burgundy']];
-const THEME_COLOR = { dark:'#151614', light:'#E9E5D9', olive:'#36392C', blue:'#CBD6D5', burgundy:'#3B2525' };
+const SCREENS = [['auto','Según la carcasa'],['ember','EMBER'],['matrix','MATRIX'],['moss','MOSS'],['phosphor','PHOSPHOR']];
+const SCREEN_OF = { vertex:'ember', pocket:'moss', carbon:'matrix', lunar:'ember', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
+const THEMES = [['auto','Automático'],['carbon','CARBON'],['lunar','LUNAR'],['vertex','VERTEX'],['pocket','POCKET'],['amber','AMBER'],['ghost','GHOST']];
+const OLD_THEME = { dark:'carbon', light:'lunar', olive:'pocket', blue:'ghost', burgundy:'amber', alt:'ghost' };   // pieles de la fase 17 → carcasas
+const OLD_SCREEN = { oled:'ember', lcdg:'moss', lcdb:'matrix' };
+const THEME_COLOR = { lunar:'#ECE9E2', carbon:'#141516', vertex:'#4B4E53', pocket:'#C3C1BA', amber:'#1D1C1A', ghost:'#56635F' };
 function applyTheme() {
   let t = state.theme;
-  if (t === 'auto') t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-  if (t === 'alt') t = 'blue';            // el antiguo «Petrol 78» pasa a Space Blue
-  if (!THEME_COLOR[t]) t = 'dark';
+  if (t === 'auto') t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'carbon' : 'lunar';
+  if (OLD_THEME[t]) t = OLD_THEME[t];
+  if (!THEME_COLOR[t]) t = 'carbon';
   document.documentElement.dataset.theme = t;
-  document.documentElement.dataset.screen = state.screen === 'auto' || !SCREENS.some(s => s[0] === state.screen) ? SCREEN_OF[t] : state.screen;
+  const sc = OLD_SCREEN[state.screen] || state.screen;
+  document.documentElement.dataset.screen = sc === 'auto' || !SCREENS.some(s => s[0] === sc) ? SCREEN_OF[t] : sc;
   $('themeColor').content = THEME_COLOR[t];
 }
 
@@ -3638,7 +3709,8 @@ function tapTempo() {
 
 const START_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat', 'drum', 'beat'];
 function sanitizeState() {
-  if (state.theme === 'alt') state.theme = 'blue';
+  if (OLD_THEME[state.theme]) state.theme = OLD_THEME[state.theme];   // pieles antiguas → carcasas
+  if (OLD_SCREEN[state.screen]) state.screen = OLD_SCREEN[state.screen];
   delete state.toolsStyle;   // ajuste de prueba retirado en la fase 18
   // Valores de listas desplegables que ya no existen (o que están fuera de rango) vuelven al de fábrica
   for (const st of SETTINGS) {
@@ -3680,7 +3752,7 @@ function buildSettings() {
   for (const s of SETTINGS) {
     if (s.section) {
       const nb = document.createElement('button'); nb.textContent = s.section; nb.dataset.sec = s.section; nb.setAttribute('role', 'tab'); nb.setAttribute('aria-selected', 'false'); nb.tabIndex = -1;
-      onTap(nb, () => showTab(s.section));
+      onChipTap(nb, () => showTab(s.section), $('sheetNav'));
       $('sheetNav').appendChild(nb);
       if (s.manual) { $('manualSec').dataset.sec = s.section; sec = null; continue; }
       sec = document.createElement('div'); sec.className = 'sec'; sec.dataset.sec = s.section; sec.hidden = true;
