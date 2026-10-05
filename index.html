@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="lunar" data-screen="ember">
+<html lang="en" data-theme="lunar" data-screen="ember">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -524,8 +524,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   --gr: rgba(255,146,46,.42); --gr2: rgba(255,146,46,.17); --cell: calc(var(--screen-h) / 6);
   --scr-overlay: linear-gradient(150deg, rgba(210,255,225,.05) 0%, rgba(210,255,225,0) 26%);
 }
-:root[data-screen="phosphor"] .display .screen { background-image: radial-gradient(ellipse at 50% 50%, #040D08 0%, #020604 70%, #010302 100%); text-shadow: 0 0 5px rgba(120,255,170,.45); }
-:root[data-screen="phosphor"] .display #scope { filter: drop-shadow(0 0 2px rgba(150,255,190,.85)) drop-shadow(0 0 8px rgba(50,230,120,.5)); }
+:root[data-screen="phosphor"] .display .screen { background-image: radial-gradient(ellipse at 50% 50%, #040D08 0%, #020604 70%, #010302 100%); text-shadow: 0 0 3px rgba(120,255,170,.28); }
+:root[data-screen="phosphor"] .display #scope { filter: drop-shadow(0 0 1.5px rgba(150,255,190,.5)); }
 :root[data-screen] .display::after { background: var(--scr-overlay); }
 .display .screen { box-shadow: var(--scr-inset); }
 .display .chord:not(.idle) { text-shadow: var(--scr-glow); }
@@ -840,33 +840,39 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 /* ===== FASE 39 · PHOSPHOR: osciloscopio simulado ===== */
 .display .scope-read { display: none; }
 :root[data-screen="phosphor"] .display .screen:not(.hiro):not(.ear):not(.tuner):not(.menu-open):not(.setv-open) .scope-read { display: block; position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); font: 10px/1 var(--mono); letter-spacing: .04em; color: var(--panel-dim); opacity: .85; white-space: nowrap; pointer-events: none; z-index: 1; }
+
+/* ===== PHASE 41 · MATRIX «Pixel display» (pilot) ===== */
+.display #pxui { display: none; }
+:root[data-screen="matrix"] .display .screen.pxui > *:not(#pxui) { opacity: 0 !important; }   /* the DOM keeps working (taps, long-press) but is invisible: the canvas draws it as pixels */
+:root[data-screen="matrix"] .display .screen.pxui #pxui { display: block; position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; pointer-events: none; z-index: 3; }
 </style>
 </head>
 <body>
 <main class="app">
-  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span><span class="wheel-lbl" id="wheelLbl" aria-hidden="true">filter</span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Rueda"><div class="wheel-rim" id="wheelRim"></div></div></div>
+  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span><span class="wheel-lbl" id="wheelLbl" aria-hidden="true">filter</span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Wheel"><div class="wheel-rim" id="wheelRim"></div></div></div>
   <div class="display" id="display">
-  <section class="screen" id="screen" aria-label="Pantalla">
+  <section class="screen" id="screen" aria-label="Screen">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
-    <button class="gear" id="gear" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
+    <button class="gear" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
     <div class="chord idle" id="chordName">—</div>
     <canvas class="scope" id="scope" aria-hidden="true"></canvas>
+    <canvas id="pxui" aria-hidden="true"></canvas>
     <span class="scope-read" id="scopeRead" aria-hidden="true"></span>
     <div class="screen-bottom">
       <span id="sMode"></span>
       <span style="display:flex;gap:10px;align-items:center">
-        <button class="oscbtn" id="wavBtn" aria-label="Guardar audio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button>
-        <button class="oscbtn" id="oscBtn" aria-label="Onda"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
+        <button class="oscbtn" id="wavBtn" aria-label="Save audio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="oscbtn" id="oscBtn" aria-label="Wave"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
         <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
       </span>
     </div>
     <div class="menu" id="menu" hidden aria-live="polite">
       <div class="menu-top"><span id="menuTitle"></span><span id="menuPos"></span></div>
-      <div class="menu-row"><canvas class="menu-glyph" id="menuGlyph" aria-hidden="true"></canvas><button class="menu-side" id="menuPrev" aria-label="Anterior"></button><span class="menu-val" id="menuVal"></span><button class="menu-side" id="menuNext" aria-label="Siguiente"></button></div>
+      <div class="menu-row"><canvas class="menu-glyph" id="menuGlyph" aria-hidden="true"></canvas><button class="menu-side" id="menuPrev" aria-label="Previous"></button><span class="menu-val" id="menuVal"></span><button class="menu-side" id="menuNext" aria-label="Next"></button></div>
       <div class="menu-bottom"><button class="menu-hint" id="menuUp"></button><button class="menu-hint" id="menuDown"></button></div>
     </div>
-    <div class="setv" id="setv" hidden role="dialog" aria-label="Ajustes">
-      <div class="setv-head" id="setvHead"><button id="setvPrev" aria-label="Pestaña anterior">‹</button><span id="setvSec"></span><button id="setvNext" aria-label="Pestaña siguiente">›</button><span id="setvPos"></span></div>
+    <div class="setv" id="setv" hidden role="dialog" aria-label="Settings">
+      <div class="setv-head" id="setvHead"><button id="setvPrev" aria-label="Previous tab">‹</button><span id="setvSec"></span><button id="setvNext" aria-label="Next tab">›</button><span id="setvPos"></span></div>
       <div class="setv-list" id="setvList"></div>
     </div>
     <div class="toast" id="toast"></div>
@@ -882,111 +888,111 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
   <section class="controls">
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
     <div class="tools" id="tools">
-      <div class="target-lbl" id="targetLbl">Botón 1</div>
-      <button id="tInv" aria-label="Inversión"></button>
-      <button id="tLock" aria-label="Fijar acorde"></button>
-      <button id="tOctDn" aria-label="Octava abajo"></button>
-      <button id="tOctUp" aria-label="Octava arriba"></button>
-      <span class="oct-cap" aria-hidden="true">octava</span>
+      <div class="target-lbl" id="targetLbl">Button 1</div>
+      <button id="tInv" aria-label="Inversion"></button>
+      <button id="tLock" aria-label="Lock chord"></button>
+      <button id="tOctDn" aria-label="Octave down"></button>
+      <button id="tOctUp" aria-label="Octave up"></button>
+      <span class="oct-cap" aria-hidden="true">octave</span>
     </div>
   </section>
 </main>
 
 <div class="sheet" id="sheet" hidden>
-  <div class="sheet-body" role="dialog" aria-label="Ajustes">
+  <div class="sheet-body" role="dialog" aria-label="Settings">
     <div class="sheet-head" id="sheetHead">
-      <h2>Ajustes</h2>
-      <button class="sheet-close" id="closeSheetTop" aria-label="Cerrar">&times;</button>
+      <h2>Settings</h2>
+      <button class="sheet-close" id="closeSheetTop" aria-label="Close">&times;</button>
       <div class="sheet-nav" id="sheetNav"></div>
     </div>
     <div id="settingsRows"></div>
     <div class="sec manual" id="manualSec" hidden>
-      <h3 class="grp">Tocar</h3>
-      <h4>Acordes</h4>
-      <p>Los siete botones tocan los acordes de la tonalidad: 1, 4 y 5 mayores; 2, 3 y 6 menores; 7 disminuido. Nunca suenan mal entre sí. Prueba 1 → 5 → 6 → 4.</p>
-      <p>Mantén un botón y mueve el joystick: cada dirección cambia el color del acorde. Suelta y vuelve al acorde normal. En Ajustes → Acordes eliges entre cinco mapas del joystick.</p>
-      <p>La pantalla muestra el nombre del acorde que suena; si prefieres verlo también en las teclas, activa «Notas y números en las teclas» en Ajustes → Aspecto. Esa opción vale para todos los modos: con ella apagada, las teclas van limpias también en Drums, Beats, Mixer, Seq y el resto (solo la selección rápida muestra siempre los nombres). En Ajustes → Acordes, «Bass» añade la raíz en grave (Root) o te deja mantener un botón para el bajo y pulsar otro para el acorde (Slash), y «V.Lead» (Voice Leading) elige las inversiones por ti (entonces la tecla INV queda atenuada).</p>
-      <h4>Herramientas</h4>
-      <p>Actúan sobre el último botón tocado, que se reconoce por su luz verde. INV cambia la inversión. FIJAR deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. Las dos teclas de abajo, unidas como un balancín, suben o bajan una octava solo ese botón.</p>
-      <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Sequencer, Mixer, Notes Hero y Ear Trainer son las mismas cuatro teclas, en el mismo sitio y con los mismos colores: solo cambian el icono y el texto de debajo, que dice qué hace cada una; en Drum, Drum Loop, Mic Sample y Tuner no se usan y desaparecen.</p>
-      <h4>Rueda</h4>
-      <p>La rueda de arriba a la derecha se gira deslizando el dedo a izquierda o derecha (en el ordenador, también con la rueda del ratón o con las flechas cuando está seleccionada). Sola barre el filtro: a la derecha, más brillante; a la izquierda, más oscuro. Con la tonalidad de la pantalla mantenida regula el ataque (Attack); con el sonido, el release; con el modo, el filtro, como en el aparato. En el menú de efectos, sobre Reverb o Delay, regula su cantidad. En Mixer, con una pista mantenida, regula su volumen, y girarla hace que la pista no se silencie. En Mic Sample, regula la ganancia del micrófono (Mic Gain). El texto pequeño junto a la rueda dice qué regula en cada momento y la pantalla muestra el valor mientras giras.</p>
-      <p>El volumen general lo llevan los botones de volumen del dispositivo: una web no puede leerlos, por eso la rueda se dedica al filtro y a lo demás.</p>
-      <h4>Controles atenuados</h4>
-      <p>Un botón o una herramienta atenuados no tienen función en el modo actual (por ejemplo, las pistas vacías en el Mixer) y no responden al toque.</p>
-      <h3 class="grp">Pantalla y atajos</h3>
-      <h4>Ajustes en la pantalla</h4>
-      <p>El engranaje de la pantalla abre los ajustes dentro de ella; otro toque, o Esc, los cierra. La primera línea es la pestaña (Aspecto, Tono, Sonido…): con ella marcada, izquierda y derecha cambian de pestaña. Arriba y abajo recorren las filas; izquierda y derecha cambian el valor de la fila marcada; un toque en la perilla (o Enter) la activa: cambia una casilla, ejecuta un botón, marca el tempo o carga y guarda los presets. La rueda mueve el deslizador de la fila marcada. También puedes tocar las filas, las flechas ‹ › y deslizar la lista con el dedo.</p>
-      <p>Mientras los ajustes están abiertos, los botones de acorde siguen sonando, así que oyes cada cambio. Los informes (diagnóstico, prueba del micrófono y de la vibración) y el código del instrumento se leen dentro de la propia pantalla: arriba y abajo (o la rueda) desplazan el texto, izquierda vuelve a la lista y, en el código, «Copiar» lo lleva al portapapeles. «Restablecer la app» pide un segundo toque («¿Seguro?»). Importar una copia abre el selector de archivos del sistema. Solo este manual se abre en la hoja de ajustes.</p>
-      <h4>Menús</h4>
-      <p>Toca la tonalidad, el sonido o el modo de la pantalla (un toque corto, como los botones gris, amarillo y rojo del aparato) y se abre su menú dentro de la pantalla. Con el joystick, izquierda y derecha cambian el valor, y arriba y abajo pasan a los submenús: en la tonalidad, arriba y abajo suben o bajan la octava de todo; en el sonido, arriba entra en la lista de efectos y ajustes (izquierda y derecha la recorren, arriba cambia la opción, abajo vuelve al sonido; en Reverb y Delay, la rueda regula la cantidad); en el modo, arriba entra en el BPM y abajo en el ajuste del modo (velocidad, kit, variación o nivel). Mantener el joystick a un lado repite el paso. También puedes tocar en la pantalla los vecinos de izquierda y derecha y las indicaciones de abajo.</p>
-      <p>El menú se cierra al tocar un acorde, con un toque en la perilla, tocando otra vez la etiqueta o tras unos segundos sin tocar nada. En Notes Hero y Ear Trainer solo se abre el del modo.</p>
-      <h4>Selección rápida</h4>
-      <p>Mantén pulsado un momento el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). La primera página es la misma que en el aparato. Sonido: 1 Saw, 2 Sine, 3 FM EPiano, 4 HX7 Piano, 5 Strings, 6 Clarinet, 7 FM Wow; en Drum y Drum Loop elige el kit (1 Tight Kit, 2 x0x Box, 3 x9x Box, 4 Lynn Kit, 5 KR-78, 6 Trap Box, 7 Tight Kit). Modo: 1 Play, 2 Strum, 3 Lead, 4 Drone, 5 Arp, 6 Repeat, 7 Mic Sample. Tonalidad: en Arp elige el patrón (1 Up, 2 Down, 3 Up/Down, 4 Down/Up, 5 Random, 6 Fingerpick) y el 7 cambia las capas (Arp Only, Chord+Arp, Rhythm+Arp); en los demás modos, las notas y las escalas.</p>
-      <p>Con el joystick hacia arriba o la derecha pasas a la página siguiente, con el resto de sonidos o de modos; hacia abajo o la izquierda, a la anterior. En el teclado: J (sonido), K (tonalidad) y L (modo), mantenidas. Sonido y tonalidad no responden en Notes Hero ni en Ear Trainer.</p>
-      <h4>Aleatorizar con la perilla</h4>
-      <p>Mantén la tonalidad, el sonido o el modo de la pantalla y, con el otro dedo, toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Tonalidad: cambia todo, es decir, el sonido, los efectos, la tonalidad y el tempo. Sonido: un sonido nuevo (forma de onda y efectos); la tonalidad, el tempo y las inversiones se quedan. Modo: un patrón nuevo (arpegio, ritmo o secuencia, y la disposición de octavas); el sonido se queda. Es lo mismo que hace el aparato en su versión 3.0. No cuenta si hay un acorde pulsado ni en Notes Hero y Ear Trainer.</p>
-      <p>En el ordenador, mantén J (sonido), K (tonalidad) o L (modo) y pulsa la barra espaciadora. Para elegir con más control, Ajustes → Presets tiene el azar con más opciones (ver «Presets y azar»).</p>
-      <h4>Teclado del ordenador</h4>
-      <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> y <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> siguiente modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> tocadas abren el menú de sonido, tonalidad y modo; mantenidas, su selección rápida · <span class="k">←</span> <span class="k">→</span> <span class="k">↑</span> <span class="k">↓</span> navegan por el menú abierto · <span class="k">Esc</span> lo cierra · <span class="k">Espacio</span> con J, K o L mantenidas aleatoriza · <span class="k">←</span> <span class="k">→</span> giran la rueda cuando está seleccionada</p>
-      <h3 class="grp">Modos y ritmos</h3>
-      <h4>Modos</h4>
-      <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. Para cambiar de modo, toca el modo de la pantalla (abajo a la izquierda) y muévete con el joystick, o mantenlo pulsado para la selección rápida (ver «Menús» y «Selección rápida»); el ajuste de cada modo (velocidad, kit, variación o nivel) está en ese mismo menú, hacia abajo.</p>
-      <p><b>Drum</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Drum Loop</b> cada botón arranca un ritmo (y lo para). <b>Sequencer</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
-      <p>En Sequencer, las teclas de abajo son play y stop, quitar el último paso, borrar y la duración del paso. En Mixer, con una pista seleccionada, son solo, vol −, vol + y borrar.</p>
+      <h3 class="grp">Play</h3>
+      <h4>Chords</h4>
+      <p>The seven buttons play the chords of the key: 1, 4 and 5 are major; 2, 3 and 6 are minor; 7 is diminished. They never sound bad together. Try 1 → 5 → 6 → 4.</p>
+      <p>Hold a button and move the joystick: each direction changes the colour of the chord. Let go and you are back to the normal chord. In Settings → Chords you can choose between five joystick maps.</p>
+      <p>The screen shows the name of the chord that is sounding; if you also want to see it on the keys, turn on "Notes and numbers on keys" in Settings → Look. That option applies to every mode: with it off, the keys stay clean in Drums, Beats, Mixer, Seq and the rest (only quick select always shows the names). In Settings → Chords, "Bass" adds the root an octave down (Root) or lets you hold one button for the bass and press another for the chord (Slash), and "V.Lead" (Voice Leading) chooses the inversions for you (the INV key is then dimmed).</p>
+      <h4>Tools</h4>
+      <p>They act on the last button you played, which you can recognise by its green light. INV changes the inversion. LOCK keeps that button on the last variation you played; press it again to release it. The two keys below, joined like a rocker, raise or lower only that button by an octave.</p>
+      <p>The light on each key shows its state: inversion on, chord locked, or octave shifted down or up. In Sequencer, Mixer, Notes Hero and Ear Trainer they are the same four keys, in the same place and with the same colours: only the icon and the text underneath change, and that text says what each one does; in Drum, Drum Loop, Mic Sample and Tuner they are not used and disappear.</p>
+      <h4>Wheel</h4>
+      <p>The wheel at the top right turns when you slide a finger left or right (on a computer, also with the mouse wheel or with the arrow keys when it is selected). On its own it sweeps the filter: to the right is brighter, to the left is darker. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets its volume, and turning it keeps that track from being muted. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls at any moment, and the screen shows the value while you turn it.</p>
+      <p>The overall volume is controlled by your device's volume buttons: a web page cannot read them, which is why the wheel is used for the filter and the rest.</p>
+      <h4>Dimmed controls</h4>
+      <p>A dimmed button or tool has no function in the current mode (for example, empty tracks in the Mixer) and does not respond to touch.</p>
+      <h3 class="grp">Screen and shortcuts</h3>
+      <h4>Settings on the screen</h4>
+      <p>The gear on the screen opens the settings inside it; another tap, or Esc, closes them. The first line is the tab (Look, Music, Sound…): with it selected, left and right change tab. Up and down move through the rows; left and right change the value of the selected row; a tap on the knob (or Enter) activates it: it toggles a checkbox, runs a button, sets the tempo or loads and saves presets. The wheel moves the slider of the selected row. You can also tap the rows and the ‹ › arrows, and slide the list with your finger.</p>
+      <p>While the settings are open, the chord buttons keep sounding, so you hear every change. Reports (diagnostics, microphone test and vibration test) and the instrument code are read inside the screen itself: up and down (or the wheel) scroll the text, left goes back to the list and, for the code, "Copy" puts it on the clipboard. "Reset the app" asks for a second tap ("Sure?"). Importing a backup opens the system file picker. Only this manual opens in the settings sheet.</p>
+      <h4>Menus</h4>
+      <p>Tap the key, the sound or the mode on the screen (a short tap, like the grey, yellow and red buttons of the device) and its menu opens inside the screen. With the joystick, left and right change the value, and up and down move to the submenus: on the key, up and down raise or lower the octave of everything; on the sound, up enters the list of effects and settings (left and right move through it, up changes the option, down goes back to the sound; on Reverb and Delay the wheel sets the amount); on the mode, up enters the BPM and down enters the mode setting (speed, kit, variation or level). Holding the joystick to one side repeats the step. You can also tap the neighbours on the left and right and the hints at the bottom of the screen.</p>
+      <p>The menu closes when you play a chord, with a tap on the knob, by tapping the label again, or after a few seconds of doing nothing. In Notes Hero and Ear Trainer only the mode menu opens.</p>
+      <h4>Quick select</h4>
+      <p>Hold the sound, the key or the mode on the screen for a moment: the seven buttons turn into choices (the current one is marked dark). The first page is the same as on the device. Sound: 1 Saw, 2 Sine, 3 FM EPiano, 4 HX7 Piano, 5 Strings, 6 Clarinet, 7 FM Wow; in Drum and Drum Loop it chooses the kit (1 Tight Kit, 2 x0x Box, 3 x9x Box, 4 Lynn Kit, 5 KR-78, 6 Trap Box, 7 Tight Kit). Mode: 1 Play, 2 Strum, 3 Lead, 4 Drone, 5 Arp, 6 Repeat, 7 Mic Sample. Key: in Arp it chooses the pattern (1 Up, 2 Down, 3 Up/Down, 4 Down/Up, 5 Random, 6 Fingerpick) and 7 changes the layers (Arp Only, Chord+Arp, Rhythm+Arp); in the other modes, the notes and the scales.</p>
+      <p>With the joystick up or right you go to the next page, with the rest of the sounds or modes; down or left, to the previous one. On the keyboard: J (sound), K (key) and L (mode), held down. Sound and key do not respond in Notes Hero or Ear Trainer.</p>
+      <h4>Randomise with the knob</h4>
+      <p>Hold the key, the sound or the mode on the screen and, with your other finger, tap the joystick knob with a short tap, without moving it (like pushing the joystick down on the device). Key: changes everything, that is, the sound, the effects, the key and the tempo. Sound: a new sound (waveform and effects); the key, the tempo and the inversions stay. Mode: a new pattern (arpeggio, rhythm or sequence, and the octave layout); the sound stays. This is what the device does in its 3.0 version. It does not count if a chord is held, nor in Notes Hero and Ear Trainer.</p>
+      <p>On a computer, hold J (sound), K (key) or L (mode) and press the space bar. For more control, Settings → Presets has randomisation with more options (see "Presets and random").</p>
+      <h4>Computer keyboard</h4>
+      <p><span class="k">1</span>–<span class="k">7</span> chords · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> and <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> next mode · <span class="k">I</span> inversion · <span class="k">F</span> lock · <span class="k">,</span> <span class="k">.</span> octave · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> tapped open the sound, key and mode menus; held, their quick select · <span class="k">←</span> <span class="k">→</span> <span class="k">↑</span> <span class="k">↓</span> move through the open menu · <span class="k">Esc</span> closes it · <span class="k">Space</span> with J, K or L held randomises · <span class="k">←</span> <span class="k">→</span> turn the wheel when it is selected</p>
+      <h3 class="grp">Modes and rhythms</h3>
+      <h4>Modes</h4>
+      <p><b>Play</b> full chord. <b>Strum</b> strummed chord. <b>Lead</b> one note, the root. <b>Drone</b> the chord keeps sounding when you let go. <b>Arp</b> arpeggio at the tempo. <b>Repeat</b> the chord pulses at the tempo. To change mode, tap the mode on the screen (bottom left) and move with the joystick, or hold it for quick select (see "Menus" and "Quick select"); each mode's setting (speed, kit, variation or level) is in that same menu, downwards.</p>
+      <p><b>Drum</b> each button is a hit; hold a pad and move the joystick to repeat it. <b>Drum Loop</b> each button starts a rhythm (and stops it). <b>Sequencer</b> adds chords to a sequence and plays it with play. <b>Mixer</b> mutes tracks and controls the metronome.</p>
+      <p>In Sequencer, the keys at the bottom are play and stop, remove the last step, clear and the step length. In Mixer, with a track selected, they are solo, vol −, vol + and clear.</p>
       <h4>Repeat: trance gate</h4>
-      <p>En Repeat, mantén un acorde y se abre y se cierra al ritmo del tempo siguiendo un patrón fijo de 32 pasos, con silencios y notas ligadas, como un sintetizador de trance. La velocidad del pulso se cambia en el menú del modo, hacia abajo (las mismas velocidades que el arpegio). El release se limita a 200 ms para que los cortes queden limpios.</p>
+      <p>In Repeat, hold a chord and it opens and closes to the beat of the tempo following a fixed 32-step pattern, with rests and tied notes, like a trance synth. The pulse speed is changed in the mode menu, downwards (the same speeds as the arpeggio). The release is limited to 200 ms so the cuts stay clean.</p>
       <h4>Fill</h4>
-      <p>En Drum Loop, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
-      <h3 class="grp">Sonido</h3>
-      <h4>Instrumentos y biblioteca</h4>
-      <p>El desplegable de Ajustes → Sonido reúne tres tipos de sonido. Instrumentos son los sonidos base (saw, piano, cuerdas, órgano…). Biblioteca son 50 presets de la app oficial, agrupados por tipo (Analog, FM, Sample, Texture, Hybrid): cada uno combina varias capas y trae su envolvente y sus efectos, que se aplican al elegirlo. Vienen incluidos y no se pueden quitar. Importados aparece solo si cargas un archivo .json en Ajustes → Presets; ahí mismo se ve cuántos hay y se pueden quitar.</p>
-      <h4>Presets y azar</h4>
-      <p>En Ajustes → Presets hay cuatro ranuras (P1 a P4). Guardar escribe en la ranura el instrumento, los efectos, la tonalidad, la escala, el modo, el tempo, las octavas, las inversiones y los acordes fijados; Cargar lo restaura. Los loops, el tema y los volúmenes no se guardan.</p>
-      <p>El azar propone cosas nuevas. Sonido elige otro instrumento con efectos; Patrón cambia el patrón del modo actual (arpegio, ritmo o secuencia) y la disposición de octavas; Todo cambia además la tonalidad y el tempo.</p>
-      <p>Con la tonalidad, el sonido o el modo mantenidos, tocar la perilla del joystick aleatoriza al instante (ver «Aleatorizar con la perilla»).</p>
+      <p>In Drum Loop, the Fill variation replaces the fourth beat of every bar with a snare and tom roll. Every four bars the fill takes the second half of the bar and ends with a cymbal on the next downbeat.</p>
+      <h3 class="grp">Sound</h3>
+      <h4>Instruments and library</h4>
+      <p>The drop-down in Settings → Sound gathers three kinds of sound. Instruments are the base sounds (saw, piano, strings, organ…). Library are 50 presets from the official app, grouped by type (Analog, FM, Sample, Texture, Hybrid): each one combines several layers and brings its own envelope and effects, which are applied when you choose it. They are included and cannot be removed. Imported appears only if you load a .json file in Settings → Presets; there you can also see how many there are and remove them.</p>
+      <h4>Presets and random</h4>
+      <p>In Settings → Presets there are four slots (P1 to P4). Save writes the instrument, the effects, the key, the scale, the mode, the tempo, the octaves, the inversions and the locked chords into the slot; Load restores them. Loops, the theme and the volumes are not saved.</p>
+      <p>Random suggests new things. Sound chooses another instrument with effects; Pattern changes the pattern of the current mode (arpeggio, rhythm or sequence) and the octave layout; All also changes the key and the tempo.</p>
+      <p>With the key, the sound or the mode held, tapping the joystick knob randomises instantly (see "Randomise with the knob").</p>
       <h4>Vocoder</h4>
-      <p>Hace que el sonido "hable" con tu voz. En Ajustes → Efectos, elige Mic (tu voz) o Loop (lo que grabaste en la pista 1 del looper, que deja de sonar directamente). Mantén un acorde y habla o canta: el sintetizador toma la forma de tu voz. Funciona mejor con sonidos ricos, como Saw o Square. Formant Shift cambia el carácter de la voz (más aguda o más grave) y Noise Level añade ruido para que se entiendan la s, la t y la k. Usa auriculares: con el altavoz se acopla.</p>
-      <h3 class="grp">Grabar y capturar</h3>
+      <p>Makes the sound "talk" with your voice. In Settings → Effects, choose Mic (your voice) or Loop (what you recorded on looper track 1, which then stops sounding directly). Hold a chord and speak or sing: the synth takes the shape of your voice. It works best with rich sounds such as Saw or Square. Formant Shift changes the character of the voice (higher or lower) and Noise Level adds noise so that s, t and k are understandable. Use headphones: with the speaker it feeds back.</p>
+      <h3 class="grp">Record and capture</h3>
       <h4>Looper</h4>
-      <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 esperan al inicio del siguiente loop para empezar (su botón parpadea; tócalo para cancelar) y se paran solas al terminar la vuelta.</p>
-      <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Drum Loop sonando lo pasa a la pista.</p>
-      <h4>Guardar audio</h4>
-      <p>El botón del círculo, junto a la onda, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
+      <p>The circle arms the selected track; another tap starts recording. In free mode, a third tap stops. With bars, there is a four-beat count-in and it stops by itself. Tracks 2 to 6 wait for the start of the next loop to begin (their button blinks; tap it to cancel) and stop by themselves at the end of the pass.</p>
+      <p>Tap a track to select it; hold it to clear it. Clearing track 1 clears everything. ▶/⏸ pauses and resumes; hold it to clear everything. Recording while a Drum Loop rhythm is playing puts it on the track.</p>
+      <h4>Save audio</h4>
+      <p>The circle button, next to the wave, records what is sounding (chords, drums, loops and vocoder) for up to four minutes; the screen shows the time. Tapping it again stops it and opens the iPhone share menu, where you choose "Save to Files"; on a computer a 16-bit stereo WAV file is downloaded. If the app goes to the background during recording, it picks up where it was when you return, without a gap. It does not include the direct microphone.</p>
       <h4>Mic Sample (sampler)</h4>
-      <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic Sample y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic Sample; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
-      <h4>Tuner (afinador)</h4>
-      <p>Mide la nota que suena cerca del micrófono y te dice si estás afinado. Entra en el modo Tuner, concede el permiso y canta o toca una sola nota larga cerca del iPhone. La pantalla muestra tres cosas: el nombre de la nota (A, C#…); cuántos cents te separas de ella (100 cents son un semitono; con + estás agudo y con − grave); y, debajo, una escala con un punto que se mueve: a la derecha del centro estás agudo y a la izquierda grave. Cuando estás a menos de 5 cents, la pantalla se invierte: estás afinado. Si no hay sonido o es muy débil, aparece una raya. La línea fina de abajo muestra cuánto oye el micrófono: si no se mueve cuando cantas, el sonido no está llegando.</p>
-      <p>Mide notas entre Si1 y Si5 (de unos 60 Hz a 1 kHz), una cada vez: los acordes y el ruido de fondo lo confunden. Si no detecta tu voz, acércate o sube «Mic Gain» en Ajustes → Sonido. En este modo los botones están atenuados porque no se usan.</p>
-      <h4>Permiso del micrófono</h4>
-      <p>El micrófono se cierra en cuanto terminas de usarlo, así que Safari puede volver a pedir permiso cada vez. Para que no lo pida más, toca "aA" en la barra de direcciones → Ajustes del sitio web → Micrófono → Permitir; la app seguirá cerrando el micrófono al terminar. En Ajustes → Sonido, "Probar el micrófono" muestra el estado: "granted" significa que Safari ya lo recuerda y "prompt" que lo volverá a pedir.</p>
-      <p>Alternativa: activar "Mantener el micrófono abierto" en Ajustes → Sonido. El micrófono queda abierto pero mudo mientras la app esté abierta (el punto naranja del iPhone puede seguir encendido) y se libera al salir de la app o tras 15 minutos sin usarlo.</p>
-      <h4>Si el micrófono no funciona</h4>
-      <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
-      <h3 class="grp">Practicar</h3>
-      <h4>Notes Hero (juego de acordes)</h4>
-      <p>Un juego de ritmo que enseña progresiones reales. Elige nivel en el menú del modo, hacia abajo (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión); el nivel, el tipo y el título de la canción salen arriba en la pantalla. Pulsa "jugar". La pantalla muestra una sola pista: arriba a la izquierda, un círculo con el botón que toca (y a su lado una flecha si hay que mover el joystick), arriba a la derecha la tonalidad, abajo a la izquierda el nombre del acorde y abajo a la derecha cuántos llevas. Tras una cuenta atrás de cuatro tiempos, una bola por acorde avanza de izquierda a derecha hacia la raya de golpeo (con la zona de acierto sombreada): pulsa su botón justo cuando la bola llegue a la raya y, si lleva una flecha encima, mantén también esa dirección del joystick. El trazo fino entre dos bolas es lo que dura ese acorde. La bola se rellena cuando acertaste y se tacha cuando fallaste. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
-      <p>"Práctica" juega más despacio: empieza al 75 % y con "vel −" y "vel +" va del 50 al 100 %. Tras los resultados, "siguiente" pasa al nivel siguiente y "repetir" vuelve a jugar el actual. En los resultados, «desfase medio» dice si sueles pulsar tarde (+) o pronto (−): si es siempre parecido, súmalo en Ajustes → Modos → «Latencia del juego» (el sonido tarda un poco en llegar a tus oídos y eso se nota); acerca la bola a la raya cuando oyes el golpe. Cada nivel estrena una idea: el acorde 6 (nivel 2), el sus4 con el joystick abajo (3), cambios cada dos tiempos y anticipos (4), el iv prestado con el joystick arriba (5), la mezcla con 2 y 3 (6), séptimas (7), novenas (8), dominantes secundarias (9) y una cadena por quintas (10).</p>
-      <p>Para salir de Notes Hero (o de Ear Trainer), con la partida parada o terminada, toca el nombre del modo, abajo a la izquierda de la pantalla: abre el menú de modos y con izquierda y derecha pasas a otro. Durante la partida ese nombre desaparece (solo se ve el estado) y no responde al toque, para no salirte sin querer: para cortar, usa «parar».</p>
-      <h4>Ear Trainer (entrenador de oído)</h4>
-      <p>La app toca algo y tú lo repites. Elige nivel en el menú del modo, hacia abajo, y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
-      <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
-      <h3 class="grp">Ajustes y mantenimiento</h3>
-      <h4>Aspecto</h4>
-      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (la OLED de 1 bit del HiChord y del Orchid: blanco frío sobre negro, píxeles visibles, barra de título invertida, selectores con marco y triángulos a los lados, y en el selector de sonido, la forma de onda del sonido), MOSS (LCD reflectante verde, como la de la primera Game Boy: la rejilla solo se insinúa dentro de lo oscuro y el marco proyecta su sombra arriba y a la izquierda) y PHOSPHOR (osciloscopio analógico: pantalla negra donde todo lo dibuja el haz en verde; la retícula está grabada en el cristal con su cruz central y la señal se dibuja respecto a esa cruz, con el barrido disparado para que la onda quede quieta y un volts/div automático). En todas las pantallas, el selector de sonido dibuja la forma de onda del sonido, animada: aparece, se sostiene y se apaga como lo hace ese sonido. «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. La línea que cruza la pantalla es la onda: va de un borde al otro; en reposo es plana; con «Onda» activada muestra la señal que suena. En PHOSPHOR esa línea no existe: la sustituye un osciloscopio simulado (un haz de electrones que se mueve, con el brillo que le deja el fósforo al apagarse), siempre activo. En «Tiempo (Y-T)» el barrido se dispara en un flanco ascendente para que la onda quede quieta, con volts/div y time/div automáticos que se leen abajo; en «XY (figuras)» la señal se dibuja contra sí misma desfasada 90° y salen figuras de Lissajous (Ajustes → Modos → «Osciloscopio (PHOSPHOR)»). Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
+      <p>Records a sound with the microphone and turns it into an instrument. Enter Mic Sample mode and grant permission. Hold button 1 while you sing, speak or make the sound; you can record up to three seconds. When you let go, the app detects the note, brings it to C and switches to Lead mode with the "Mic Sample" instrument: the buttons play your sound at different pitches. To record another one, enter Mic Sample mode again; the new take replaces the previous one, and the last one is kept when you close the app. In this mode only button 1 works; the rest are dimmed.</p>
+      <h4>Tuner</h4>
+      <p>Measures the note sounding near the microphone and tells you whether you are in tune. Enter Tuner mode, grant permission and sing or play a single long note near the iPhone. The screen shows three things: the name of the note (A, C#…); how many cents you are away from it (100 cents are a semitone; with + you are sharp and with − flat); and, below, a scale with a moving dot: to the right of the centre you are sharp and to the left flat. When you are within 5 cents, the screen inverts: you are in tune. If there is no sound or it is very weak, a dash appears. The thin line at the bottom shows how much the microphone hears: if it does not move when you sing, the sound is not arriving.</p>
+      <p>It measures notes between B1 and B5 (about 60 Hz to 1 kHz), one at a time: chords and background noise confuse it. If it does not detect your voice, move closer or raise "Mic Gain" in Settings → Sound. In this mode the buttons are dimmed because they are not used.</p>
+      <h4>Microphone permission</h4>
+      <p>The microphone is closed as soon as you finish using it, so Safari may ask for permission every time. To stop it asking, tap "aA" in the address bar → Website Settings → Microphone → Allow; the app will still close the microphone when it finishes. In Settings → Sound, "Test microphone" shows the state: "granted" means Safari already remembers it and "prompt" that it will ask again.</p>
+      <p>Alternative: turn on "Keep microphone open" in Settings → Sound. The microphone stays open but muted while the app is open (the iPhone's orange dot may stay on) and is released when you leave the app or after 15 minutes of not using it.</p>
+      <h4>If the microphone does not work</h4>
+      <p>If the notice says it is blocked, in Safari tap "aA" in the address bar, go to Website Settings and allow the microphone. If it says iOS could not start the audio, close Safari completely and open the page again; if it is still the same, restart the iPhone. "Test microphone", in Settings → Sound, shows the full state.</p>
+      <h3 class="grp">Practice</h3>
+      <h4>Notes Hero (chord game)</h4>
+      <p>A rhythm game that teaches real songwriting moves. Choose a level in the mode menu, downwards (10 levels in five tiers: Folk, Rock, Modern, Jazz and Fusion); the level, the tier and the song title appear at the top of the screen. Press "play". The screen shows a single lane: at the top left, a circle with the button you need (and next to it an arrow if you must move the joystick), at the top right the key, at the bottom left the name of the chord and at the bottom right how many you have done. After a four-beat count-in, one ball per chord travels from left to right towards the hit line (with the hit zone shaded): press its button just as the ball reaches the line and, if it has an arrow above it, also hold that joystick direction. The thin stroke between two balls is how long that chord lasts. The ball fills in when you hit and is crossed out when you miss. The closer to the beat, the better the grade: Perfect, Great, OK or Miss. Your streak and best streak are counted. Each song sets its own key, sound and rhythm; your settings come back when it ends.</p>
+      <p>"Practice" plays slower: it starts at 75 % and with "speed −" and "speed +" goes from 50 to 100 %. After the results, "next" goes to the next level and "replay" plays the current one again. In the results, "mean offset" tells you whether you tend to press late (+) or early (−): if it is always similar, add it in Settings → Modes → "Game latency" (sound takes a moment to reach your ears and you can feel it); the ball should reach the line when you hear the hit. Each level introduces an idea: the chord 6 (level 2), sus4 with the joystick down (3), changes every two beats and anticipations (4), the borrowed iv with the joystick up (5), the mix with 2 and 3 (6), sevenths (7), ninths (8), secondary dominants (9) and a chain of fifths (10).</p>
+      <p>To leave Notes Hero (or Ear Trainer), with the game stopped or finished, tap the mode name at the bottom left of the screen: it opens the mode menu and left and right take you to another one. During play that name disappears (only the status shows) and does not respond to touch, so you do not leave by accident: to cut it short, use "stop".</p>
+      <h4>Ear Trainer</h4>
+      <p>The app plays something and you repeat it. Choose a level in the mode menu, downwards, and press "play": first the base note (the tonic) sounds and then the question. Level 1: you hear the tonic and a higher note; press the button for that note. Level 2: the note can be above or below. Level 3: a chord of the key. Level 4: a progression of four chords. Level 5: a chord with a modification (sevenths, sus, aug…): answer with the joystick too. Level 6: a progression of four chords with modifications.</p>
+      <p>If you get stuck, "tonic" plays the base note again and "replay" repeats the question. Your streak and best streak are counted. On levels with modifications, a miss shows an arrow with the correct joystick direction. While you play, your settings are replaced by the trainer's and come back when it ends.</p>
+      <h3 class="grp">Settings and maintenance</h3>
+      <h4>Look</h4>
+      <p>notes is a single instrument built in six editions, which you choose in Settings → Look → Case: CARBON (black), LUNAR (ivory with black controls and orange touches), VERTEX (90s console-pad grey, with coloured buttons), POCKET (beige with an olive screen and aubergine buttons, like an 80s handheld), AMBER (warm charcoal with cream and mustard keys, like a boutique synth) and GHOST (smoked plastic that shows the circuit board). The screen is independent and represents another technology: EMBER (warm OLED), MATRIX (the 1-bit OLED of the HiChord and the Orchid: cool white on black, visible pixels, inverted title bar, selectors with a frame and triangles at the sides, and on the sound selector the waveform of the sound), MOSS (green reflective LCD, like the first Game Boy: the grid only hints inside the dark parts and the frame casts its shadow at the top and left) and PHOSPHOR (analogue oscilloscope: black screen where the beam draws everything in green; the graticule is engraved in the glass with its centre cross and the signal is drawn relative to that cross, with the sweep triggered so the wave stays still and an automatic volts/div). On every screen, the sound selector draws the waveform of the sound, animated: it appears, is held and fades out the way that sound does. "By case" uses each edition's own, and you can combine them however you like. With MATRIX selected, "Pixel display" (Settings → Look) redraws the screen as a real grid of about 120 × 63 pixels with a bitmap font, like the OLED of the device: everything is made of whole pixels. It covers the play screens and the menus; settings, games and the tuner keep the regular screen. "Automatic" picks CARBON or LUNAR depending on the device's dark or light mode. The line that crosses the screen is the wave: it runs from one edge to the other; at rest it is flat; with "Wave" on it shows the signal that is sounding. In PHOSPHOR that line does not exist: a simulated oscilloscope replaces it (an electron beam that moves, with the glow the phosphor leaves as it fades), always on. In "Time (Y-T)" the sweep triggers on a rising edge so the wave stays still, with automatic volts/div and time/div that you can read at the bottom; in "XY (figures)" the signal is drawn against itself shifted by 90° and Lissajous figures appear (Settings → Modes → "Oscilloscope", only available with the PHOSPHOR screen). The chord keys are clean, without notes or numbers; turn them on with "Notes and numbers on keys". "Test vibration" checks whether your device can vibrate from the app and, if not, why: on the iPhone you need iOS 18 or later and System Haptics turned on (iPhone Settings → Sounds &amp; Haptics).</p>
       <h4>MIDI</h4>
-      <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
-      <h4>Copia de seguridad</h4>
-      <p>Exportar guarda en un archivo tus ajustes, presets, sonidos importados y la última muestra del micrófono. Importar restaura esa copia y también acepta los archivos de presets de la app oficial.</p>
-      <h4>Sin conexión</h4>
-      <p>Abre la página una vez con internet y añádela a la pantalla de inicio (Compartir → Añadir a pantalla de inicio). Desde entonces funciona sin conexión. Las versiones nuevas se descargan al abrirla con internet.</p>
-      <h4>Audio y pantalla de bloqueo</h4>
-      <p>Tras 20 segundos sin tocar ni sonar nada, la app suspende el audio para no aparecer como "reproduciendo"; el primer toque lo reactiva y la primera nota puede tardar un instante. Al salir de la app o bloquear el iPhone se detiene todo, incluidos los loops.</p>
-      <h4>Si algo falla</h4>
-      <p>Si al pulsar un botón no suena nada, aparece un aviso con el motivo. Ajustes → Presets → Diagnóstico hace una prueba (audio, un acorde, micrófono, MIDI, estado guardado, caché y los últimos errores) y muestra un informe que puedes copiar o enviar para pedir ayuda; la línea «parámetros de audio» indica si una extensión del navegador (de privacidad o contra el rastreo) está bloqueando el audio: la app lo sortea sola.</p>
-      <p>Si algo se queda en un estado raro, «Restablecer la app», en el mismo lugar, borra los ajustes, los presets y la caché y vuelve a empezar; pide confirmar con un segundo toque. Antes puedes guardar una copia con Exportar (ver «Copia de seguridad»).</p>
-      <h4>Créditos</h4>
-      <p>Grabaciones: VCSL y VSCO 2 Community Edition de Versilian Studios (CC0) y FluidR3_GM a través de midi-js-soundfonts (CC BY 3.0).</p>
+      <p>PC only (Chrome or Edge) and Android; Safari on iPhone does not support it, which is why the setting does not appear there. Turn it on in Settings → Sound. The white keys of any octave play buttons 1 to 7 (C is 1). The chord that sounds goes out as MIDI notes on every connected output (if an output sends the notes back to the input, the app ignores that echo). In Arp and Repeat the held chord is sent, not every hit.</p>
+      <h4>Backup</h4>
+      <p>Export saves your settings, presets, imported sounds and the last microphone sample to a file. Import restores that backup and also accepts the preset files of the official app.</p>
+      <h4>Offline</h4>
+      <p>Open the page once with internet and add it to the home screen (Share → Add to Home Screen). From then on it works offline. New versions are downloaded when you open it with internet.</p>
+      <h4>Audio and lock screen</h4>
+      <p>After 20 seconds of nothing being touched or sounding, the app suspends audio so it does not show as "playing"; the first tap wakes it up and the first note may take a moment. When you leave the app or lock the iPhone everything stops, including the loops.</p>
+      <h4>If something fails</h4>
+      <p>If nothing sounds when you press a button, a notice appears with the reason. Settings → Presets → Diagnostics runs a test (audio, a chord, microphone, MIDI, saved state, cache and the latest errors) and shows a report that you can copy or send to ask for help; the "audio parameters" line tells you whether a browser extension (privacy or anti-tracking) is blocking the audio: the app works around it by itself.</p>
+      <p>If something is stuck in a strange state, "Reset the app", in the same place, erases the settings, the presets and the cache and starts over; it asks you to confirm with a second tap. Before that you can save a backup with Export (see "Backup").</p>
+      <h4>Credits</h4>
+      <p>Recordings: VCSL and VSCO 2 Community Edition by Versilian Studios (CC0) and FluidR3_GM through midi-js-soundfonts (CC BY 3.0).</p>
     </div>
     </div>
   </div>
@@ -1003,11 +1009,11 @@ let apStatus = 'normal';
     if (typeof AudioParam === 'undefined') return;
     const d = Object.getOwnPropertyDescriptor(AudioParam.prototype, 'value');
     if (!d || d.set || !d.get) return;
-    apStatus = 'bloqueado por una extensión (sorteado)';
+    apStatus = 'blocked by an extension (bypassed)';
     if (!d.configurable) return;
     Object.defineProperty(AudioParam.prototype, 'value', { configurable:true, enumerable:d.enumerable, get:d.get,
       set(v) { try { this.setValueAtTime(v, (typeof ctx !== 'undefined' && ctx) ? ctx.currentTime : 0); } catch (e) {} } });
-    apStatus = 'bloqueado por una extensión (reparado)';
+    apStatus = 'blocked by an extension (repaired)';
   } catch (e) {}
 })();
 function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (la especificación lo define como setValueAtTime en el instante actual)
@@ -1315,7 +1321,7 @@ function importLibrary(json) {
     const pr = p.preset || p; if (!pr.oscillators) continue;
     const g = pr.global || {}, e = pr.effects || {}, s = pr.settings || {};
     state.library = state.library || [];
-    state.library.push({ n:p.name || 'Preset', c:p.category || 'Importado',
+    state.library.push({ n:p.name || 'Preset', c:p.category || 'Imported',
       L:pr.oscillators.slice(0, 6).map(o => [T[o.type] || 'w', o.source, o.gain, o.pan]),
       g:[g.attack|0, g.decay|0, g.sustain|0, g.release|0, g.filterCutoff|0, g.filterResonance|0, g.filterDrive|0, g.reverb|0, g.chorus|0],
       e:{ rev:+!!e.reverbOn, cho:+!!e.chorusOn, dly:e.delayOn ? e.delayRate : 0, fl:+!!e.flangerOn, gl:e.glideOn ? e.glideRate : 0, bass:+!!e.bassOn, hp:+!!e.hifiltOn, filt:+!!e.filterOn },
@@ -1349,7 +1355,7 @@ const DEFAULT_STATE = {
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
   library:[],
-  scopeMode:'yt', hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
+  scopeMode:'yt', pixelUi:false, hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
   micGain:1, micHold:false, midi:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
@@ -1690,7 +1696,7 @@ function renderModes() {
     if (el.dataset.m === 'mixer') el.hidden = !loopHasAudio() && state.mode !== 'mixer';
   });
   const p = modeParam(), el = $('modeParam');
-  if (state.mode === 'seq') { el.disabled = false; el.textContent = (seq.playing ? 'parar' : 'tocar') + ' · ' + seq.steps.length + (seq.steps.length === 1 ? ' paso' : ' pasos'); return; }
+  if (state.mode === 'seq') { el.disabled = false; el.textContent = (seq.playing ? 'stop' : 'tocar') + ' · ' + seq.steps.length + (seq.steps.length === 1 ? ' step' : ' steps'); return; }
   el.disabled = !p || gameLocked(); el.textContent = p ? p.names[state[p.key]] : 'ajuste';
 }
 function buildModes() {
@@ -1701,7 +1707,7 @@ function buildModes() {
     onChipTap(b, () => setMode(m.id), scroll); scroll.appendChild(b);
   }
   const arrow = (dir) => {   // solo con ratón: desplazan la franja una página
-    const a = document.createElement('button'); a.className = 'modes-arrow'; a.setAttribute('aria-label', dir < 0 ? 'Modos anteriores' : 'Modos siguientes');
+    const a = document.createElement('button'); a.className = 'modes-arrow'; a.setAttribute('aria-label', dir < 0 ? 'Previous modes' : 'Next modes');
     a.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + (dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>';
     a.addEventListener('click', () => scroll.scrollBy({ left: dir * scroll.clientWidth * 0.7, behavior: 'smooth' }));
     return a;
@@ -2377,7 +2383,7 @@ function recEnabled() {
 function looperClick() {
   if (!recEnabled()) return;
   ensureAudio();
-  if (!recReady) { toast('Preparando la grabación'); return; }
+  if (!recReady) { toast('Preparing the recording'); return; }
   
   const t = tracks[loop.cur];
   if (t.state === 'off') { t.state = 'armed'; haptic(true); renderLooper(); return; }
@@ -2438,7 +2444,7 @@ function stopRecording(t, t1) {
   if (t.free) metroCancel();
   if (waiting) { t.state = 'off'; renderLooper(); return; }
   if (t.isMaster && t.free) {
-    if (t1 - t.t0 < 0.25) { t.state = 'off'; toast('Loop demasiado corto'); renderLooper(); return; }
+    if (t1 - t.t0 < 0.25) { t.state = 'off'; toast('Loop too short'); renderLooper(); return; }
     loop.len = Math.min(MAX_LOOP, t1 - t.t0); loop.start = t.t0;
     t1 = t.t0 + loop.len;
   } else if (t.isMaster) { loop.len = t1 - t.f0 / ctx.sampleRate; loop.start = t.f0 / ctx.sampleRate; }
@@ -2476,7 +2482,7 @@ function clearTrack(i) {
   applyMutesSafe(); renderLooper(); renderModes();
 }
 function applyMutesSafe() { if (ctx) applyMutes(); }
-function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderModes(); toast('Loops borrados'); }
+function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderModes(); toast('Loops cleared'); }
 
 function togglePause() {
   if (!loopHasAudio()) return;
@@ -2505,7 +2511,7 @@ function looperSuspend() {   // al ir a segundo plano
 // ----- interfaz del looper -----
 function buildLooper() {
   const wrap = $('looper');
-  const rec = document.createElement('button'); rec.className = 'lp-rec'; rec.id = 'lpRec'; rec.setAttribute('aria-label', 'Grabar');
+  const rec = document.createElement('button'); rec.className = 'lp-rec'; rec.id = 'lpRec'; rec.setAttribute('aria-label', 'Record');
   rec.innerHTML = '<span></span>'; wrap.appendChild(rec);
   rec.addEventListener('pointerdown', e => { e.preventDefault(); looperClick(); });
   for (let i = 0; i < 6; i++) {
@@ -2519,7 +2525,7 @@ function buildLooper() {
       loop.cur = i; renderLooper();
       if (t.buffer || t.state === 'rec') {
         c.classList.add('hold');
-        hold = setTimeout(() => { hold = null; c.classList.remove('hold'); clearTrack(i); toast('Pista ' + (i + 1) + ' borrada'); haptic(true); }, 700);
+        hold = setTimeout(() => { hold = null; c.classList.remove('hold'); clearTrack(i); toast('Track ' + (i + 1) + ' cleared'); haptic(true); }, 700);
       }
     });
     const end = () => { if (hold) clearTimeout(hold); hold = null; c.classList.remove('hold'); };
@@ -2527,7 +2533,7 @@ function buildLooper() {
     c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
     wrap.appendChild(c);
   }
-  const tr = document.createElement('button'); tr.className = 'lp-transport'; tr.id = 'lpTransport'; tr.setAttribute('aria-label', 'Reproducir o pausar');
+  const tr = document.createElement('button'); tr.className = 'lp-transport'; tr.id = 'lpTransport'; tr.setAttribute('aria-label', 'Play or pause');
   let th = null;
   tr.addEventListener('pointerdown', e => {
     e.preventDefault(); if (!loopHasAudio()) return;
@@ -2549,12 +2555,12 @@ function renderLooper() {
   const rec = $('lpRec'), cur = tracks[loop.cur];
   rec.className = 'lp-rec s-' + cur.state + (recEnabled() ? '' : ' off');
   const tr = $('lpTransport'); tr.innerHTML = loop.paused || !loopHasAudio() ? I.play : I.pause; tr.disabled = !loopHasAudio();
-  $('lpBars').textContent = loop.bars ? loop.bars + 'c' : 'libre'; $('lpBars').disabled = !!loop.len;
+  $('lpBars').textContent = loop.bars ? loop.bars + (loop.bars === 1 ? ' bar' : ' bars') : 'free'; $('lpBars').disabled = !!loop.len;
 }
 function looperStatus() {
   const rec = tracks.find(t => t.state === 'rec' || (t.state === 'armed' && t.countdown));
-  if (rec) return (rec.state === 'rec' ? 'rec ' : 'espera ') + (tracks.indexOf(rec) + 1);
-  if (loop.len) return (loop.paused ? 'pausa ' : 'loop ') + loop.len.toFixed(1) + 's';
+  if (rec) return (rec.state === 'rec' ? 'rec ' : 'waiting ') + (tracks.indexOf(rec) + 1);
+  if (loop.len) return (loop.paused ? 'paused ' : 'loop ') + loop.len.toFixed(1) + 's';
   return '';
 }
 
@@ -2604,7 +2610,7 @@ function seqBounce() {
   const free = tracks.find(t => t.state === 'off');
   if (!free || !recReady || loop.paused) { seqStop(); return; }
   const dur = beatSec() * seq.stepLen * seq.steps.length;
-  if (dur > MAX_LOOP) { toast('La secuencia es más larga que un loop'); seqStop(); return; }
+  if (dur > MAX_LOOP) { toast('The sequence is longer than a loop'); seqStop(); return; }
   const now = ctx.currentTime;
   const t0 = loop.len ? nextLoopPoint(now + 0.05) : seq.next - Math.floor((seq.next - now) / dur) * dur;
   // reinicia la secuencia justo en t0 para que el loop empiece por el primer paso
@@ -2616,14 +2622,14 @@ function seqBounce() {
   const t1 = t0 + (loop.len || dur);
   scheduleStop(free, t1, job);
   setTimeout(() => seqStop(), (t1 - now) * 1000 + 30);
-  toast('Grabando la secuencia en la pista ' + (loop.cur + 1));
+  toast('Recording the sequence on track ' + (loop.cur + 1));
   renderLooper();
 }
 
 // ===== MIXER =====
 function mixerPress(btn) {
   wheelMuteFixed.delete(btn);   // cada pulsación nueva vuelve a poder silenciar
-  if (btn === 6) { loop.metro = !loop.metro; toast('Metrónomo ' + (loop.metro ? 'activado' : 'desactivado')); renderPads(); return; }
+  if (btn === 6) { loop.metro = !loop.metro; toast('Metronome ' + (loop.metro ? 'activado' : 'desactivado')); renderPads(); return; }
   const t = tracks[btn]; if (!t.buffer) return;
   t.mute = !t.mute; applyMutesSafe(); loop.cur = btn; renderPads(); renderLooper();
 }
@@ -2632,7 +2638,7 @@ function mixerTool(which) {
   if (which === 'solo') { t.solo = !t.solo; applyMutesSafe(); }
   else if (which === 'down') { t.vol = Math.max(0, +(t.vol - 0.1).toFixed(2)); if (t.gain && ctx) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
   else if (which === 'up') { t.vol = Math.min(1.5, +(t.vol + 0.1).toFixed(2)); if (t.gain && ctx) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
-  toast('Pista ' + (target + 1) + (which === 'solo' ? (t.solo ? ' en solo' : ' sin solo') : ': ' + Math.round(t.vol * 100) + '%'));
+  toast('Track ' + (target + 1) + (which === 'solo' ? (t.solo ? ' soloed' : ' solo off') : ': ' + Math.round(t.vol * 100) + '%'));
   renderPads(); renderLooper();
 }
 
@@ -2666,12 +2672,12 @@ let micSink = null, micIdleTimer = null;
 function micErrorText(e) {
   const n = e && e.name;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
-    return window.isSecureContext === false ? 'La página no es segura (hace falta https)' : 'Este navegador no ofrece micrófono a las webs';
-  if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') return 'Micrófono bloqueado';
-  if (n === 'NotFoundError') return 'No se encuentra ningún micrófono';
-  if (n === 'InvalidStateError') return 'iOS no pudo iniciar el audio del micrófono';
-  if (n === 'NotReadableError' || n === 'AbortError') return 'El micrófono está ocupado por otra app';
-  return 'Error del micrófono' + (n ? ' (' + n + ')' : '');
+    return window.isSecureContext === false ? 'The page is not secure (https is required)' : 'This browser does not give web pages microphone access';
+  if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') return 'Microphone blocked';
+  if (n === 'NotFoundError') return 'No microphone found';
+  if (n === 'InvalidStateError') return 'iOS could not start the microphone audio';
+  if (n === 'NotReadableError' || n === 'AbortError') return 'The microphone is in use by another app';
+  return 'Microphone error' + (n ? ' (' + n + ')' : '');
 }
 let micPending = null;
 async function micStart(user) {
@@ -2715,9 +2721,9 @@ async function micOpenStream() {
   toast(micLastError.replace(/ \[.*\]$/, ''));
   return false;
 }
-const DIAG_TITLES = { 'set-diag': 'Diagnóstico', 'set-hapticTest': 'Vibración', 'set-mic_test': 'Micrófono' };
+const DIAG_TITLES = { 'set-diag': 'Diagnostics', 'set-hapticTest': 'Vibration', 'set-mic_test': 'Microphone' };
 function showDiag(text, id) {
-  if (setv) { setvShowDetail(DIAG_TITLES[id || 'set-mic_test'] || 'Informe', ((id || 'set-mic_test') === 'set-mic_test' ? String(text).replace(/ · /g, '\n') : String(text)), false); return; }
+  if (setv) { setvShowDetail(DIAG_TITLES[id || 'set-mic_test'] || 'Report', ((id || 'set-mic_test') === 'set-mic_test' ? String(text).replace(/ · /g, '\n') : String(text)), false); return; }
   const row = $(id || 'set-mic_test').closest('.row'); row.classList.add('wrap');
   let d = row.querySelector('.diag'); if (!d) { d = document.createElement('div'); d.className = 'diag'; row.appendChild(d); }
   d.textContent = text;
@@ -2725,32 +2731,32 @@ function showDiag(text, id) {
 async function runDiag() {
   const L = [], t = (k, v) => L.push(k + ': ' + v);
   t('navegador', navigator.userAgent.replace(/\s+/g, ' ').slice(0, 120));
-  t('ventana', innerWidth + '×' + innerHeight + ' @' + devicePixelRatio + (navigator.standalone ? ' · app instalada' : ''));
-  t('protocolo', location.protocol + ' · seguro: ' + (window.isSecureContext ? 'sí' : 'no'));
+  t('ventana', innerWidth + '×' + innerHeight + ' @' + devicePixelRatio + (navigator.standalone ? ' · installed app' : ''));
+  t('protocolo', location.protocol + ' · secure: ' + (window.isSecureContext ? 'yes' : 'no'));
   let a = 'ok';
-  try { ensureAudio(); } catch (e) { a = 'FALLA → ' + (e.message || e); logErr('diag-audio', e); }
-  t('audio', a + (ctx ? ' · ' + ctx.state + ' · ' + ctx.sampleRate + ' Hz · latencia base ' + (ctx.baseLatency != null ? Math.round(ctx.baseLatency * 1000) + ' ms' : '?') : ''));
+  try { ensureAudio(); } catch (e) { a = 'FAILS → ' + (e.message || e); logErr('diag-audio', e); }
+  t('audio', a + (ctx ? ' · ' + ctx.state + ' · ' + ctx.sampleRate + ' Hz · base latency ' + (ctx.baseLatency != null ? Math.round(ctx.baseLatency * 1000) + ' ms' : '?') : ''));
   let c;
   try {
     pressInner(0); await new Promise(r => setTimeout(r, 200));
-    c = held.length === 1 && voices.size >= 1 ? 'ok (debe haber sonado un acorde)' : 'NO se creó el acorde (pulsados ' + held.length + ', voces ' + voices.size + ')';
-  } catch (e) { c = 'FALLA → ' + (e.message || e); logErr('diag-acorde', e); }
+    c = held.length === 1 && voices.size >= 1 ? 'ok (a chord should have sounded)' : 'The chord was NOT created (pressed ' + held.length + ', voices ' + voices.size + ')';
+  } catch (e) { c = 'FAILS → ' + (e.message || e); logErr('diag-acorde', e); }
   try { releaseInner(0); } catch (e) {}
-  t('acorde de prueba', c);
-  t('parámetros de audio', apStatus);
-  t('worklet', ctx && ctx.audioWorklet ? (recWorkletLoaded === ctx ? 'cargado' : 'no cargado (usa la alternativa)') : 'no disponible');
-  t('muestras', typeof SAMPLE_DATA === 'undefined' ? 'samples.js NO cargó' : Object.keys(SAMPLE_DATA).length + ' definidas, ' + Object.keys(sampleBuf).length + ' listas');
-  t('MIDI', (navigator.requestMIDIAccess ? 'disponible' : 'no disponible') + ' · ajuste ' + (state.midi ? 'ACTIVADO' : 'apagado') + (midiAcc ? ' · entradas ' + midiAcc.inputs.size + ', salidas ' + midiAcc.outputs.size : ''));
-  t('estado', 'modo ' + state.mode + ' · ' + NOTE_NAMES[state.key] + ' · escala ' + state.scale + ' · sonido ' + state.sound + ' · tema ' + state.theme + ' · selección rápida ' + (quick ? 'ABIERTA' : 'cerrada'));
-  try { t('cachés', (await caches.keys()).join(', ') || 'ninguna'); } catch (e) { t('cachés', 'no consultables'); }
-  try { const r = await navigator.serviceWorker.getRegistrations(); t('service worker', r.length ? 'activo' + (navigator.serviceWorker.controller ? ' y controla la página' : '') : 'ninguno'); } catch (e) {}
+  t('test chord', c);
+  t('audio parameters', apStatus);
+  t('worklet', ctx && ctx.audioWorklet ? (recWorkletLoaded === ctx ? 'cargado' : 'not loaded (using the fallback)') : 'unavailable');
+  t('muestras', typeof SAMPLE_DATA === 'undefined' ? 'samples.js did NOT load' : Object.keys(SAMPLE_DATA).length + ' defined, ' + Object.keys(sampleBuf).length + ' ready');
+  t('MIDI', (navigator.requestMIDIAccess ? 'disponible' : 'unavailable') + ' · setting ' + (state.midi ? 'ON' : 'apagado') + (midiAcc ? ' · inputs ' + midiAcc.inputs.size + ', outputs ' + midiAcc.outputs.size : ''));
+  t('estado', 'mode ' + state.mode + ' · ' + NOTE_NAMES[state.key] + ' · scale ' + state.scale + ' · sound ' + state.sound + ' · theme ' + state.theme + ' · quick select ' + (quick ? 'OPEN' : 'cerrada'));
+  try { t('caches', (await caches.keys()).join(', ') || 'ninguna'); } catch (e) { t('caches', 'not queryable'); }
+  try { const r = await navigator.serviceWorker.getRegistrations(); t('service worker', r.length ? 'activo' + (navigator.serviceWorker.controller ? ' and controls the page' : '') : 'ninguno'); } catch (e) {}
   t('errores', errLog.length ? '\n' + errLog.map(e => ' · ' + e.t + ' [' + e.src + '] ' + e.msg + (e.where ? ' @ ' + e.where : '')).join('\n') : 'ninguno');
   showDiag(L.join('\n'), 'set-diag');
 }
 let resetArmed = false;
 async function resetApp() {
   const el = $('set-reset_app');
-  if (!resetArmed) { resetArmed = true; el.textContent = '¿Seguro?'; if (setv) setvRender(); setTimeout(() => { resetArmed = false; el.textContent = 'Restablecer'; if (setv) setvRender(); }, 3500); return; }
+  if (!resetArmed) { resetArmed = true; el.textContent = 'Sure?'; if (setv) setvRender(); setTimeout(() => { resetArmed = false; el.textContent = 'Reset'; if (setv) setvRender(); }, 3500); return; }
   try { for (const k of Object.keys(localStorage)) if (k.startsWith('notes-')) localStorage.removeItem(k); } catch (e) {}
   try { for (const k of await caches.keys()) await caches.delete(k); } catch (e) {}
   try { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); } catch (e) {}
@@ -2758,13 +2764,13 @@ async function resetApp() {
 }
 async function runMicTest() {
   const out = [];
-  out.push('https: ' + (window.isSecureContext ? 'sí' : 'no'));
-  out.push('pantalla de inicio: ' + (navigator.standalone ? 'sí' : 'no'));
-  out.push('API del micrófono: ' + (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? 'sí' : 'no'));
-  try { const p = await navigator.permissions.query({ name:'microphone' }); out.push('permiso: ' + p.state); } catch (e) { out.push('permiso: no consultable'); }
-  showDiag(out.join(' · ') + ' · probando…');
+  out.push('https: ' + (window.isSecureContext ? 'yes' : 'no'));
+  out.push('home screen: ' + (navigator.standalone ? 'yes' : 'no'));
+  out.push('microphone API: ' + (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? 'yes' : 'no'));
+  try { const p = await navigator.permissions.query({ name:'microphone' }); out.push('permission: ' + p.state); } catch (e) { out.push('permission: not queryable'); }
+  showDiag(out.join(' · ') + ' · testing…');
   const ok = await micStart('test');
-  out.push('resultado: ' + (ok ? 'el micrófono funciona' : (micLastError || 'falló')));
+  out.push('result: ' + (ok ? 'the microphone works' : (micLastError || 'failed')));
   if (ok) micStop('test');
   showDiag(out.join(' · '));
 }
@@ -2866,14 +2872,14 @@ function micRecordStop() {
   if (!micTake) return;
   const take = micTake; micTake = null; clearTimeout(take.timer);
   const f1 = Math.round(ctx.currentTime * ctx.sampleRate), n = Math.min(f1 - take.f0, Math.round(MIC_MAX * ctx.sampleRate));
-  if (n < ctx.sampleRate * 0.1) { toast('Grabación demasiado corta'); renderPads(); return; }
+  if (n < ctx.sampleRate * 0.1) { toast('Recording too short'); renderPads(); return; }
   // espera a que llegue el último bloque
   setTimeout(() => {
     const sr = ctx.sampleRate, data = new Float32Array(n);
     for (let i = 0; i < n; i++) data[i] = micRing.L[(take.f0 + i) % micRing.len];
     // recorta el silencio inicial y normaliza
     let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(data[i]));
-    if (peak < 0.005) { toast('No se captó sonido'); renderPads(); return; }
+    if (peak < 0.005) { toast('No sound was picked up'); renderPads(); return; }
     let s = 0; while (s < n && Math.abs(data[s]) < peak * 0.05) s++; s = Math.max(0, s - Math.round(sr * 0.005));
     const trimmed = data.subarray(s); const g = 0.9 / peak;
     const buf = ctx.createBuffer(1, trimmed.length, sr), ch = buf.getChannelData(0);
@@ -2884,7 +2890,7 @@ function micRecordStop() {
     buf._root = p ? Math.round(p.midi) : 60; buf._start = 0;
     sampleBuf.mic = buf; micSample = { root:buf._root, detected:!!p };
     saveMicSample(ch, sr, buf._root);
-    toast(p ? 'Afinado a Do (era ' + midiName(buf._root) + ')' : 'No se detectó afinación; se usa tal cual');
+    toast(p ? 'Tuned to C (was ' + midiName(buf._root) + ')' : 'No pitch detected; using it as it is');
     state.sound = 'micsample'; saveState(); syncSettings();
     setMode('lead'); micStop('sampler');
   }, 120);
@@ -3024,11 +3030,11 @@ function hapticTest() {   // botón «Probar» de Ajustes → Aspecto (se ejecut
   const ua = navigator.userAgent, m = /OS (\d+)_/.exec(ua), ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   try { if (navigator.vibrate) navigator.vibrate([20, 60, 20]); else { iosTick(); setTimeout(() => {}, 0); } } catch (e) {}
   const lines = [
-    'Sistema: ' + (ios ? 'iOS ' + (m ? m[1] : '?') : (/Android/.test(ua) ? 'Android' : 'ordenador')),
-    'App instalada: ' + ((navigator.standalone || matchMedia('(display-mode: standalone)').matches) ? 'sí' : 'no'),
-    'Método: ' + (navigator.vibrate ? 'vibración del sistema (Android)' : ios ? 'interruptor de iOS (necesita iOS 18 o posterior y «Hápticos del sistema» activados)' : 'no disponible en este dispositivo'),
+    'System: ' + (ios ? 'iOS ' + (m ? m[1] : '?') : (/Android/.test(ua) ? 'Android' : 'ordenador')),
+    'Installed app: ' + ((navigator.standalone || matchMedia('(display-mode: standalone)').matches) ? 'yes' : 'no'),
+    'Method: ' + (navigator.vibrate ? 'system vibration (Android)' : ios ? 'iOS switch (needs iOS 18 or later and "System Haptics" turned on)' : 'not available on this device'),
   ];
-  if (ios && m && +m[1] < 18) lines.push('Este iPhone tiene iOS ' + m[1] + ': la vibración desde una web necesita iOS 18 o posterior.');
+  if (ios && m && +m[1] < 18) lines.push('This iPhone has iOS ' + m[1] + ': vibration from a web page needs iOS 18 or later.');
   showDiag(lines.join('\n'), 'set-hapticTest');
 }
 function haptic(strong) {
@@ -3105,7 +3111,7 @@ function refresh() {
     }
     if (bassMidi == null && curSound().subOctave) bassMidi = ch.root - 12;
     let notes;
-    if (s.lead) { notes = [ch.root, null, null, curSound().subOctave ? ch.root - 12 : null, null, null]; name = NOTE_NAMES[ch.pc] + ' (nota)'; }
+    if (s.lead) { notes = [ch.root, null, null, curSound().subOctave ? ch.root - 12 : null, null, null]; name = NOTE_NAMES[ch.pc] + ' (note)'; }
     else notes = applyVoiceCount(slotNotes(upper, bassMidi), state.voices);
     for (const n of notes) if (n != null) midiNow.add(Math.max(0, Math.min(127, Math.round(n))));
     tones = sortNum(upper);
@@ -3171,7 +3177,7 @@ function setJoyDir(source, dir) {
   // En modo cromático, sin acorde pulsado, izquierda/derecha cambian la tonalidad
   if (state.joy === 'chromatic' && held.length === 0 && (dir === 'l' || dir === 'r')) {
     state.key = (state.key + (dir === 'r' ? 1 : 11)) % 12; saveState();
-    toast('Tonalidad: ' + NOTE_NAMES[state.key]);
+    toast('Key: ' + NOTE_NAMES[state.key]);
     renderPads(); renderScreen(false); syncSettings();
   }
   renderJoy(); checkPendingDir();
@@ -3188,26 +3194,26 @@ function toolInversion() {
   if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
   if (state.mode === 'mixer') { mixerTool('solo'); return; }
   state.inv[target] = (state.inv[target] + 1) % 3; saveState();
-  const names = ['posición fundamental', '1ª inversión', '2ª inversión'];
-  toast('Botón ' + (target + 1) + ': ' + names[state.inv[target]]);
+  const names = ['root position', '1st inversion', '2nd inversion'];
+  toast('Button ' + (target + 1) + ': ' + names[state.inv[target]]);
   if (held.length) refresh(); else renderPads();
 }
 function toolLock() {
   if (state.mode === 'hiro') { hiroTool(1); return; }
   if (state.mode === 'ear') { earTool(1); return; }
   if (NO_TOOLS.includes(state.mode)) return;
-  if (state.mode === 'seq') { seq.steps.pop(); renderModes(); renderScreen(false); renderPads(); toast('Último paso quitado'); return; }
+  if (state.mode === 'seq') { seq.steps.pop(); renderModes(); renderScreen(false); renderPads(); toast('Last step removed'); return; }
   if (state.mode === 'mixer') { mixerTool('down'); return; }
   if (state.locks[target]) {
     state.locks[target] = null; saveState();
-    toast('Botón ' + (target + 1) + ' liberado');
+    toast('Button ' + (target + 1) + ' released');
   } else {
     const dir = held.includes(target) ? dirFor(target) : lastDirUsed[target];
     if (!dir) return;
     const ch = resolveChord(Object.assign({}, state, { locks:[] }), target, dir);
     state.locks[target] = { rootBase:ch.rootBase, iv:ch.iv, suffix:ch.suffix };
     saveState();
-    toast('Botón ' + (target + 1) + ' fijado en ' + ch.name);
+    toast('Button ' + (target + 1) + ' locked at ' + ch.name);
   }
   if (held.length) refresh(); else renderPads();
 }
@@ -3217,20 +3223,20 @@ function toolOct(d) {
   if (state.mode === 'ear') { earTool(d < 0 ? 2 : 3); return; }
   if (NO_TOOLS.includes(state.mode)) return;
   if (state.mode === 'seq') {
-    if (d < 0) { seqStop(); seq.steps = []; renderModes(); renderScreen(false); renderPads(); toast('Secuencia borrada'); }
-    else { const L = [1, 2, 4]; seq.stepLen = L[(L.indexOf(seq.stepLen) + 1) % L.length]; renderPads(); toast('Paso: ' + (seq.stepLen === 4 ? '1 compás' : seq.stepLen + (seq.stepLen === 1 ? ' tiempo' : ' tiempos'))); }
+    if (d < 0) { seqStop(); seq.steps = []; renderModes(); renderScreen(false); renderPads(); toast('Sequence cleared'); }
+    else { const L = [1, 2, 4]; seq.stepLen = L[(L.indexOf(seq.stepLen) + 1) % L.length]; renderPads(); toast('Step: ' + (seq.stepLen === 4 ? '1 bar' : seq.stepLen + (seq.stepLen === 1 ? ' beat' : ' beats'))); }
     return;
   }
   if (state.mode === 'mixer') {
     if (d < 0) { mixerTool('up'); return; }
     const t = tracks[target]; if (!t.buffer) return;
-    if (clearArm === target) { clearArm = null; clearTrack(target); toast('Pista ' + (target + 1) + ' borrada'); renderPads(); }
-    else { clearArm = target; toast('Vuelve a pulsar para borrar la pista ' + (target + 1)); setTimeout(() => { if (clearArm === target) clearArm = null; }, 2500); }
+    if (clearArm === target) { clearArm = null; clearTrack(target); toast('Track ' + (target + 1) + ' cleared'); renderPads(); }
+    else { clearArm = target; toast('Press again to clear track ' + (target + 1)); setTimeout(() => { if (clearArm === target) clearArm = null; }, 2500); }
     return;
   }
   const v = Math.max(-2, Math.min(2, state.btnOct[target] + d));
   state.btnOct[target] = v; saveState();
-  toast('Botón ' + (target + 1) + ': octava ' + (v > 0 ? '+' + v : v));
+  toast('Button ' + (target + 1) + ': octave ' + (v > 0 ? '+' + v : v));
   if (held.length) refresh(); else renderPads();
 }
 
@@ -3270,28 +3276,28 @@ function renderTools() {
   if (m === 'seq') {
     const none = !seq.steps.length;
     setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play', { off: none });
-    setTool('tLock', 'minus', 'quitar', { off: none }); setTool('tOctDn', 'trash', 'borrar', { off: none });
-    setTool('tOctUp', 'step', 'paso ×' + seq.stepLen);
+    setTool('tLock', 'minus', 'remove', { off: none }); setTool('tOctDn', 'trash', 'clear', { off: none });
+    setTool('tOctUp', 'step', 'step ×' + seq.stepLen);
     $('targetLbl').textContent = 'Sequencer'; return;
   }
   if (m === 'mixer') {
     const t = tracks[target] || {};
     setTool('tInv', 'solo', 'solo', { on: !!t.solo, off: !t.buffer }); setTool('tLock', 'volDn', 'vol −', { off: !t.buffer });
-    setTool('tOctDn', 'volUp', 'vol +', { off: !t.buffer }); setTool('tOctUp', 'trash', 'borrar', { off: !t.buffer });
-    $('targetLbl').textContent = 'Pista ' + (target + 1); return;
+    setTool('tOctDn', 'volUp', 'vol +', { off: !t.buffer }); setTool('tOctUp', 'trash', 'clear', { off: !t.buffer });
+    $('targetLbl').textContent = 'Track ' + (target + 1); return;
   }
   if (m === 'hiro') {
     const pl = hiro.phase === 'count' || hiro.phase === 'play', res = hiro.phase === 'result', sp = state.hiroPractice && !pl && !res;
-    setTool('tInv', pl ? 'stop' : res ? 'next' : 'play', pl ? 'parar' : res ? 'siguiente' : 'jugar');
-    setTool('tLock', res ? 'replay' : 'practice', res ? 'repetir' : 'práctica', { on: !res && state.hiroPractice, off: pl });
-    setTool('tOctDn', 'minus', 'vel −', { off: !sp }); setTool('tOctUp', 'plus', Math.round(state.hiroSpeed * 100) + '%', { off: !sp });
+    setTool('tInv', pl ? 'stop' : res ? 'next' : 'play', pl ? 'stop' : res ? 'next' : 'play');
+    setTool('tLock', res ? 'replay' : 'practice', res ? 'replay' : 'practice', { on: !res && state.hiroPractice, off: pl });
+    setTool('tOctDn', 'minus', 'speed −', { off: !sp }); setTool('tOctUp', 'plus', Math.round(state.hiroSpeed * 100) + '%', { off: !sp });
     $('targetLbl').textContent = 'Notes Hero'; return;
   }
   if (m === 'ear') {
     const act = ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback', res = ear.phase === 'result';
-    setTool('tInv', act ? 'stop' : res ? 'next' : 'play', act ? 'parar' : res ? 'siguiente' : 'jugar');
-    setTool('tLock', 'replay', 'repetir', { off: ear.phase !== 'answer' && !res });
-    setTool('tOctDn', 'note', 'tónica', { off: ear.phase !== 'answer' }); setTool('tOctUp', 'none', '', { off: true });
+    setTool('tInv', act ? 'stop' : res ? 'next' : 'play', act ? 'stop' : res ? 'next' : 'play');
+    setTool('tLock', 'replay', 'replay', { off: ear.phase !== 'answer' && !res });
+    setTool('tOctDn', 'note', 'tonic', { off: ear.phase !== 'answer' }); setTool('tOctUp', 'none', '', { off: true });
     $('targetLbl').textContent = 'Ear Trainer'; return;
   }
   if (m === 'drum' || m === 'beat' || m === 'mic' || m === 'tuner') {
@@ -3303,7 +3309,7 @@ function renderTools() {
   const canLock = locked || !!(held.includes(target) ? dirFor(target) : lastDirUsed[target]);
   setTool('tInv', 'inv', 'inv', { off: state.vlead, on: state.inv[target] > 0 && !state.vlead }); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked, off: !canLock });
   setTool('tOctDn', 'down', 'oct −', { on: state.btnOct[target] < 0 }); setTool('tOctUp', 'up', 'oct +', { on: state.btnOct[target] > 0 });
-  $('targetLbl').textContent = 'Botón ' + (target + 1);
+  $('targetLbl').textContent = 'Button ' + (target + 1);
 }
 
 // ===== RENDER =====
@@ -3323,7 +3329,7 @@ function renderScreen(active) {
   $('sSound').textContent = named ? named.name : '';
   const p = modeParam();
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
-  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : '') : '';
+  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' recording' : '') : '';
   $('sMode').classList.remove('live');
   $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
     + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '') + (wavRec ? ' · audio ' + wavClock() : '');
@@ -3404,7 +3410,7 @@ function renderPads() {
     const qi = quick ? quickItems()[b] : null;
     if (quick) { label = qi ? qi.label : ''; el.className = 'cb' + (qi && qi.on ? ' cur' : ''); }
     el.querySelector('.cn').textContent = label;
-    el.setAttribute('aria-label', 'Botón ' + (b + 1) + (label ? ': ' + label : ''));
+    el.setAttribute('aria-label', 'Button ' + (b + 1) + (label ? ': ' + label : ''));
     const enabled = padEnabled(b);
     el.classList.toggle('off', !enabled); el.setAttribute('aria-disabled', enabled ? 'false' : 'true');
     const badges = [];
@@ -3605,22 +3611,23 @@ function setvSections() {
   for (const s of SETTINGS) {
     if (s.section) { cur = { name: s.section, rows: [] }; out.push(cur); continue; }
     if (!cur) continue;
+    if (s.when && !s.when()) continue;   // ajustes que solo existen con ciertas pantallas
     const row = s.el && s.el.closest('.row'); if (row && row.hidden) continue;
     if (s.type === 'preset') { cur.rows.push({ s, kind: 'load' }, { s, kind: 'save' }); continue; }
     cur.rows.push({ s, kind: s.type });
   }
-  const man = out.find(x => x.name === 'Manual'); if (man) man.rows = [{ s: { id: 'manual', label: 'Abrir el manual' }, kind: 'manual' }];
+  const man = out.find(x => x.name === 'Manual'); if (man) man.rows = [{ s: { id: 'manual', label: 'Open the manual' }, kind: 'manual' }];
   return out.filter(x => x.rows.length);
 }
 function setvRow() { if (!setv) return null; const secs = setvSections(), sec = secs[Math.min(setv.sec, secs.length - 1)]; return sec && setv.row >= 0 ? sec.rows[Math.min(setv.row, sec.rows.length - 1)] : null; }
-const SETV_LABEL = { reset_app: 'Restablecer la app', bk_import: 'Importar copia', tw_code: 'Código del instrumento' };
-function setvLabel(r) { if (SETV_LABEL[r.s.id]) return SETV_LABEL[r.s.id]; return r.kind === 'load' ? r.s.label + ' · cargar' : r.kind === 'save' ? r.s.label + ' · guardar' : r.s.label; }
+const SETV_LABEL = { reset_app: 'Reset the app', bk_import: 'Import backup', tw_code: 'Instrument code' };
+function setvLabel(r) { if (SETV_LABEL[r.s.id]) return SETV_LABEL[r.s.id]; return r.kind === 'load' ? r.s.label + ' · load' : r.kind === 'save' ? r.s.label + ' · save' : r.s.label; }
 function setvValue(r) {
   const el = r.s.el;
   if (r.kind === 'select') return el && el.selectedIndex >= 0 ? el.options[el.selectedIndex].text : '';
   if (r.kind === 'check') return el && el.checked ? 'On' : 'Off';
   if (r.kind === 'range') return el && el._out ? el._out.textContent : '';
-  if (r.kind === 'button') return (r.s.id === 'reset_app' && resetArmed) ? '¿Seguro?' : (r.s.text || '›');
+  if (r.kind === 'button') return (r.s.id === 'reset_app' && resetArmed) ? 'Sure?' : (r.s.text || '›');
   if (r.kind === 'tap') return 'tap';
   if (r.kind === 'load') return el && el._info ? el._info.textContent : '';
   if (r.kind === 'save') return '›';
@@ -3641,7 +3648,7 @@ function setvActivate(r) {
     else if (r.kind === 'tap') tapTempo();
     else if (r.kind === 'load') { if (presets[r.s.slot]) presetLoad(r.s.slot); }
     else if (r.kind === 'save') presetSave(r.s.slot);
-    else if (r.kind === 'code') { const snd = curSound(); setvShowDetail('Código del instrumento', snd.id + ' ' + JSON.stringify(state.tweaks[snd.id] || {}), true); return; }
+    else if (r.kind === 'code') { const snd = curSound(); setvShowDetail('Instrument code', snd.id + ' ' + JSON.stringify(state.tweaks[snd.id] || {}), true); return; }
     else if (r.kind === 'file') { if (r.s.el) r.s.el.click(); return; }   // el selector de archivos es del sistema
     else if (r.kind === 'manual') {   // el manual es lo único que sigue en la hoja (pendiente: modo hoja de papel)
       const sec = setvSections()[setv.sec].name; setvClose(); openSettings(); showTab(sec);
@@ -3657,7 +3664,7 @@ function setvShowDetail(title, text, copy) {   // un informe o un texto largo DE
 function setvBack() { if (!setv || !setv.detail) return; setv.detail = null; setvRender(); renderWheel(); }
 function setvCopy() {
   const t = setv && setv.detail && setv.detail.text; if (!t) return;
-  try { navigator.clipboard.writeText(t).then(() => toast('Copiado'), () => toast('No se pudo copiar')); } catch (e) { toast('No se pudo copiar'); }
+  try { navigator.clipboard.writeText(t).then(() => toast('Copied'), () => toast('Could not copy')); } catch (e) { toast('Could not copy'); }
 }
 function setvEsc() { if (setv && setv.detail) setvBack(); else setvClose(); }
 function setvOpen() {
@@ -3692,13 +3699,14 @@ function setvJoy(dir) {   // un paso al empujar; mantener repite (arriba/abajo p
   setvRep = setTimeout(again, 380);
 }
 function setvRender() {
+  puKick();
   const el = $('setv'); if (!el) return;
   $('screen').classList.toggle('setv-open', !!setv);
   if (!setv) { el.hidden = true; return; }
   el.hidden = false;
   $('setvNext').style.visibility = setv.detail ? 'hidden' : '';
   if (setv.detail) {   // informe / texto largo en la pantalla
-    $('setvSec').textContent = setv.detail.title; $('setvPos').textContent = setv.detail.copy ? 'Copiar' : ''; $('setvHead').classList.remove('cur');
+    $('setvSec').textContent = setv.detail.title; $('setvPos').textContent = setv.detail.copy ? 'Copy' : ''; $('setvHead').classList.remove('cur');
     const list = $('setvList'); list.innerHTML = '';
     const t = document.createElement('div'); t.className = 'setv-text'; t.textContent = setv.detail.text; list.appendChild(t);
     return;
@@ -3716,7 +3724,7 @@ function setvRender() {
     const adjustable = r.kind === 'select' || r.kind === 'range';
     if (adjustable) {
       const dec = mk('button', 'dec', '‹'), v = mk('span', 'v', setvValue(r)), inc = mk('button', 'inc', '›');
-      dec.setAttribute('aria-label', 'Anterior'); inc.setAttribute('aria-label', 'Siguiente');
+      dec.setAttribute('aria-label', 'Previous'); inc.setAttribute('aria-label', 'Next');
       onChipTap(dec, () => { setv.row = i; setvChange(r, -1); setvRender(); }, list);
       onChipTap(inc, () => { setv.row = i; setvChange(r, 1); setvRender(); }, list);
       if (r.kind === 'select') onChipTap(v, () => { setv.row = i; setvChange(r, 1); setvRender(); }, list);
@@ -3892,6 +3900,7 @@ function drawMenuGlyph(now) {
 }
 function glyphLoop(now) {   // 20 fotogramas por segundo, como una pantalla pequeña
   glyphRaf = null; if (!menu || menu.kind !== 'sound') return;
+  if ($('screen').classList.contains('pxui')) { glyphRaf = requestAnimationFrame(glyphLoop); return; }   // the pixel display draws the glyph itself
   if (now - glyphLast > (pxScale() > 1 ? 48 : 24)) { glyphLast = now; drawMenuGlyph(now); }
   glyphRaf = requestAnimationFrame(glyphLoop);
 }
@@ -3928,7 +3937,8 @@ function renderMenu() {
   $('menuTitle').textContent = title; $('menuPos').textContent = pos; $('menuVal').textContent = val;
   $('menuPrev').textContent = prev; $('menuNext').textContent = next; $('menuUp').textContent = up; $('menuDown').textContent = down;
   $('menuUp').disabled = !up; $('menuDown').disabled = !down;
-  el.classList.toggle('has-glyph', k === 'sound'); if (k === 'sound') { glyphStart(); drawMenuGlyph(); }
+  el.classList.toggle('has-glyph', k === 'sound'); if (k === 'sound') { glyphStart(); if (!(window.__pxui && $('screen').classList.contains('pxui'))) drawMenuGlyph(); }
+  puKick();
 }
 // Toques en la propia pantalla (para quien no use el joystick): vecinos = izquierda/derecha; pistas de abajo = arriba/abajo
 const menuTap = dir => () => { if (performance.now() - menuOpenedAt < 450) return; menuNav(dir); };   // ignora el toque que acaba de abrir el menú
@@ -4056,7 +4066,7 @@ function midiSetup() {
   if (!navigator.requestMIDIAccess) return;
   if (midiAcc) { midiBind(); return; }
   navigator.requestMIDIAccess().then(a => { midiAcc = a; a.onstatechange = midiBind; midiBind(); if (held.length) refresh(); })
-    .catch(() => { state.midi = false; saveState(); syncSettings(); toast('MIDI no disponible'); });
+    .catch(() => { state.midi = false; saveState(); syncSettings(); toast('MIDI unavailable'); });
 }
 if (state.midi) midiSetup();
 
@@ -4095,7 +4105,7 @@ async function wavToggle() {
     ensureAudio();
     wavRec = { chunks:[], frames:0, sr:ctx.sampleRate, node:null, full:false };
     wavAttach();
-    if (!wavRec.node) { wavRec = null; toast('No se pudo grabar el audio'); return; }
+    if (!wavRec.node) { wavRec = null; toast('Could not record the audio'); return; }
     wavTimer = setInterval(() => renderScreen(held.length > 0), 500);
     $('wavBtn').classList.add('on'); renderScreen(held.length > 0); return;
   }
@@ -4108,11 +4118,11 @@ async function wavToggle() {
   const name = 'notes-' + d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + '.wav';
   try {
     const file = new File([blob], name, { type:'audio/wav' });
-    if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:name }); toast('Audio guardado'); return; }
+    if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:name }); toast('Audio saved'); return; }
   } catch (e) { if (e && e.name === 'AbortError') return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-  toast('Audio guardado');
+  toast('Audio saved');
 }
 $('wavBtn').addEventListener('click', wavToggle);
 
@@ -4124,9 +4134,9 @@ const pct = { to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.roun
 const opts = list => () => list;
 const DIV_OPTS = [['off','Off'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16T'],['1/32','1/32']];
 
-const SCREENS = [['auto','Según la carcasa'],['ember','EMBER'],['matrix','MATRIX'],['moss','MOSS'],['phosphor','PHOSPHOR']];
+const SCREENS = [['auto','By case'],['ember','EMBER'],['matrix','MATRIX'],['moss','MOSS'],['phosphor','PHOSPHOR']];
 const SCREEN_OF = { vertex:'ember', pocket:'moss', carbon:'matrix', lunar:'ember', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa (AMBER: la OLED negra del Orchid)   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
-const THEMES = [['auto','Automático'],['carbon','CARBON'],['lunar','LUNAR'],['vertex','VERTEX'],['pocket','POCKET'],['amber','AMBER'],['ghost','GHOST']];
+const THEMES = [['auto','Automatic'],['carbon','CARBON'],['lunar','LUNAR'],['vertex','VERTEX'],['pocket','POCKET'],['amber','AMBER'],['ghost','GHOST']];
 const OLD_THEME = { dark:'carbon', light:'lunar', olive:'pocket', blue:'ghost', burgundy:'amber', alt:'ghost' };   // pieles de la fase 17 → carcasas
 const OLD_SCREEN = { oled:'ember', lcdg:'moss', lcdb:'matrix', hichord:'matrix' };
 const THEME_COLOR = { lunar:'#E0D9CF', carbon:'#29292A', vertex:'#BDBCBD', pocket:'#CCC4B5', amber:'#312E29', ghost:'#2E3532' };
@@ -4166,31 +4176,140 @@ function scopeSamples() {
   if (analyser.getFloatTimeDomainData) analyser.getFloatTimeDomainData(v);   // con decimales: la onda sale suave aunque sea muy pequeña (los bytes dan escalones de 1/128)
   else { analyser.getByteTimeDomainData(scopeData); for (let i = 0; i < n; i++) v[i] = (scopeData[i] - 128) / 128; }
   for (let i = 0; i < n; i++) mean += v[i]; mean /= n;
-  let pk = 0; for (let i = 0; i < n; i++) { v[i] -= mean; if (Math.abs(v[i]) > pk) pk = Math.abs(v[i]); }
-  return { v, n, pk };
+  // «BW limit» de los osciloscopios: media móvil de 5 muestras; quita el rizado de alta frecuencia que hace la traza nerviosa y estabiliza el disparo
+  const w = new Float32Array(n); for (let i = 0; i < n; i++) { let a = 0, c = 0; for (let k = -2; k <= 2; k++) { const j = i + k; if (j >= 0 && j < n) { a += v[j]; c++; } } w[i] = a / c - mean; }
+  let pk = 0; for (let i = 0; i < n; i++) if (Math.abs(w[i]) > pk) pk = Math.abs(w[i]);
+  return { v: w, n, pk };
 }
-// Cruces ascendentes por 0 V (con histéresis) y su periodo mediano
+// Cruces ascendentes por 0 V (con histéresis) y su periodo mediano. Solo cuenta un cruce si la señal SIGUE subiendo después (flanco limpio): así el disparo no salta con el ruido
 function scopeCrossings(sm) {
-  const { v, n, pk } = sm, h = Math.max(0.004, pk * 0.04), cr = []; let armed = v[0] < -h;
-  for (let i = 1; i < n; i++) { if (v[i] < -h) armed = true; else if (armed && v[i] >= 0) { const fr = v[i - 1] === v[i] ? 0 : (0 - v[i - 1]) / (v[i] - v[i - 1]); cr.push(i - 1 + Math.max(0, Math.min(1, fr))); armed = false; } }
+  const { v, n, pk } = sm, h = Math.max(0.006, pk * 0.12), cr = []; let armed = v[0] < -h;
+  for (let i = 1; i < n - 6; i++) { if (v[i] < -h) armed = true; else if (armed && v[i] >= 0 && v[i + 5] > v[i] + h * 0.5) { const fr = v[i - 1] === v[i] ? 0 : (0 - v[i - 1]) / (v[i] - v[i - 1]); cr.push(i - 1 + Math.max(0, Math.min(1, fr))); armed = false; } }
   let P = 0; if (cr.length >= 2) { const ds = []; for (let i = 1; i < cr.length; i++) ds.push(cr[i] - cr[i - 1]); ds.sort((x, y) => x - y); P = ds[Math.floor(ds.length / 2)]; }
   return { cr, P };
 }
+// Base de tiempos en escalones 1-2-5 con histéresis (como un selector SEC/DIV): solo cambia si lo que se ve queda fuera de 1,8–5,5 ciclos, y como mucho cada 0,4 s
+const TDIV_STEPS = [0.00002, 0.00005, 0.0001, 0.0002, 0.0005, 0.001, 0.002];
+let scopeTdiv = 0.0005, scopeTdivAt = 0, scopeP = 0;
+function scopeAutoTdiv(P, divs) {
+  if (!P || !ctx) return;
+  scopeP = scopeP ? scopeP * 0.8 + P * 0.2 : P;
+  const now = performance.now(); if (now - scopeTdivAt < 400) return;
+  const cycles = scopeTdiv * divs * ctx.sampleRate / scopeP; let i = TDIV_STEPS.indexOf(scopeTdiv); if (i < 0) i = 4;
+  if (cycles > 5.5 && i > 0) { i--; scopeTdivAt = now; } else if (cycles < 1.8 && i < TDIV_STEPS.length - 1) { i++; scopeTdivAt = now; }
+  scopeTdiv = TDIV_STEPS[i];
+}
 // Disparo de un osciloscopio: devuelve f(u) para u en 0..1 (0 = borde izquierdo de la pantalla = instante del disparo, 1 = borde derecho)
-function scopeTrigger(live) {
+function scopeTrigger(live, divs) {
   if (!live) { const z = () => 0; z.pk = 0; return z; }
   const sm = scopeSamples(), { v, n, pk } = sm;
   if (pk < 0.004) { const z = () => 0; z.pk = 0; return z; }   // sin señal: recta sobre el eje (0 V)
-  const { cr, P } = scopeCrossings(sm);
-  const span = Math.max(60, Math.min(Math.round(P ? P * 3 : 700), n - 80));   // muestras entre los dos bordes
-  let c0 = cr.find(c => c + span < n - 1); if (c0 == null) c0 = 0;
+  const { cr, P } = scopeCrossings(sm); scopeAutoTdiv(P, divs || 11);
+  const span = Math.max(60, Math.min(Math.round(scopeTdiv * (divs || 11) * ctx.sampleRate), n - 64));   // muestras entre los dos bordes
+  let c0 = cr.find(c => c > 24 && c + span < n - 2); if (c0 == null) c0 = 24;
   const f = u => { const x = c0 + u * span, i = Math.floor(x), fr = x - i; return v[i] + (v[Math.min(n - 1, i + 1)] - v[i]) * fr; };
   f.pk = pk; f.span = span; return f;
 }
 // Volts/div automático (como el «autoset» de un osciloscopio): escalones 1-2-5 con histéresis, para que la onda se vea siempre entre ±2,7 divisiones sin saltar de un fotograma a otro
 const VDIV_STEPS = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1];
-let scopeVdiv = 0.1;
-function scopeAutoVdiv(pk) { let i = VDIV_STEPS.indexOf(scopeVdiv); if (i < 0) i = 5; if (pk / scopeVdiv > 2.7 && i < VDIV_STEPS.length - 1) i++; else if (pk / scopeVdiv < 0.9 && i > 0) i--; scopeVdiv = VDIV_STEPS[i]; }
+let scopeVdiv = 0.1, scopePk = 0, scopeLow = 0;
+function scopeAutoVdiv(pk) {
+  scopePk = Math.max(pk, scopePk * 0.94);   // ataque inmediato, caída lenta: los finales de nota no hacen bailar la escala
+  let i = VDIV_STEPS.indexOf(scopeVdiv); if (i < 0) i = 5; const r = scopePk / scopeVdiv;
+  if (r > 2.7 && i < VDIV_STEPS.length - 1) { i++; scopeLow = 0; }
+  else if (r < 0.55 && i > 0) { if (++scopeLow > 36) { i--; scopeLow = 0; } }   // medio segundo seguido demasiado pequeña
+  else scopeLow = 0;
+  scopeVdiv = VDIV_STEPS[i];
+}
+// ===== MATRIX «Pixel display» (pilot) =====
+// The whole screen mirrored as a REAL 1-bit framebuffer (≈120×63 logical pixels, 3 CSS px each), like the HiChord OLED: bitmap font (Spleen 5×8 / 8×16, BSD-2, Frederic Cambus), icons, frames.
+// The DOM underneath keeps working and keeps its tap areas but is invisible (opacity 0); the canvas only reads its texts and draws them as pixels, so every behaviour (taps, long-press quick select, menus) is unchanged.
+// Settings, games, tuner keep the regular screen in this pilot. Setting «Pixel display» (MATRIX only).
+function pxuiState() { return (window.__pxui = window.__pxui || { raf: null, last: 0, fb: null, w: 0, h: 0, font: null }); }
+function pxFont() { const u = pxuiState(); return u.font || (u.font = JSON.parse(`{"f5":{"w":5,"h":8,"g":{" ":[0,0,0,0,0,0,0,0],"!":[4,4,4,4,4,0,4,0],"\\"":[10,10,10,0,0,0,0,0],"#":[0,10,31,10,10,31,10,0],"$":[4,14,20,12,6,6,28,4],"%":[2,18,20,4,8,10,18,16],"&":[4,10,10,12,21,18,13,0],"'":[4,4,4,0,0,0,0,0],"(":[2,4,8,8,8,8,4,2],")":[8,4,2,2,2,2,4,8],"*":[0,0,18,12,30,12,18,0],"+":[0,0,4,4,31,4,4,0],",":[0,0,0,0,0,4,4,8],"-":[0,0,0,0,30,0,0,0],".":[0,0,0,0,0,0,4,0],"/":[2,2,4,4,8,8,16,16],"0":[0,12,18,22,26,18,12,0],"1":[0,4,12,4,4,4,14,0],"2":[0,12,18,2,12,16,30,0],"3":[0,12,18,4,2,18,12,0],"4":[0,16,20,20,30,4,4,0],"5":[0,30,16,28,2,2,28,0],"6":[0,12,16,28,18,18,12,0],"7":[0,30,18,2,4,8,8,0],"8":[0,12,18,12,18,18,12,0],"9":[0,12,18,18,14,2,12,0],":":[0,0,0,4,0,0,4,0],";":[0,0,0,4,0,4,4,8],"<":[0,2,4,8,8,4,2,0],"=":[0,0,0,30,0,30,0,0],">":[0,8,4,2,2,4,8,0],"?":[12,18,2,4,8,0,8,0],"@":[0,12,18,22,22,16,14,0],"A":[0,12,18,18,30,18,18,0],"B":[0,28,18,28,18,18,28,0],"C":[0,14,16,16,16,16,14,0],"D":[0,28,18,18,18,18,28,0],"E":[0,14,16,28,16,16,14,0],"F":[0,14,16,16,28,16,16,0],"G":[0,14,16,22,18,18,14,0],"H":[0,18,18,30,18,18,18,0],"I":[0,14,4,4,4,4,14,0],"J":[0,14,4,4,4,4,24,0],"K":[0,18,18,28,18,18,18,0],"L":[0,16,16,16,16,16,14,0],"M":[0,18,30,30,18,18,18,0],"N":[0,18,26,26,22,22,18,0],"O":[0,12,18,18,18,18,12,0],"P":[0,28,18,18,28,16,16,0],"Q":[0,12,18,18,18,18,12,6],"R":[0,28,18,18,28,18,18,0],"S":[0,14,16,12,2,2,28,0],"T":[0,31,4,4,4,4,4,0],"U":[0,18,18,18,18,18,14,0],"V":[0,18,18,18,18,12,12,0],"W":[0,18,18,18,30,30,18,0],"X":[0,18,18,12,12,18,18,0],"Y":[0,18,18,18,14,2,28,0],"Z":[0,30,2,4,8,16,30,0],"[":[14,8,8,8,8,8,8,14],"\\\\":[16,16,8,8,4,4,2,2],"]":[14,2,2,2,2,2,2,14],"^":[0,4,10,17,0,0,0,0],"_":[0,0,0,0,0,0,0,30],"\`":[8,4,0,0,0,0,0,0],"a":[0,0,12,2,14,18,14,0],"b":[16,16,28,18,18,18,28,0],"c":[0,0,14,16,16,16,14,0],"d":[2,2,14,18,18,18,14,0],"e":[0,0,14,18,30,16,14,0],"f":[6,8,8,28,8,8,8,0],"g":[0,0,14,18,18,12,2,28],"h":[16,16,28,18,18,18,18,0],"i":[0,4,0,12,4,4,6,0],"j":[0,4,0,4,4,4,4,24],"k":[16,16,18,20,24,20,18,0],"l":[8,8,8,8,8,8,6,0],"m":[0,0,18,30,30,18,18,0],"n":[0,0,28,18,18,18,18,0],"o":[0,0,12,18,18,18,12,0],"p":[0,0,28,18,18,28,16,16],"q":[0,0,14,18,18,14,2,2],"r":[0,0,14,18,16,16,16,0],"s":[0,0,14,16,12,2,28,0],"t":[8,8,28,8,8,8,6,0],"u":[0,0,18,18,18,18,14,0],"v":[0,0,18,18,18,12,12,0],"w":[0,0,18,18,30,30,18,0],"x":[0,0,18,12,12,18,18,0],"y":[0,0,18,18,18,14,2,28],"z":[0,0,30,2,4,8,30,0],"{":[6,8,8,24,24,8,8,6],"|":[4,4,4,4,4,4,4,4],"}":[24,4,4,6,6,4,4,24],"~":[0,0,0,9,22,0,0,0]}},"f8":{"w":8,"h":16,"g":{" ":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"!":[0,0,24,24,24,24,24,24,24,0,24,24,0,0,0,0],"\\"":[0,102,102,102,102,0,0,0,0,0,0,0,0,0,0,0],"#":[0,0,108,108,254,108,108,108,108,254,108,108,0,0,0,0],"$":[0,16,126,208,208,208,124,22,22,22,22,252,16,0,0,0],"%":[0,0,6,102,108,12,24,24,48,54,102,96,0,0,0,0],"&":[0,0,56,108,108,108,56,112,218,204,204,122,0,0,0,0],"'":[0,24,24,24,24,0,0,0,0,0,0,0,0,0,0,0],"(":[0,14,24,48,48,96,96,96,96,48,48,24,14,0,0,0],")":[0,112,24,12,12,6,6,6,6,12,12,24,112,0,0,0],"*":[0,0,0,0,102,60,24,255,24,60,102,0,0,0,0,0],"+":[0,0,0,0,0,24,24,126,24,24,0,0,0,0,0,0],",":[0,0,0,0,0,0,0,0,0,0,24,24,48,0,0,0],"-":[0,0,0,0,0,0,0,126,0,0,0,0,0,0,0,0],".":[0,0,0,0,0,0,0,0,0,0,24,24,0,0,0,0],"/":[0,6,6,12,12,24,24,48,48,96,96,192,192,0,0,0],"0":[0,0,124,198,198,206,222,246,230,198,198,124,0,0,0,0],"1":[0,0,24,56,120,88,24,24,24,24,24,126,0,0,0,0],"2":[0,0,124,198,6,6,12,24,48,96,198,254,0,0,0,0],"3":[0,0,124,198,6,6,60,6,6,6,198,124,0,0,0,0],"4":[0,0,192,192,204,204,204,204,254,12,12,12,0,0,0,0],"5":[0,0,254,198,192,192,252,6,6,6,198,124,0,0,0,0],"6":[0,0,124,198,192,192,252,198,198,198,198,124,0,0,0,0],"7":[0,0,254,198,6,6,12,24,48,48,48,48,0,0,0,0],"8":[0,0,124,198,198,198,124,198,198,198,198,124,0,0,0,0],"9":[0,0,124,198,198,198,198,126,6,6,198,124,0,0,0,0],":":[0,0,0,0,0,24,24,0,0,0,24,24,0,0,0,0],";":[0,0,0,0,0,24,24,0,0,0,24,24,48,0,0,0],"<":[0,0,6,12,24,48,96,96,48,24,12,6,0,0,0,0],"=":[0,0,0,0,0,126,0,0,126,0,0,0,0,0,0,0],">":[0,0,96,48,24,12,6,6,12,24,48,96,0,0,0,0],"?":[0,0,124,198,6,12,24,48,48,0,48,48,0,0,0,0],"@":[0,0,0,124,194,218,218,218,218,222,192,124,0,0,0,0],"A":[0,0,124,198,198,198,254,198,198,198,198,198,0,0,0,0],"B":[0,0,252,198,198,198,252,198,198,198,198,252,0,0,0,0],"C":[0,0,126,192,192,192,192,192,192,192,192,126,0,0,0,0],"D":[0,0,252,198,198,198,198,198,198,198,198,252,0,0,0,0],"E":[0,0,126,192,192,192,248,192,192,192,192,126,0,0,0,0],"F":[0,0,126,192,192,192,248,192,192,192,192,192,0,0,0,0],"G":[0,0,126,192,192,192,222,198,198,198,198,126,0,0,0,0],"H":[0,0,198,198,198,198,254,198,198,198,198,198,0,0,0,0],"I":[0,0,126,24,24,24,24,24,24,24,24,126,0,0,0,0],"J":[0,0,126,24,24,24,24,24,24,24,24,240,0,0,0,0],"K":[0,0,198,198,198,204,248,204,198,198,198,198,0,0,0,0],"L":[0,0,192,192,192,192,192,192,192,192,192,126,0,0,0,0],"M":[0,0,198,238,254,214,198,198,198,198,198,198,0,0,0,0],"N":[0,0,198,198,230,230,214,214,206,206,198,198,0,0,0,0],"O":[0,0,124,198,198,198,198,198,198,198,198,124,0,0,0,0],"P":[0,0,252,198,198,198,252,192,192,192,192,192,0,0,0,0],"Q":[0,0,124,198,198,198,198,198,198,214,214,124,24,12,0,0],"R":[0,0,252,198,198,198,252,198,198,198,198,198,0,0,0,0],"S":[0,0,126,192,192,192,124,6,6,6,6,252,0,0,0,0],"T":[0,0,255,24,24,24,24,24,24,24,24,24,0,0,0,0],"U":[0,0,198,198,198,198,198,198,198,198,198,126,0,0,0,0],"V":[0,0,198,198,198,198,198,198,198,108,56,16,0,0,0,0],"W":[0,0,198,198,198,198,198,198,214,254,238,198,0,0,0,0],"X":[0,0,198,198,198,108,56,108,198,198,198,198,0,0,0,0],"Y":[0,0,198,198,198,198,126,6,6,6,6,252,0,0,0,0],"Z":[0,0,254,6,6,12,24,48,96,192,192,254,0,0,0,0],"[":[0,62,48,48,48,48,48,48,48,48,48,48,62,0,0,0],"\\\\":[0,192,192,96,96,48,48,24,24,12,12,6,6,0,0,0],"]":[0,124,12,12,12,12,12,12,12,12,12,12,124,0,0,0],"^":[0,16,56,108,198,0,0,0,0,0,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,254,0],"\`":[0,48,24,12,0,0,0,0,0,0,0,0,0,0,0,0],"a":[0,0,0,0,0,124,6,126,198,198,198,126,0,0,0,0],"b":[0,0,192,192,192,252,198,198,198,198,198,252,0,0,0,0],"c":[0,0,0,0,0,126,192,192,192,192,192,126,0,0,0,0],"d":[0,0,6,6,6,126,198,198,198,198,198,126,0,0,0,0],"e":[0,0,0,0,0,126,198,198,254,192,192,126,0,0,0,0],"f":[0,0,30,48,48,48,124,48,48,48,48,48,0,0,0,0],"g":[0,0,0,0,0,126,198,198,198,198,198,124,6,6,252,0],"h":[0,0,192,192,192,252,198,198,198,198,198,198,0,0,0,0],"i":[0,0,24,24,0,56,24,24,24,24,24,28,0,0,0,0],"j":[0,0,24,24,0,24,24,24,24,24,24,24,24,24,112,0],"k":[0,0,192,192,192,204,216,240,240,216,204,198,0,0,0,0],"l":[0,0,48,48,48,48,48,48,48,48,48,28,0,0,0,0],"m":[0,0,0,0,0,236,214,214,214,214,198,198,0,0,0,0],"n":[0,0,0,0,0,252,198,198,198,198,198,198,0,0,0,0],"o":[0,0,0,0,0,124,198,198,198,198,198,124,0,0,0,0],"p":[0,0,0,0,0,252,198,198,198,198,198,252,192,192,192,0],"q":[0,0,0,0,0,126,198,198,198,198,198,126,6,6,6,0],"r":[0,0,0,0,0,126,198,192,192,192,192,192,0,0,0,0],"s":[0,0,0,0,0,126,192,192,124,6,6,252,0,0,0,0],"t":[0,0,48,48,48,124,48,48,48,48,48,30,0,0,0,0],"u":[0,0,0,0,0,198,198,198,198,198,198,126,0,0,0,0],"v":[0,0,0,0,0,198,198,198,198,108,56,16,0,0,0,0],"w":[0,0,0,0,0,198,198,214,214,214,214,110,0,0,0,0],"x":[0,0,0,0,0,198,108,56,56,108,198,198,0,0,0,0],"y":[0,0,0,0,0,198,198,198,198,198,198,126,6,6,252,0],"z":[0,0,0,0,0,254,6,12,24,48,96,254,0,0,0,0],"{":[0,14,24,24,24,24,112,112,24,24,24,24,14,0,0,0],"|":[0,24,24,24,24,24,24,24,24,24,24,24,24,0,0,0],"}":[0,112,24,24,24,24,14,14,24,24,24,24,112,0,0,0],"~":[0,0,0,0,0,0,50,126,76,0,0,0,0,0,0,0],"á":[0,12,24,48,0,124,6,126,198,198,198,126,0,0,0,0],"é":[0,12,24,48,0,126,198,198,254,192,192,126,0,0,0,0],"í":[0,12,24,48,0,56,24,24,24,24,24,28,0,0,0,0],"ó":[0,12,24,48,0,124,198,198,198,198,198,124,0,0,0,0],"ú":[0,12,24,48,0,198,198,198,198,198,198,126,0,0,0,0],"ñ":[0,50,126,76,0,252,198,198,198,198,198,198,0,0,0,0],"Ñ":[50,76,0,198,230,230,214,214,206,206,198,198,0,0,0,0],"ü":[0,0,108,108,0,198,198,198,198,198,198,126,0,0,0,0],"Á":[24,48,0,124,198,198,198,254,198,198,198,198,0,0,0,0],"É":[24,48,0,126,192,192,192,248,192,192,192,126,0,0,0,0],"Í":[12,24,0,126,24,24,24,24,24,24,24,126,0,0,0,0],"Ó":[24,48,0,124,198,198,198,198,198,198,198,124,0,0,0,0],"Ú":[24,48,0,198,198,198,198,198,198,198,198,126,0,0,0,0],"¿":[0,0,24,24,0,24,24,48,96,192,198,124,0,0,0,0],"¡":[0,0,24,24,0,24,24,24,24,24,24,24,0,0,0,0],"°":[0,56,108,108,56,0,0,0,0,0,0,0,0,0,0,0],"·":[0,0,0,0,0,0,0,24,24,0,0,0,0,0,0,0],"±":[0,0,0,0,0,24,24,126,24,24,0,126,0,0,0,0],"×":[0,0,0,0,0,198,108,56,56,108,198,0,0,0,0,0],"÷":[0,0,0,0,24,24,0,126,0,24,24,0,0,0,0,0],"µ":[0,0,0,0,0,204,204,204,204,204,204,246,192,192,192,0],"▲":[0,0,0,0,0,16,56,56,124,124,254,254,0,0,0,0],"▼":[0,0,0,0,0,254,254,124,124,56,56,16,0,0,0,0],"‹":[0,0,0,0,0,0,12,24,48,24,12,0,0,0,0,0],"›":[0,0,0,0,0,0,48,24,12,24,48,0,0,0,0,0]}}}`)); }
+function puWanted() { return !!state.pixelUi && document.documentElement.dataset.screen === 'matrix' && !setv && (!!menu || !OWN_TITLE.includes(state.mode)) && !document.hidden; }   // a menu is always drawn in pixels, even over a game's mode (menus cannot open while playing)
+function puPx(x, y, v) { const u = pxuiState(); x = Math.round(x); y = Math.round(y); if (x >= 0 && x < u.w && y >= 0 && y < u.h) u.fb[y * u.w + x] = v === 0 ? 0 : 1; }
+function puRect(x, y, w, h, v) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) puPx(x + i, y + j, v); }
+function puFrame(x, y, w, h, v) { puRect(x, y, w, 1, v); puRect(x, y + h - 1, w, 1, v); puRect(x, y, 1, h, v); puRect(x + w - 1, y, 1, h, v); }
+function puLine(x0, y0, x1, y1, v) { x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1); const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1; let e = dx + dy; for (;;) { puPx(x0, y0, v); if (x0 === x1 && y0 === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx; } if (e2 <= dx) { e += dx; y0 += sy; } } }
+function puCircle(cx, cy, r, v, fill) { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) { const d = Math.sqrt(x * x + y * y); if (fill ? d <= r + 0.3 : (d <= r + 0.35 && d > r - 0.95)) puPx(cx + x, cy + y, v); } }
+function puTri(x, y, w, dir) { for (let i = 0; i < w; i++) { const h = w - i; for (let j = -h + 1; j < h; j++) puPx(dir === 'r' ? x + i : x - i, y + j); } }
+function puMap(s) { return String(s).replace(/▲/g, '^').replace(/▼/g, 'v').replace(/[–—−]/g, '-').replace(/‹/g, '<').replace(/›/g, '>').replace(/…/g, '...').replace(/[·•]/g, '-').replace(/×/g, 'x').replace(/°/g, 'o').replace(/[^\x20-\x7E]/g, '?'); }
+function puText(str, x, y, o) {
+  o = o || {}; const f = pxFont()[o.font || 'f5'], sc = o.scale || 1, v = o.v === 0 ? 0 : 1, adv = (f.w + 1) * sc; str = puMap(str);
+  const w = str.length * adv - sc; let cx = o.align === 'c' ? x - Math.floor(w / 2) : o.align === 'r' ? x - w : x;
+  for (const ch of str) { const rows = f.g[ch] || f.g['?']; if (rows) for (let r = 0; r < f.h; r++) for (let c = 0; c < f.w; c++) if ((rows[r] >> (f.w - 1 - c)) & 1) puRect(cx + c * sc, y + r * sc, sc, sc, v); cx += adv; }
+  return w;
+}
+function puWidth(str, font, sc) { const f = pxFont()[font || 'f5']; return puMap(str).length * (f.w + 1) * (sc || 1) - (sc || 1); }
+function puBig(str, cx, y, maxW) { const sc = puWidth(str, 'f8', 2) <= maxW ? 2 : 1; if (puWidth(str, 'f8', sc) > maxW) { puText(str, cx, y + 4, { align: 'c' }); return; } puText(str, cx, y + (sc === 1 ? 8 : 0), { font: 'f8', scale: sc, align: 'c' }); }
+function puName(str, cx, y, maxW) { const sc = puWidth(str, 'f5', 2) <= maxW ? 2 : 1; puText(str, cx, y + (sc === 1 ? 4 : 0), { scale: sc, align: 'c' }); }   // selector names: 5×8 font, doubled when it fits
+function puGear(x, y) { puCircle(x + 3, y + 3, 2, 0); [[3, 0], [3, 6], [0, 3], [6, 3], [1, 1], [5, 1], [1, 5], [5, 5]].forEach(q => puPx(x + q[0], y + q[1], 0)); }
+function puIcon(name, x, y, t) {
+  const R = (a, b, c, d, v) => puRect(x + a, y + b, c, d, v), L = (a, b, c, d) => puLine(x + a, y + b, x + c, y + d), C = (cx, cy, r, f) => puCircle(x + cx, y + cy, r, 1, f);
+  if (name === 'play') { puFrame(x + 1, y + 3, 22, 18); for (let i = 1; i < 4; i++) R(1 + i * 5 + (i > 1 ? 1 : 0), 3, 1, 18); R(5, 3, 3, 10); R(11, 3, 3, 10); R(17, 3, 3, 10); }
+  else if (name === 'strum') { for (let i = 0; i < 6; i++) R(3 + i * 3, 1, 1, 22); const k = Math.floor(t * 6) % 6; for (let i = 0; i <= k; i++) R(2 + i * 3, 11, 3, 2); L(0, 22, 22, 4); }
+  else if (name === 'lead') { C(8, 18, 4, true); R(11, 3, 2, 16); R(11, 3, 9, 3); R(18, 5, 2, 6); }
+  else if (name === 'drone') { R(1, 11, 22, 2); for (let i = 0; i < 4; i++) { const hh = 4 + ((Math.floor(t * 4) + i) % 3) * 3; R(3 + i * 6, 12 - hh, 2, hh * 2); } }
+  else if (name === 'arp') { for (let i = 0; i < 5; i++) R(1 + i * 5, 20 - i * 4 - 3, 4, i * 4 + 4); R(1 + (Math.floor(t * 5) % 5) * 5, 0, 4, 2); }
+  else if (name === 'repeat') { C(12, 12, 9, false); R(8, 2, 10, 4, 0); puTri(x + 13, y + 4, 4, 'r'); R(6, 18, 10, 4, 0); puTri(x + 11, y + 20, 4, 'l'); }
+  else if (name === 'seq') { for (let j = 0; j < 2; j++) for (let i = 0; i < 4; i++) { if ((i + j * 4) === Math.floor(t * 3) % 8) R(1 + i * 6, 3 + j * 10, 5, 8); else puFrame(x + 1 + i * 6, y + 3 + j * 10, 5, 8); } }
+  else if (name === 'drum' || name === 'beat') { C(12, 14, 9, false); R(3, 14, 18, 8, 0); puFrame(x + 3, y + 14, 18, 7); R(4, 7, 17, 1); L(2, 1, 11, 9); L(22, 1, 13, 9); if (name === 'beat') { R(9, 17, 6, 1); } }
+  else if (name === 'hiro') { R(0, 12, 24, 1); R(17, 5, 1, 15); C(4 + Math.floor(t * 8) % 14, 12, 3, false); }
+  else if (name === 'ear') { C(12, 11, 9, false); C(12, 11, 5, false); R(7, 10, 8, 4, 0); C(11, 11, 2, false); L(12, 20, 14, 23); }
+  else if (name === 'tuner') { for (let a = -50; a <= 50; a += 10) { const r = a * Math.PI / 180 * 0.8; L(12 + Math.sin(r) * 10, 20 - Math.cos(r) * 10, 12 + Math.sin(r) * 13, 20 - Math.cos(r) * 13); } const sw = Math.sin(t * 2) * 30 * Math.PI / 180; L(12, 20, 12 + Math.sin(sw) * 11, 20 - Math.cos(sw) * 11); C(12, 20, 1, true); }
+  else if (name === 'mic') { puFrame(x + 8, y + 1, 8, 13); R(12, 3, 1, 9); L(5, 12, 5, 15); L(5, 15, 8, 18); L(19, 12, 19, 15); L(19, 15, 16, 18); R(8, 18, 8, 1); R(12, 18, 1, 4); R(8, 22, 8, 1); }
+  else if (name === 'mixer') { for (let i = 0; i < 3; i++) { R(4 + i * 8, 1, 1, 22); const yy = 4 + ((Math.sin(t * 1.6 + i * 2) + 1) * 7 | 0); R(1 + i * 8, yy, 7, 3); } }
+  else C(12, 12, 8, false);
+}
+function puT(id) { const e = $(id); return e ? e.textContent : ''; }
+function puIndicators(w, h, t) {   // bottom right: joystick compass always; record ring only while recording; wave box only when «Wave» is on (mirrors the DOM state)
+  const rec = $('wavBtn') && ($('wavBtn').classList.contains('on') || $('wavBtn').classList.contains('rec')), osc = !!state.osc; let x0 = w - 12;
+  document.querySelectorAll('#sDir circle').forEach(c => { const x = w - 9 + Math.round((+c.getAttribute('cx') - 10) / 7 * 3) + 3, y = h - 8 + Math.round((+c.getAttribute('cy') - 10) / 7 * 3) + 3; if (c.classList.contains('on')) puRect(x - 1, y - 1, 2, 2, 1); else puPx(x, y, 1); });
+  if (osc) { puRect(x0 - 14, h - 9, 13, 8, 1); for (let i = 0; i < 11; i++) puPx(x0 - 13 + i, h - 5 + Math.round(Math.sin(i / 10 * 6.28 * 1.25) * 2), 0); x0 -= 16; }
+  if (rec) { puCircle(x0 - 3, h - 5, 3, 1, true); x0 -= 8; }
+  return x0;
+}
+function puPlay(t, w, h) {
+  puRect(0, 0, w, 9, 1); puText(puT('sKey').toUpperCase(), 2, 0, { v: 0 }); puText(puT('sSound').toUpperCase(), w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+  const name = puT('chordName'), el = $('chordName'), idle = !el || el.classList.contains('idle') || !name || name === '—';
+  if (idle) { if (Math.floor(t * 2) % 2 === 0) puRect(4, 13, 7, 16, 1); } else puBig(name, Math.floor(w / 2) - 0, 10, w - 6);
+  const cy = Math.round(h * 0.77);
+  if (state.osc && analyser && ctx && ctx.state === 'running') { analyser.getByteTimeDomainData(scopeData); let prev = null; for (let x = 0; x < w; x++) { const v = (scopeData[Math.min(699, Math.floor(x / w * 700))] - 128) / 128, y = Math.round(cy - v * 6), y0 = prev == null ? y : prev; puRect(x, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; } }
+  else for (let x = 0; x < w; x += 2) puPx(x, cy);   // dotted line = the dim rest line
+  const x0 = puIndicators(w, h, t), short = puT('sMode').toUpperCase().replace('SEQUENCER', 'SEQ').replace('DRUM LOOP', 'LOOP').replace('MIC SAMPLE', 'MIC').replace('NOTES HERO', 'HERO').replace('EAR TRAINER', 'EAR').replace('TIGHT KIT', 'TIGHT').replace(' · ', ' ');
+  puText(short.slice(0, Math.max(4, Math.floor((x0 - 3) / 6))), 2, h - 8);
+}
+function puMenu(t, w, h) {
+  const k = menu.kind; puRect(0, 0, w, 9, 1); puText(puT('menuTitle').toUpperCase(), 2, 0, { v: 0 }); puText(puT('menuPos').toUpperCase(), w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+  const fx = 8, fy = 11, fw = w - 16, fh = h - 22, mid = fy + Math.floor(fh / 2); puFrame(fx, fy, fw, fh);
+  puTri(fx + 5, mid, 5, 'r'); puTri(fx + fw - 6, mid, 5, 'l');
+  const val = puT('menuVal');
+  if (k === 'sound') {
+    const n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 12, amp = 9; let prev = null;
+    for (let i = 0; i < n; i++) { const y = Math.round(gy - pts[i] * amp), y0 = prev == null ? y : prev; puRect(fx + 15 + i, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; }
+    puName(val, Math.floor(w / 2), fy + fh - 17, fw - 24);
+  } else if (k === 'mode') { puIcon(state.mode, Math.floor(w / 2) - 12, fy + 2, t); puName(val, Math.floor(w / 2), fy + fh - 17, fw - 24); }
+  else puBig(val, Math.floor(w / 2), mid - 8, fw - 24);
+  puText(puT('menuUp').toUpperCase(), 2, h - 8); puText(puT('menuDown').toUpperCase(), w - 2, h - 8, { align: 'r' });
+}
+function puFrameDraw(now) {
+  const c = $('pxui'); if (!c) return;
+  const pxm = pxCanvas(c, 3); if (!pxm) return;
+  const u = pxuiState(), { w, h } = pxm; if (u.w !== w || u.h !== h || !u.fb) { u.w = w; u.h = h; u.fb = new Uint8Array(w * h); } else u.fb.fill(0);
+  const t = now / 1000; if (menu) puMenu(t, w, h); else puPlay(t, w, h);
+  const ts = $('toast'); if (ts && ts.classList.contains('show') && ts.textContent) { puRect(0, h - 9, w, 9, 1); puText(ts.textContent.toUpperCase().slice(0, Math.floor((w - 4) / 6)), 2, h - 9, { v: 0 }); }
+  const g = c.getContext('2d'), im = g.createImageData(w, h), rgb = cssRgb(getComputedStyle(document.documentElement).getPropertyValue('--panel-ink'));
+  for (let i = 0; i < u.fb.length; i++) if (u.fb[i]) { const j = i * 4; im.data[j] = rgb[0]; im.data[j + 1] = rgb[1]; im.data[j + 2] = rgb[2]; im.data[j + 3] = 255; }
+  g.putImageData(im, 0, 0);
+}
+function puTick(now) {
+  const u = pxuiState(); u.raf = null; const want = puWanted(), scr = $('screen'); if (!scr) return;
+  scr.classList.toggle('pxui', want); if (!want) return;
+  if (now - u.last > 45) { u.last = now; try { puFrameDraw(now); } catch (e) { logErr('pixel display', e); scr.classList.remove('pxui'); state.pixelUi = false; return; } }
+  u.raf = requestAnimationFrame(puTick);
+}
+function puKick() { const u = pxuiState(); if (!u.raf) u.raf = requestAnimationFrame(puTick); }
 function scopeWanted() { return !document.hidden && (state.osc || document.documentElement.dataset.screen === 'phosphor'); }
 function scopeKick() { if (!scopeRaf && scopeWanted()) scopeRaf = requestAnimationFrame(drawScope); }
 // ===== PHOSPHOR: osciloscopio simulado =====
@@ -4209,31 +4328,31 @@ function phosphorScope() {
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const xy = state.scopeMode === 'xy', live = analyser && ctx && ctx.state === 'running', cell = H / 6;
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.lineJoin = 'round'; g.lineCap = 'round';
-  g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + (xy ? 0.34 : 0.72) + ')'; g.fillRect(0, 0, W, H);   // decaimiento del fósforo
+  g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + (xy ? 0.58 : 0.8) + ')'; g.fillRect(0, 0, W, H);   // decaimiento del fósforo
   g.globalCompositeOperation = 'lighter';
   const sm = live ? scopeSamples() : null, sig = sm && sm.pk >= 0.004;
   if (sig) scopeAutoVdiv(sm.pk);
   const unit = cell / scopeVdiv;   // píxeles por unidad de señal
   let xs, ys, readT = '';
   if (!xy) {
-    const frame = scopeTrigger(live), N = Math.max(64, Math.min(900, Math.round(W * 1.5)));
+    const frame = scopeTrigger(live, W / cell), N = Math.max(64, Math.min(900, Math.round(W * 1.5)));
     xs = new Array(N); ys = new Array(N);
     for (let i = 0; i < N; i++) { xs[i] = i / (N - 1) * W; ys[i] = H / 2 - frame(i / (N - 1)) * unit; }
-    if (frame.span && ctx) readT = scopeUnit(frame.span / ctx.sampleRate / (W / cell), 's') + '/div';
+    if (frame.span && ctx) readT = scopeUnit(scopeTdiv, 's') + '/div';
   } else if (sig) {
-    const { cr, P } = scopeCrossings(sm), d = Math.max(4, Math.round((P || 96) / 4)), M = Math.min(sm.n - d - 1, 640), i0 = sm.n - M;
+    const { cr, P } = scopeCrossings(sm), d = Math.max(4, Math.round((P || 96) / 4)), M = Math.min(sm.n - d - 1, 420), i0 = sm.n - M;
     xs = new Array(M); ys = new Array(M);
     for (let k = 0; k < M; k++) { const i = i0 + k; xs[k] = W / 2 + sm.v[i - d] * unit; ys[k] = H / 2 - sm.v[i] * unit; }
   } else { xs = [W / 2, W / 2 + 0.01]; ys = [H / 2, H / 2]; }
   // luz por tramo ∝ 1/velocidad, en SCOPE_BINS niveles
   const bins = Array.from({ length: SCOPE_BINS }, () => []);
   for (let i = 1; i < xs.length; i++) { const sp = Math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]); bins[Math.min(SCOPE_BINS - 1, Math.floor(Math.min(1, sp / (xy ? 9 : 5)) * (SCOPE_BINS - 1)))].push(i); }
-  const gain = xy ? 0.3 : 1;
+  const gain = xy ? 0.42 : 1;
   const pass = (w, col, a0) => { g.lineWidth = w; g.strokeStyle = col; bins.forEach((b, k) => { if (!b.length) return; g.globalAlpha = Math.max(0.03, a0 * (1 - k / SCOPE_BINS * 0.92)) * gain; g.beginPath(); for (const i of b) { g.moveTo(xs[i - 1], ys[i - 1]); g.lineTo(xs[i], ys[i]); } g.stroke(); }); };
-  pass(6, 'rgb(30,200,95)', 0.11); pass(2.8, 'rgb(80,255,150)', 0.34); pass(1.2, 'rgb(215,255,230)', 0.85);
+  pass(4, 'rgb(30,200,95)', 0.07); pass(2, 'rgb(80,255,150)', 0.26); pass(1.1, 'rgb(215,255,230)', 0.9);
   // el punto del haz (en XY es el último punto; sin señal, el punto quieto del centro)
   const lx = xs[xs.length - 1], ly = ys[ys.length - 1];
-  if (xy) { g.globalAlpha = sig ? 0.55 : 0.9; const rg = g.createRadialGradient(lx, ly, 0, lx, ly, sig ? 7 : 9); rg.addColorStop(0, 'rgba(235,255,240,1)'); rg.addColorStop(0.25, 'rgba(110,255,170,.7)'); rg.addColorStop(1, 'rgba(30,220,110,0)'); g.fillStyle = rg; g.beginPath(); g.arc(lx, ly, sig ? 7 : 9, 0, 7); g.fill(); }
+  if (xy) { g.globalAlpha = sig ? 0.5 : 0.85; const rg = g.createRadialGradient(lx, ly, 0, lx, ly, sig ? 5 : 8); rg.addColorStop(0, 'rgba(235,255,240,1)'); rg.addColorStop(0.25, 'rgba(110,255,170,.7)'); rg.addColorStop(1, 'rgba(30,220,110,0)'); g.fillStyle = rg; g.beginPath(); g.arc(lx, ly, sig ? 5 : 8, 0, 7); g.fill(); }
   g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   // lectura de las escalas (calibradas en pantalla): volts/div y time/div
   const t = performance.now(); if (t - scopeReadT > 250) { scopeReadT = t; const el = $('scopeRead'); if (el) el.textContent = (xy ? 'X-Y  ' : 'CH1  ') + scopeUnit(scopeVdiv, 'V') + '/div' + (readT ? '  ' + readT : ''); }
@@ -4328,32 +4447,33 @@ function drawBaseline() {
   g.lineWidth = 1.4; g.beginPath(); g.moveTo(-4, Math.round(H / 2) + .5); g.lineTo(W + 4, Math.round(H / 2) + .5); g.stroke();
 }
 window.addEventListener('resize', () => drawBaseline());
-{ const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); scopeKick(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); scopeKick(); }; }
-document.addEventListener('visibilitychange', () => scopeKick());   // la traza en reposo sigue a la pantalla, la carcasa y el modo
+{ const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); scopeKick(); puKick(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); scopeKick(); puKick(); }; }
+document.addEventListener('visibilitychange', () => { scopeKick(); puKick(); });   // la traza en reposo sigue a la pantalla, la carcasa y el modo
 
 const SETTINGS = [
-  { section:'Aspecto' },
-  { id:'theme', label:'Carcasa', type:'select', options:opts(THEMES) },
-  { id:'screen', label:'Pantalla', type:'select', options:opts(SCREENS) },
-  { id:'keyLabels', label:'Notas y números en las teclas', type:'check' },
-  { id:'osc', label:'Onda', type:'check' },
-  { id:'scopeMode', label:'Osciloscopio (PHOSPHOR)', type:'select', options:opts([['yt','Tiempo (Y-T)'],['xy','XY (figuras)']]) },
-  { id:'haptics', label:'Vibración', type:'check' },
-  { id:'hapticTest', label:'Probar la vibración', type:'button', text:'Probar', run:() => hapticTest() },
-  { id:'swipe', label:'Deslizar sobre los botones', type:'check' },
-  { section:'Tono' },
+  { section:'Look' },
+  { id:'theme', label:'Case', type:'select', options:opts(THEMES) },
+  { id:'screen', label:'Screen', type:'select', options:opts(SCREENS) },
+  { id:'pixelUi', label:'Pixel display', type:'check', when:() => document.documentElement.dataset.screen === 'matrix' },   // pilot: MATRIX drawn as a real 1-bit pixel grid
+  { id:'keyLabels', label:'Notes and numbers on keys', type:'check' },
+  { id:'osc', label:'Wave', type:'check', when:() => document.documentElement.dataset.screen !== 'phosphor' },   // en PHOSPHOR la sustituye el osciloscopio
+  { id:'scopeMode', label:'Oscilloscope', type:'select', options:opts([['yt','Time (Y-T)'],['xy','XY (figures)']]), when:() => document.documentElement.dataset.screen === 'phosphor' },   // solo existe con la pantalla PHOSPHOR
+  { id:'haptics', label:'Vibration', type:'check' },
+  { id:'hapticTest', label:'Test vibration', type:'button', text:'Test', run:() => hapticTest() },
+  { id:'swipe', label:'Swipe across buttons', type:'check' },
+  { section:'Music' },
   { id:'key', label:'Key', type:'select', numeric:true, options:() => NOTE_NAMES.map((n, i) => [i, n]) },
   { id:'scale', label:'Scale', type:'select', numeric:true, options:() => SCALES.map((s, i) => [i, s.name]) },
   { id:'globalOct', label:'Octave', type:'select', numeric:true, options:() => [-2,-1,0,1,2].map(v => [v, v > 0 ? '+' + v : String(v)]) },
   { id:'bpm', label:'BPM', type:'range', min:40, max:300, to:v => v, from:v => Math.round(v), fmt:v => Math.round(v) + ' BPM' },
   { id:'tap', label:'Tap Tempo', type:'tap' },
-  { section:'Sonido' },
+  { section:'Sound' },
   { id:'sound', label:'Sound', type:'select', groups:true, options:() => {
       const lib = LIB.filter(s => s.id.startsWith('lib:')), cats = [...new Set(lib.map(s => s.cat))], usr = LIB.filter(s => s.id.startsWith('usr:'));
       return [
-        ['Instrumentos', SOUNDS.map(s => [s.id, s.name])],
-        ...cats.map(c => ['Biblioteca · ' + c, lib.filter(s => s.cat === c).map(s => [s.id, s.name])]),
-        ...(usr.length ? [['Importados', usr.map(s => [s.id, s.name])]] : []),
+        ['Instruments', SOUNDS.map(s => [s.id, s.name])],
+        ...cats.map(c => ['Library · ' + c, lib.filter(s => s.cat === c).map(s => [s.id, s.name])]),
+        ...(usr.length ? [['Imported', usr.map(s => [s.id, s.name])]] : []),
       ];
     } },
   { id:'adsr', label:'ADSR', type:'select', options:() => Object.keys(ADSR).map(k => [k, k.charAt(0) + k.slice(1).toLowerCase()]) },
@@ -4364,72 +4484,72 @@ const SETTINGS = [
   { id:'lfo', label:'LFO', type:'select', options:opts([['off','Off'],['low','Low'],['med','Medium'],['high','High']]) },
   { id:'stereo', label:'Stereo', type:'check' },
   { id:'cutoff', label:'Filter', type:'range', min:0, max:1000, to:v => v, from:v => v,
-    fmt:v => v >= 1000 ? 'abierto' : Math.round(cutoffHz(v)) + ' Hz' },
+    fmt:v => v >= 1000 ? 'open' : Math.round(cutoffHz(v)) + ' Hz' },
   { id:'volume', label:'Volume', type:'range', min:0, max:100, ...pct },
   { id:'micGain', label:'Mic Gain', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
-  { id:'mic_test', label:'Probar el micrófono', type:'button', text:'Probar', run:() => onActivation(runMicTest) },
-  { id:'micHold', label:'Mantener el micrófono abierto', type:'check' },
-  { id:'midi', label:'MIDI (entrada y salida)', type:'check' },
-  { section:'Editor del instrumento' },
-  { id:'tw_level', label:'Nivel', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
-  { id:'tw_detune', label:'Desafinado del par', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
-  { id:'tw_bright', label:'Brillo', type:'range', min:300, max:1000, tweak:'bright', to:v => v, from:v => v, fmt:v => v >= 1000 ? 'completo' : Math.round(cutoffHz(v)) + ' Hz' },
-  { id:'tw_fmRatio', label:'FM: relación', type:'range', min:1, max:32, tweak:'fmRatio', fmOnly:true, to:v => v / 2, from:v => Math.round(v * 2), fmt:v => v + 'x' },
-  { id:'tw_fmIndex', label:'FM: cantidad', type:'range', min:0, max:80, tweak:'fmIndex', fmOnly:true, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) },
-  { id:'tw_fmDecay', label:'FM: caída', type:'range', min:5, max:300, tweak:'fmDecay', fmOnly:true, to:v => v / 100, from:v => Math.round(v * 100), fmt:v => v.toFixed(2) + ' s' },
-  { id:'tw_code', label:'Código del instrumento', type:'code' },
-  { id:'tw_reset', label:'Volver a los valores originales', type:'button', text:'Restablecer', run:() => { delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrumento restablecido'); } },
-  { section:'Efectos' },
+  { id:'mic_test', label:'Test microphone', type:'button', text:'Test', run:() => onActivation(runMicTest) },
+  { id:'micHold', label:'Keep microphone open', type:'check' },
+  { id:'midi', label:'MIDI (input and output)', type:'check' },
+  { section:'Instrument editor' },
+  { id:'tw_level', label:'Level', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
+  { id:'tw_detune', label:'Pair detune', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
+  { id:'tw_bright', label:'Brightness', type:'range', min:300, max:1000, tweak:'bright', to:v => v, from:v => v, fmt:v => v >= 1000 ? 'full' : Math.round(cutoffHz(v)) + ' Hz' },
+  { id:'tw_fmRatio', label:'FM: ratio', type:'range', min:1, max:32, tweak:'fmRatio', fmOnly:true, to:v => v / 2, from:v => Math.round(v * 2), fmt:v => v + 'x' },
+  { id:'tw_fmIndex', label:'FM: amount', type:'range', min:0, max:80, tweak:'fmIndex', fmOnly:true, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) },
+  { id:'tw_fmDecay', label:'FM: decay', type:'range', min:5, max:300, tweak:'fmDecay', fmOnly:true, to:v => v / 100, from:v => Math.round(v * 100), fmt:v => v.toFixed(2) + ' s' },
+  { id:'tw_code', label:'Instrument code', type:'code' },
+  { id:'tw_reset', label:'Back to original values', type:'button', text:'Reset', run:() => { delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrument reset'); } },
+  { section:'Effects' },
   { id:'reverb', label:'Reverb', type:'select', options:opts([['off','Off'],['room','Room'],['hall','Hall'],['plate','Plate'],['spring','Spring'],['ambient','Ambient']]) },
-  { id:'reverbAmt', label:'Cantidad de reverb', type:'range', min:0, max:100, ...pct },
+  { id:'reverbAmt', label:'Reverb amount', type:'range', min:0, max:100, ...pct },
   { id:'delay', label:'Delay', type:'select', options:opts(DIV_OPTS) },
-  { id:'delayAmt', label:'Cantidad de delay', type:'range', min:0, max:100, ...pct },
+  { id:'delayAmt', label:'Delay amount', type:'range', min:0, max:100, ...pct },
   { id:'chorus', label:'Chorus', type:'select', options:opts([['off','Off'],['light','Light'],['warm','Warm'],['wide','Wide'],['lush','Lush']]) },
   { id:'flanger', label:'Flanger', type:'select', options:opts([['off','Off'],['slow','Slow'],['jet','Jet'],['deep','Deep'],['metal','Metal']]) },
   { id:'drive', label:'Drive', type:'select', options:opts([['off','Off'],['tube','Tube'],['drive','Drive'],['dist','Dist'],['fuzz','Fuzz']]) },
   { id:'tape', label:'Tape', type:'select', options:opts([['off','Off'],['lofi','LoFi'],['vinyl','Vinyl'],['tape','Tape']]) },
   { id:'tremolo', label:'Tremolo', type:'select', options:opts(DIV_OPTS) },
-  { id:'vocoder', label:'Vocoder', type:'select', options:opts([['off','Off'],['mic','Mic'],['loop','Loop (pista 1)']]) },
+  { id:'vocoder', label:'Vocoder', type:'select', options:opts([['off','Off'],['mic','Mic'],['loop','Loop (track 1)']]) },
   { id:'vocFormant', label:'Vocoder: Formant Shift', type:'range', min:-12, max:12, to:v => v, from:v => v, fmt:v => (v > 0 ? '+' : '') + v + ' st' },
   { id:'vocNoise', label:'Vocoder: Noise Level', type:'range', min:0, max:100, ...pct },
-  { section:'Modos' },
+  { section:'Modes' },
   { id:'mode', label:'Mode', type:'select', options:() => MODES.map(m => [m.id, m.name]) },
   { id:'strumSpeed', label:'Strum Speed', type:'select', options:opts([['slow','Slow (200 ms)'],['medium','Medium (80 ms)'],['fast','Fast (40 ms)']]) },
   { id:'arpPattern', label:'Arp Pattern', type:'select', options:opts(ARP_PATTERNS) },
   { id:'arpRate', label:'Arp Rate', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
   { id:'arpLayer', label:'Arp Layering', type:'select', options:opts(ARP_LAYERS) },
   { id:'repeatRate', label:'Repeat Rate', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
-  { id:'hiroLatency', label:'Latencia del juego', type:'range', min:-100, max:400, to:v => v, from:v => Math.round(v), fmt:v => (v > 0 ? '+' : '') + Math.round(v) + ' ms' },
-  { section:'Batería' },
+  { id:'hiroLatency', label:'Game latency', type:'range', min:-100, max:400, to:v => v, from:v => Math.round(v), fmt:v => (v > 0 ? '+' : '') + Math.round(v) + ' ms' },
+  { section:'Drums' },
   { id:'kit', label:'Kit', type:'select', options:opts(KITS) },
   { id:'beatVar', label:'Drum Loop Variation', type:'select', options:opts(BEAT_VARS) },
-  { id:'drumVol', label:'Volumen de batería', type:'range', min:0, max:100, ...pct },
-  { section:'Acordes' },
+  { id:'drumVol', label:'Drum volume', type:'range', min:0, max:100, ...pct },
+  { section:'Chords' },
   { id:'joy', label:'Joystick', type:'select', options:() => JOY_MODES.map(m => [m.id, m.name]) },
   { id:'bass', label:'Bass', type:'select', options:opts([['off','Off'],['root','Root'],['slash','Slash']]) },
   { id:'vlead', label:'V.Lead (Voice Leading)', type:'check' },
-  { id:'btn_reset', label:'Quitar fijados, octavas e inversiones', type:'button', text:'Restablecer', run:() => {
+  { id:'btn_reset', label:'Clear locks, octaves and inversions', type:'button', text:'Reset', run:() => {
     state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
-    saveState(); renderPads(); toast('Botones restablecidos'); } },
+    saveState(); renderPads(); toast('Buttons reset'); } },
   { section:'Presets' },
   { id:'pre_1', label:'P1', type:'preset', slot:0 },
   { id:'pre_2', label:'P2', type:'preset', slot:1 },
   { id:'pre_3', label:'P3', type:'preset', slot:2 },
   { id:'pre_4', label:'P4', type:'preset', slot:3 },
-  { id:'rnd_sound', label:'Azar: sonido', type:'button', text:'Sortear', run:() => randomize('sound') },
-  { id:'rnd_pattern', label:'Azar: patrón', type:'button', text:'Sortear', run:() => randomize('pattern') },
-  { id:'rnd_all', label:'Azar: todo', type:'button', text:'Sortear', run:() => randomize('all') },
-  { id:'bk_export', label:'Exportar ajustes', type:'button', text:'Exportar', run:() => onActivation(exportBackup) },
-  { id:'bk_import', label:'Importar copia o presets', type:'file', run:text => importFile(text) },
-  { id:'diag', label:'Diagnóstico', type:'button', text:'Ejecutar', run:() => onActivation(runDiag) },
-  { id:'reset_app', label:'Restablecer la app (borra ajustes, presets y caché)', type:'button', text:'Restablecer', run:() => onActivation(resetApp) },
-  { id:'lib_clear', label:'Presets importados', type:'button', text:'Quitar', run:() => {
+  { id:'rnd_sound', label:'Random: sound', type:'button', text:'Roll', run:() => randomize('sound') },
+  { id:'rnd_pattern', label:'Random: pattern', type:'button', text:'Roll', run:() => randomize('pattern') },
+  { id:'rnd_all', label:'Random: all', type:'button', text:'Roll', run:() => randomize('all') },
+  { id:'bk_export', label:'Export settings', type:'button', text:'Export', run:() => onActivation(exportBackup) },
+  { id:'bk_import', label:'Import backup or presets', type:'file', run:text => importFile(text) },
+  { id:'diag', label:'Diagnostics', type:'button', text:'Run', run:() => onActivation(runDiag) },
+  { id:'reset_app', label:'Reset the app (erases settings, presets and cache)', type:'button', text:'Reset', run:() => onActivation(resetApp) },
+  { id:'lib_clear', label:'Imported presets', type:'button', text:'Remove', run:() => {
       if (!(state.library || []).length) return;
       state.library = []; if (state.sound.startsWith('usr:')) state.sound = 'saw';
-      saveState(); buildLib(); rebuildSoundOptions(); refreshPresetRows(); toast('Importados eliminados'); } },
+      saveState(); buildLib(); rebuildSoundOptions(); refreshPresetRows(); toast('Imported presets removed'); } },
   { section:'Manual', manual:true },
 ];
-let settingsTab = 'Aspecto';
+let settingsTab = 'Look';
 function fadeEdges(el) {
   if (!el) return;
   const upd = () => { el.classList.toggle('fade-l', el.scrollLeft > 4); el.classList.toggle('fade-r', el.scrollLeft + el.clientWidth < el.scrollWidth - 4); };
@@ -4469,7 +4589,7 @@ function onSettingChanged(id) {
   if (id === 'midi') midiSetup();
   if (id === 'vocoder') { ensureAudio(); updateFx('vocoder'); vocoderSource(); }
   if (id === 'vocFormant' || id === 'vocNoise') { if (state.vocoder !== 'off') updateFx('vocoder'); }
-  if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('Sin muestra grabada');
+  if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('No sample recorded');
   if (id === 'theme' || id === 'screen') applyTheme();
   if (id === 'keyLabels') renderPads();
   else if (id === 'osc') setOsc(state.osc);
@@ -4527,7 +4647,7 @@ function sanitizeState() {
 }
 function buildSettings() {
   const wrap = $('settingsRows'); wrap.innerHTML = ''; let sec = null;
-  const nav = $('sheetNav'); nav.setAttribute('role', 'tablist'); nav.setAttribute('aria-label', 'Secciones de ajustes');
+  const nav = $('sheetNav'); nav.setAttribute('role', 'tablist'); nav.setAttribute('aria-label', 'Settings sections');
   if (!nav._keys) {   // flechas, Inicio y Fin mueven entre pestañas (patrón estándar de pestañas)
     nav._keys = true;
     nav.addEventListener('keydown', e => {
@@ -4587,8 +4707,8 @@ function buildSettings() {
       input._out = out;
     } else if (s.type === 'preset') {
       input = document.createElement('div'); input.className = 'btns';
-      const sv = document.createElement('button'); sv.className = 'act'; sv.textContent = 'Guardar';
-      const ld = document.createElement('button'); ld.className = 'act'; ld.textContent = 'Cargar';
+      const sv = document.createElement('button'); sv.className = 'act'; sv.textContent = 'Save';
+      const ld = document.createElement('button'); ld.className = 'act'; ld.textContent = 'Load';
       onTap(sv, () => presetSave(s.slot)); onTap(ld, () => presetLoad(s.slot));
       input.appendChild(sv); input.appendChild(ld); input._ld = ld;
       const info = document.createElement('div'); info.className = 'diag'; row.classList.add('wrap'); input._info = info;
@@ -4604,7 +4724,7 @@ function buildSettings() {
       input = document.createElement('button'); input.className = 'act'; input.textContent = s.text;
       onTap(input, s.run); row.appendChild(input);
     } else if (s.type === 'code') {
-      input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Mostrar';
+      input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Show';
       const out = document.createElement('output'); out.className = 'code'; out.hidden = true;
       input.addEventListener('click', () => {
         const snd = curSound(); out.textContent = snd.id + ' ' + JSON.stringify(state.tweaks[snd.id] || {});
@@ -4612,7 +4732,7 @@ function buildSettings() {
       });
       row.appendChild(input); row.appendChild(out);
     } else if (s.type === 'tap') {
-      input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Toca al ritmo';
+      input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Tap to the rhythm';
       input.addEventListener('pointerdown', e => { e.preventDefault(); tapTempo(); });
       row.appendChild(input);
     } else {
@@ -4680,16 +4800,16 @@ function presetSummary(p) {
 }
 function refreshPresetRows() {
   for (const s of SETTINGS) {
-    if (s.type === 'preset' && s.el) { const p = presets[s.slot]; s.el._info.textContent = p ? presetSummary(p) : 'vacío'; s.el._ld.disabled = !p; }
+    if (s.type === 'preset' && s.el) { const p = presets[s.slot]; s.el._info.textContent = p ? presetSummary(p) : 'empty'; s.el._ld.disabled = !p; }
     if (s.id === 'lib_clear' && s.el) {
       const n = (state.library || []).length;
-      s.el.disabled = n === 0; s.el.closest('.row').querySelector('label').textContent = 'Presets importados: ' + n;
+      s.el.disabled = n === 0; s.el.closest('.row').querySelector('label').textContent = 'Imported presets: ' + n;
     }
   }
 }
 function presetSave(i) {
   const snap = {}; for (const k of PRESET_KEYS) snap[k] = structuredClone(state[k]);
-  presets[i] = { snap, at:Date.now() }; savePresets(); refreshPresetRows(); toast('P' + (i + 1) + ' guardado');
+  presets[i] = { snap, at:Date.now() }; savePresets(); refreshPresetRows(); toast('P' + (i + 1) + ' saved');
 }
 // Aplica al motor y a la interfaz todo el estado (tras cargar un preset o restaurar una copia)
 function reapplyAll() {
@@ -4711,7 +4831,7 @@ function presetLoad(i) {
   if (['mic', 'tuner', 'mixer', 'hiro', 'ear'].includes(next.mode)) next.mode = 'play';
   Object.assign(state, next);
   if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
-  reapplyAll(); toast('P' + (i + 1) + ' cargado');
+  reapplyAll(); toast('P' + (i + 1) + ' loaded');
 }
 
 // Azar: sonido (instrumento + efectos), patrón (del modo actual + octavas) o todo (+ tonalidad y tempo)
@@ -4748,7 +4868,7 @@ function randomPattern() {
 function randomize(kind) {
   let msg;
   if (kind === 'sound') msg = randomSound().name;
-  else if (kind === 'pattern') { randomPattern(); msg = 'Patrón nuevo'; }
+  else if (kind === 'pattern') { randomPattern(); msg = 'New pattern'; }
   else { state.key = Math.floor(Math.random() * 12); state.bpm = 70 + Math.floor(Math.random() * 71); msg = randomSound().name + ' · ' + NOTE_NAMES[state.key] + ' · ' + state.bpm; }
   saveState(); lastUpper = null; syncSettings(); renderModes(); renderPads(); renderScreen(held.length > 0);
   if (held.length) refresh();
@@ -4761,14 +4881,14 @@ function backupObject() {
   return { app:'notes-backup', version:1, at:new Date().toISOString(), state, presets, mic };
 }
 async function exportBackup() {
-  const text = JSON.stringify(backupObject()), name = 'notes-ajustes-' + new Date().toISOString().slice(0, 10) + '.json';
+  const text = JSON.stringify(backupObject()), name = 'notes-settings-' + new Date().toISOString().slice(0, 10) + '.json';
   try {
     const file = new File([text], name, { type:'application/json' });
-    if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:name }); toast('Ajustes exportados'); return; }
+    if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:name }); toast('Settings exported'); return; }
   } catch (e) { if (e && e.name === 'AbortError') return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type:'application/json' })); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  toast('Ajustes exportados');
+  toast('Settings exported');
 }
 function restoreBackup(d) {
   setMode('play');
@@ -4782,10 +4902,10 @@ function restoreBackup(d) {
 function importFile(text) {
   try {
     const d = JSON.parse(text);
-    if (d && d.app === 'notes-backup') { restoreBackup(d); toast('Copia restaurada'); return; }
+    if (d && d.app === 'notes-backup') { restoreBackup(d); toast('Backup restored'); return; }
     const n = importLibrary(d); rebuildSoundOptions(); refreshPresetRows();
     toast(n ? n + ' preset' + (n === 1 ? '' : 's') + ' importado' + (n === 1 ? '' : 's') : 'El archivo no contiene presets');
-  } catch (e) { toast('No se pudo leer el archivo'); }
+  } catch (e) { toast('Could not read the file'); }
 }
 
 // ===== REPEAT: TRANCE GATE DE 32 PASOS =====
@@ -4794,32 +4914,32 @@ const GATE32 = ('x.xx.xx.' + 'x.x.xxx.' + 'xx.xx.x.' + 'x.xxx.xx').split('').map
 
 // ===== JUEGO DE ACORDES Y ENTRENADOR DE OÍDO =====
 const OWN_TITLE = ['tuner', 'hiro', 'ear'];
-const HIRO_TIERS = ['Folk', 'Rock', 'Moderno', 'Jazz', 'Fusión'];
+const HIRO_TIERS = ['Folk', 'Rock', 'Modern', 'Jazz', 'Fusion'];
 // Partitura: «botón[dirección]:tiempos» (direcciones u ur r dr d dl l ul; «-» = silencio). Canciones propias.
 const HIRO_SONGS = [
-  { name:'Fogata',      tier:0, bpm:84,  key:0,  sound:'acoustic', joy:'default', beat:['rock', 'half', 'tight'],
+  { name:'Campfire',      tier:0, bpm:84,  key:0,  sound:'acoustic', joy:'default', beat:['rock', 'half', 'tight'],
     chart:'1:4 1:4 4:4 1:4 5:4 4:4 1:4 5:4 1:4 4:4 5:4 1:8' },
-  { name:'Sendero',     tier:0, bpm:88,  key:7,  sound:'piano',    joy:'default', beat:['rock', 'orig', 'tight'],
+  { name:'Trail',     tier:0, bpm:88,  key:7,  sound:'piano',    joy:'default', beat:['rock', 'orig', 'tight'],
     chart:'1:4 5:4 6:4 4:4 1:4 5:4 6:4 4:4 1:4 5:4 4:4 1:4 5:4 1:8' },
-  { name:'Garaje',      tier:1, bpm:100, key:4,  sound:'eguitar',  joy:'default', beat:['rock', 'orig', 'x9x'],
+  { name:'Garage',      tier:1, bpm:100, key:4,  sound:'eguitar',  joy:'default', beat:['rock', 'orig', 'x9x'],
     chart:'1:4 5:4 6:4 4:4 1:4 5d:2 5:2 6:4 4d:2 4:2 1:4 5d:2 5:2 1:8' },
-  { name:'Empujón',     tier:1, bpm:104, key:9,  sound:'organ',    joy:'default', beat:['funk', 'orig', 'tight'],
+  { name:'Push',     tier:1, bpm:104, key:9,  sound:'organ',    joy:'default', beat:['funk', 'orig', 'tight'],
     chart:'1:2 5:2 6:3.5 4:4.5 1:2 5:2 6:2 4:2 5:3.5 1:4.5 4:2 5:2 1:4' },
-  { name:'Neón',        tier:2, bpm:96,  key:2,  sound:'tineep',   joy:'default', beat:['house', 'orig', 'x9x'],
+  { name:'Neon',        tier:2, bpm:96,  key:2,  sound:'tineep',   joy:'default', beat:['house', 'orig', 'x9x'],
     chart:'1:4 5:4 6:4 4:4 1:4 4:2 4u:2 1:4 5:4 4:4 4u:4 1:8' },
-  { name:'Marea',       tier:2, bpm:100, key:5,  sound:'strings',  joy:'default', beat:['dembow', 'orig', 'tight'],
+  { name:'Tide',       tier:2, bpm:100, key:5,  sound:'strings',  joy:'default', beat:['dembow', 'orig', 'tight'],
     chart:'1:4 3:4 4:4 5:4 6:4 2:4 5:4 1:4 6:4 4:2 4u:2 5:4 1:8' },
-  { name:'Terciopelo',  tier:3, bpm:92,  key:0,  sound:'retroep',  joy:'default', beat:['swing', 'orig', 'lynn'],
+  { name:'Velvet',  tier:3, bpm:92,  key:0,  sound:'retroep',  joy:'default', beat:['swing', 'orig', 'lynn'],
     chart:'1r:4 6r:4 2r:4 5ur:4 1r:4 4r:4 2r:4 5ur:4 1r:8' },
-  { name:'Medianoche',  tier:3, bpm:96,  key:10, sound:'tineep',   joy:'default', beat:['swing', 'ghost', 'lynn'],
+  { name:'Midnight',  tier:3, bpm:96,  key:10, sound:'tineep',   joy:'default', beat:['swing', 'ghost', 'lynn'],
     chart:'2dr:4 5ur:4 1dr:4 6r:4 2dr:4 5ur:2 5ur:2 1dr:4 4dr:4 3r:4 6r:4 2dr:4 5ur:4 1dr:8' },
-  { name:'Corriente',   tier:4, bpm:100, key:3,  sound:'fmep',     joy:'borrow',  beat:['funk', 'push', 'trap'],
+  { name:'Current',   tier:4, bpm:100, key:3,  sound:'fmep',     joy:'borrow',  beat:['funk', 'push', 'trap'],
     chart:'1:4 1u:4 4:4 2u:4 5:4 3u:4 6:4 6:4 2:4 5u:4 1:8' },
-  { name:'Espiral',     tier:4, bpm:110, key:6,  sound:'tineep',   joy:'borrow',  beat:['break', 'fill', 'x0x'],
+  { name:'Solstice',     tier:4, bpm:110, key:6,  sound:'tineep',   joy:'borrow',  beat:['break', 'fill', 'x0x'],
     chart:'3:2 3u:2 6:2 6u:2 2:2 2u:2 5:2 5u:2 1:4 1u:2 4:2 2u:2 5:2 3u:2 6:2 6u:2 2:2 2u:2 5u:2 1:8' },
 ];
 const WIN = { perfect:0.06, great:0.11, ok:0.2 };
-const GRADE_TXT = { perfect:'Perfecto', great:'Bien', ok:'OK', miss:'Fallo' };
+const GRADE_TXT = { perfect:'Perfect', great:'Great', ok:'OK', miss:'Miss' };
 const SERIF = '"Instrument Serif", Georgia, serif';
 const hiro = { phase:'idle', song:null, events:[], t0:0, spb:0.5, idx:0, stats:null, streak:0, best:0, acc:0, raf:null, saved:null, flash:null, last:'' };
 const ear = { phase:'idle', q:[], idx:0, marks:[], round:0, correct:0, streak:0, hint:null, shown:'', timers:[], saved:null };
@@ -4966,14 +5086,14 @@ function hiroTick() {
 function hiroTexts() {
   const song = HIRO_SONGS[state.hiroLevel] || HIRO_SONGS[0], cn = $('chordName');
   $('sKey').textContent = (state.hiroLevel + 1) + ' · ' + HIRO_TIERS[song.tier] + ' · ' + song.name;   // título arriba: la línea grande no se usa en el juego
-  $('sSound').textContent = hiro.streak ? 'racha ' + hiro.streak : (state.hiroBest ? 'mejor ' + state.hiroBest : '');
-  let big = song.name, status = state.hiroPractice ? 'práctica ' + Math.round(state.hiroSpeed * 100) + '%' : '';
+  $('sSound').textContent = hiro.streak ? 'streak ' + hiro.streak : (state.hiroBest ? 'best ' + state.hiroBest : '');
+  let big = song.name, status = state.hiroPractice ? 'practice ' + Math.round(state.hiroSpeed * 100) + '%' : '';
   if (hiro.phase === 'count') { big = String(Math.max(1, Math.min(4, Math.ceil((hiro.t0 - ctx.currentTime) / hiro.spb)))); status = ''; }
   else if (hiro.phase === 'play') { const t = hiro.events[hiro.idx]; big = t ? t.name : '—'; }   // el último resultado se dibuja dentro del juego
   else if (hiro.phase === 'result') {
     const s = hiro.stats; big = Math.round(hiro.acc * 100) + '%';
     status = ''; hiro.detail = GRADE_TXT.perfect + ' ' + s.perfect + ' · ' + GRADE_TXT.great + ' ' + s.great + ' · OK ' + s.ok + ' · ' + GRADE_TXT.miss + ' ' + s.miss;   // el desglose se dibuja dentro del juego
-    $('sSound').textContent = 'mejor racha ' + hiro.best;
+    $('sSound').textContent = 'best streak ' + hiro.best;
   }
   cn.textContent = big; cn.classList.toggle('idle', hiro.phase === 'idle'); hiro.big = big;   // la cuenta atrás y el porcentaje se dibujan dentro del juego
   const live = hiro.phase === 'count' || hiro.phase === 'play';
@@ -4998,7 +5118,7 @@ function hiroRender() {
       g.globalAlpha = ev.result === 'ok' ? 0.5 : 1; rrect(g, x0 + i * (sz + 3), H * 0.64 - sz / 2, sz, sz, 3);
       if (ev.result === 'miss') g.stroke(); else g.fill(); g.globalAlpha = 1;
     });
-    if (hiro.meanErr != null) { const m = Math.round(hiro.meanErr); g.fillStyle = faint; g.font = '500 ' + Math.round(11 * u) + 'px ' + mono; g.fillText('desfase medio ' + (m > 0 ? '+' : '') + m + ' ms', W / 2, H * 0.88); }
+    if (hiro.meanErr != null) { const m = Math.round(hiro.meanErr); g.fillStyle = faint; g.font = '500 ' + Math.round(11 * u) + 'px ' + mono; g.fillText('mean offset ' + (m > 0 ? '+' : '') + m + ' ms', W / 2, H * 0.88); }
     g.textAlign = 'left'; return;
   }
   const live = hiro.phase === 'count' || hiro.phase === 'play', song = hiro.song || HIRO_SONGS[0];
@@ -5159,13 +5279,13 @@ function earAnswer(btn, tp) {
 }
 function earTexts() {
   const cn = $('chordName');
-  $('sKey').textContent = 'Nivel ' + (state.earLevel + 1);
-  $('sSound').textContent = ear.streak ? 'racha ' + ear.streak : (state.earBest ? 'mejor ' + state.earBest : '');
+  $('sKey').textContent = 'Level ' + (state.earLevel + 1);
+  $('sSound').textContent = ear.streak ? 'streak ' + ear.streak : (state.earBest ? 'best ' + state.earBest : '');
   let big = '—', status = '';
   if (ear.phase === 'listen') big = '…';
   else if (ear.phase === 'answer') { big = '?'; status = ear.q.length > 1 ? (ear.idx + 1) + '/' + ear.q.length : ''; }
-  else if (ear.phase === 'feedback') { big = ear.shown; status = ear.marks.includes('bad') ? 'Incorrecto' : 'Correcto'; }
-  else if (ear.phase === 'result') { big = ear.correct + '/' + EAR_LEVELS[state.earLevel].rounds; status = 'Aciertos'; }
+  else if (ear.phase === 'feedback') { big = ear.shown; status = ear.marks.includes('bad') ? 'Wrong' : 'Right'; }
+  else if (ear.phase === 'result') { big = ear.correct + '/' + EAR_LEVELS[state.earLevel].rounds; status = 'Hits'; }
   cn.textContent = big; cn.classList.toggle('idle', ear.phase === 'idle' || ear.phase === 'listen');
   const live = ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback';
   $('sMode').classList.toggle('live', live);
