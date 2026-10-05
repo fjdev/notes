@@ -254,7 +254,7 @@ body {
 /* ===== Joystick y herramientas ===== */
 .controls { flex: 0 0 auto; display: flex; gap: 14px; align-items: center; }
 .joy {
-  flex: 0 0 auto; width: 150px; height: 150px; border-radius: 50%; background: var(--ctl);
+  flex: 0 0 auto; width: var(--joy-size, 150px); height: var(--joy-size, 150px); border-radius: 50%; background: var(--ctl);
   border: 1.5px solid var(--ctl-line); position: relative; touch-action: none;
 }
 .joy .dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--ctl-line); opacity: .5; transform: translate(-50%, -50%); }
@@ -353,7 +353,7 @@ body {
 .sheet .actions .primary { background: var(--accent2); color: var(--on-accent); border-color: var(--accent2); }
 button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
-@media (max-height: 640px) { .joy { width: 124px; height: 124px; } .chord { font-size: 48px; } .scope { height: 48px; } }
+@media (max-height: 640px) { .chord { font-size: 48px; } .scope { height: 48px; } }
 /* selección rápida */
 .fn { cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; padding: 8px 6px; margin: -8px -6px; border-radius: 6px; }
 .fn.on { color: var(--panel-ink); }
@@ -444,7 +444,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .joy { background: var(--well); border: 0; box-shadow: inset 0 4px 12px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.12); }
 .joy .dot { background: var(--key-ink); opacity: .28; }
 .joy .dot.on { background: var(--accent3); opacity: 1; box-shadow: 0 0 8px var(--accent3); }
-.knob { width: 66px; height: 66px; margin: -33px 0 0 -33px; border: 0;
+.knob { width: var(--knob-size, 66px); height: var(--knob-size, 66px); margin: calc(var(--knob-size, 66px) / -2) 0 0 calc(var(--knob-size, 66px) / -2); border: 0;
   background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--knob, var(--btn)) 65%, #fff) 0%, var(--knob, var(--btn)) 52%, color-mix(in srgb, var(--knob, var(--btn)) 76%, #000) 100%);
   box-shadow: 0 5px 10px rgba(0,0,0,.5), inset 0 -3px 0 rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.4); }
 .knob::after { content: ""; position: absolute; left: 50%; top: 8px; width: 3px; height: 13px; margin-left: -1.5px; border-radius: 2px; background: color-mix(in srgb, var(--knob-ink, var(--btn-ink)) 70%, transparent); }
@@ -458,12 +458,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 @media (prefers-reduced-motion: reduce) { .knob.click::before { animation: none; opacity: 0; } }
 
 
-/* Placa inferior: marca y rejillas de altavoz */
-.foot { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; height: 28px; padding: 0 2px; }
-.foot .grille { width: 50px; height: 22px; opacity: .55;
-  background-image: radial-gradient(circle, var(--ink) 1.3px, transparent 1.6px); background-size: 7px 7px; background-position: center; }
-.foot .brand { font: 400 34px/1 var(--serif); letter-spacing: -.01em; color: var(--ink); opacity: .92; padding-bottom: 3px; }
-@media (max-height: 740px) { .foot { display: none; } }
+/* Marca: «notes» en la esquina de la barra superior contraria a la rueda (fase 32; el pie con nombre y rejillas de altavoz se quitó para dar espacio al joystick, los botones y la pantalla) */
+.topbar .brand { margin-right: auto; padding-left: 4px; font: 400 25px/1 var(--serif); letter-spacing: -.01em; color: var(--ink); opacity: .92; transform: translateY(-1px); user-select: none; }
 
 /* Ajustes con la misma tipografía */
 .sheet h2 { font: 700 15px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; margin-top: 12px; }
@@ -489,24 +485,28 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   --panel:#0B0C0B; --panel-ink:#EDE4CF; --panel-dim:#C9743E; --scr-active:#E8763A; --scope:#EDE4CF; --bezel:#08090A;
   --scr-glow: 0 0 6px rgba(237,228,207,.16); --chip-glow: 0 0 8px -3px rgba(237,228,207,.35); --chord-font: var(--mono);
   --scr-inset: inset 0 0 0 1px rgba(255,255,255,.02); --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.035) 0%, rgba(255,255,255,0) 30%);
+  --panel-mid:#3A362F;
 }
 :root[data-screen="matrix"] {   /* MATRIX: LCD monocroma industrial; gris carbón verdoso, menos contraste, sin brillo, matriz apagada apenas visible */
   --panel:#17181A; --panel-ink:#D2D4D0; --panel-dim:#8C8F8B; --scr-active:#F0F2EE; --scope:#D2D4D0;
   --scr-glow: none; --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
   --scr-inset: inset 0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
-  --scr-overlay: radial-gradient(circle, rgba(200,214,196,.055) .7px, transparent .95px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 32%);
+  --panel-mid:#3C403D;
+  --scr-overlay: linear-gradient(90deg, rgba(23,24,26,.3) 1px, transparent 1px) 0 0 / 3px 3px, linear-gradient(rgba(23,24,26,.3) 1px, transparent 1px) 0 0 / 3px 3px, radial-gradient(circle, rgba(210,212,208,.045) .8px, transparent 1px) 1.5px 1.5px / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 32%);
 }
 :root[data-screen="moss"] {   /* MOSS: LCD portátil verdosa de cuatro tonos; todo dibujado por la propia matriz, sin blanco ni brillo */
   --panel:#8C925B; --panel-ink:#1E2412; --panel-dim:#222815; --scr-active:#1E2412; --scope:#1E2412;
   --scr-glow: 1px 1px 0 rgba(32,40,23,.18); --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
   --scr-inset: inset 0 2px 5px rgba(32,40,23,.35), inset 0 0 0 1px rgba(32,40,23,.25);
-  --scr-overlay: radial-gradient(circle, rgba(32,40,23,.10) .7px, transparent .95px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 35%);
+  --panel-mid:#5E6538;
+  --scr-overlay: linear-gradient(90deg, rgba(140,146,91,.3) 1px, transparent 1px) 0 0 / 3px 3px, linear-gradient(rgba(140,146,91,.3) 1px, transparent 1px) 0 0 / 3px 3px, radial-gradient(circle, rgba(30,36,18,.07) .8px, transparent 1px) 1.5px 1.5px / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 35%);
 }
 :root[data-screen="phosphor"] {   /* PHOSPHOR: tubo de osciloscopio de laboratorio; verde fósforo contenido, rejilla y líneas mínimas, brillo muy suave */
   --panel:#07100B; --panel-ink:#7CD39B; --panel-dim:#4E8F66; --scr-active:#B5EDC6; --scope:#7CD39B;
   --scr-glow: 0 0 7px rgba(124,211,155,.22); --chip-glow: 0 0 9px -3px rgba(124,211,155,.4); --chord-font: var(--mono);
   --scr-inset: inset 0 3px 10px rgba(0,0,0,.7), inset 0 0 30px rgba(0,0,0,.45);
-  --scr-overlay: repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px), linear-gradient(rgba(124,211,155,.06) 1px, transparent 1px) 0 0 / 100% 14px, linear-gradient(90deg, rgba(124,211,155,.06) 1px, transparent 1px) 0 0 / 14px 100%;
+  --panel-mid:#1F4A31;
+  --scr-overlay: linear-gradient(rgba(124,211,155,.18), rgba(124,211,155,.18)) center / 100% 1px no-repeat, linear-gradient(90deg, rgba(124,211,155,.18), rgba(124,211,155,.18)) center / 1px 100% no-repeat, repeating-linear-gradient(90deg, rgba(124,211,155,.26) 0 1px, transparent 1px 8px) center / 100% 6px no-repeat, repeating-linear-gradient(0deg, rgba(124,211,155,.26) 0 1px, transparent 1px 8px) center / 6px 100% no-repeat, linear-gradient(rgba(124,211,155,.07) 1px, transparent 1px) 0 0 / 100% 12.5%, linear-gradient(90deg, rgba(124,211,155,.07) 1px, transparent 1px) 0 0 / 10% 100%, repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
 }
 :root[data-screen] .display::after { background: var(--scr-overlay); }
 .display .screen { box-shadow: var(--scr-inset); }
@@ -520,7 +520,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .display .screen { border-radius: 6px 6px 0 0; padding: 12px 14px 10px; background: var(--panel);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.035), inset 0 3px 8px rgba(0,0,0,.65), inset 0 0 36px rgba(0,0,0,.35); }
 .display .modes { margin-top: 0; border-radius: 0 0 6px 6px; padding: 5px 6px 7px; background: var(--panel);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--panel-ink) 9%, transparent), inset 0 -8px 16px rgba(0,0,0,.30); }
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--panel-ink) 9%, transparent); }   /* sin sombra propia: la franja es parte de la pantalla */
 /* cristal: un reflejo muy suave y una dominante de color; en las LCD, una rejilla de puntos casi invisible (sin llegar a CRT) */
 .display::after { content: ""; position: absolute; inset: 7px; border-radius: 6px; pointer-events: none; z-index: 4;
   background: linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%), var(--glass); }
@@ -542,7 +542,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 /* ==========================================================================================
    TAMAÑO FIJO DEL APARATO (fase 21): la pantalla, la franja de modos y los botones miden lo mismo en todos los modos.
    ========================================================================================== */
-.display .screen { height: 140px; display: flex; flex-direction: column; overflow: hidden; }
+:root { --screen-h: 156px; --joy-size: 150px; --knob-size: 66px; }
+@media (min-height: 741px) { :root { --screen-h: 176px; --joy-size: 158px; --knob-size: 70px; } }
+@media (min-height: 800px) { :root { --screen-h: 190px; --joy-size: 166px; --knob-size: 72px; } }
+.display .screen { height: var(--screen-h); display: flex; flex-direction: column; overflow: hidden; }
 .display .screen .chord { flex: 0 0 auto; }
 .display .screen .scope { flex: 1 1 auto; min-height: 0; height: auto; margin: 2px 0 4px; }
 .display .screen.osc .chord, .display .screen.hiro .chord, .display .screen.ear .chord { font-size: 22px; margin: 0 0 2px; }
@@ -550,7 +553,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .display .screen.hiro .chord, .display .screen.hiro #wavBtn, .display .screen.hiro #oscBtn { display: none; }   /* Notes Hero: el título va arriba y la cuenta atrás dentro del juego */
 .display .screen.hiro .scope { margin: 4px 0 2px; }
 .display .screen .screen-bottom { margin-top: auto; }
-@media (max-height: 640px) { .display .screen { height: 122px; } }
+@media (max-height: 640px) { :root { --screen-h: 136px; --joy-size: 124px; --knob-size: 56px; } }
 /* Franja de modos: siempre una sola fila; con el dedo se desliza en horizontal (sin bambolearse en vertical) y se detiene en cada chip */
 .modes-scroll { overflow-y: hidden; touch-action: pan-x; overscroll-behavior-x: contain; scroll-snap-type: x proximity; }
 .modes-scroll .chip { scroll-snap-align: start; }
@@ -615,7 +618,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   box-shadow: inset 0 0 0 2px rgba(150,165,155,.38), inset 0 3px 0 rgba(255,255,255,.10), inset 0 -6px 16px rgba(0,0,0,.35); }
 [data-theme="ghost"] body { background: var(--body); }
 [data-theme="ghost"] .knob { background: repeating-conic-gradient(from 0deg, rgba(0,0,0,.16) 0 4deg, rgba(255,255,255,.10) 4deg 8deg), radial-gradient(circle at 40% 32%, #C8C8C2 0%, #9A9A93 55%, #6E6E68 100%); }
-[data-theme="ghost"] .wheel-lbl, [data-theme="ghost"] .controls .tools button span, [data-theme="ghost"] .oct-cap, [data-theme="ghost"] .foot .brand { text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+[data-theme="ghost"] .wheel-lbl, [data-theme="ghost"] .controls .tools button span, [data-theme="ghost"] .oct-cap, [data-theme="ghost"] .topbar .brand { text-shadow: 0 1px 3px rgba(0,0,0,.85); }
 
 
 /* La franja de modos es PARTE DE LA PANTALLA (fase 30): mismo fondo, mismo vidrio y misma tecnología que el resto del display */
@@ -639,6 +642,38 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .display .menu-hint { border: 0; background: transparent; color: var(--panel-dim); font: 9.5px/1.2 var(--pixel); letter-spacing: .08em; text-transform: uppercase; padding: 6px 0; cursor: pointer; }
 .display .menu-hint:disabled { visibility: hidden; }
 .display .screen.menu-open .screen-top, .display .screen.menu-open .chord, .display .screen.menu-open .screen-bottom, .display .screen.menu-open .scope { visibility: hidden; }
+
+
+/* ===== FASE 33 ===== */
+/* Sin franja de modos: el modo se cambia en su menú (toque en el modo de la pantalla) o con la selección rápida; la pantalla gana su altura */
+.display .modes { display: none; }
+.display .screen { border-radius: 6px; }
+/* Acorde grande y traza a la vez (en los modos de tocar): la traza es una línea en reposo y la onda en vivo si el osciloscopio está activado */
+.display .screen:not(.hiro):not(.ear):not(.tuner) .scope { display: block; }
+.display .screen:not(.hiro):not(.ear):not(.tuner) .chord { font-size: clamp(38px, 11vw, 50px); margin: 0; }
+/* El tono medio de cada pantalla (en MOSS, el cuarto verde): indicadores apagados */
+.display .compass circle:not(.on) { fill: var(--panel-mid); }
+/* Ajustes dentro de la pantalla (regla 16: solo colores y tipografía de la pantalla) */
+.display .setv { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; padding: 10px 12px 8px; background: var(--panel); color: var(--panel-ink); }
+.display .setv[hidden] { display: none; }
+.display .setv-head { display: flex; align-items: center; gap: 2px; padding: 0 34px 5px 0; font: 10px/1.2 var(--pixel); letter-spacing: .08em; text-transform: uppercase; color: var(--scr-active);
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-ink) 14%, transparent); }
+.display .setv-head button { border: 0; background: transparent; color: var(--panel-dim); font: 15px/1 var(--mono); padding: 5px 9px; cursor: pointer; }
+.display #setvSec { padding: 4px 6px; border-radius: 3px; }
+.display .setv-head.cur #setvSec { background: var(--panel-ink); color: var(--panel); }
+.display #setvPos { margin-left: auto; color: var(--panel-dim); }
+.display .setv-list { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; touch-action: pan-y; overscroll-behavior: contain; margin-top: 4px; }
+.display .setv-list::-webkit-scrollbar { display: none; }
+.display .setv-row { display: flex; align-items: center; gap: 8px; min-height: 27px; padding: 0 2px 0 6px; border-radius: 4px; font: 500 12.5px/1.15 var(--chord-font, var(--mono)); }
+.display .setv-row .lb { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--panel-ink); padding: 6px 0; cursor: pointer; }
+.display .setv-row .vl { flex: 0 1 auto; display: flex; align-items: center; max-width: 55%; color: var(--panel-dim); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.display .setv-row .vl .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.display .setv-row button { border: 0; background: transparent; color: inherit; font: 500 15px/1 var(--mono); padding: 6px 7px; cursor: pointer; }
+.display .setv-row.cur { background: var(--panel-ink); }
+.display .setv-row.cur .lb, .display .setv-row.cur .vl { color: var(--panel); }
+.display .screen.setv-open .screen-top, .display .screen.setv-open .chord, .display .screen.setv-open .screen-bottom, .display .screen.setv-open .scope { visibility: hidden; }
+:root[data-screen="moss"] .display .setv-row, :root[data-screen="matrix"] .display .setv-row { font: 11px/1.2 var(--pixel); letter-spacing: .05em; text-transform: uppercase; }   /* fuente de píxel para tamaños pequeños: números inconfundibles */
+.row.flash { background: color-mix(in srgb, var(--accent2) 28%, transparent); transition: background .4s; }
 
 /* Rueda del canto superior (fase 24): se ve el borde estriado de una rueda a través de una ranura; al girarla, las estrías se desplazan */
 .topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 24px; margin: -6px 2px -4px; }
@@ -690,7 +725,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 </head>
 <body>
 <main class="app">
-  <div class="topbar" id="topbar"><span class="wheel-lbl" id="wheelLbl" aria-hidden="true">filter</span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Rueda"><div class="wheel-rim" id="wheelRim"></div></div></div>
+  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span><span class="wheel-lbl" id="wheelLbl" aria-hidden="true">filter</span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Rueda"><div class="wheel-rim" id="wheelRim"></div></div></div>
   <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Pantalla">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
@@ -709,6 +744,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <div class="menu-top"><span id="menuTitle"></span><span id="menuPos"></span></div>
       <div class="menu-row"><button class="menu-side" id="menuPrev" aria-label="Anterior"></button><span class="menu-val" id="menuVal"></span><button class="menu-side" id="menuNext" aria-label="Siguiente"></button></div>
       <div class="menu-bottom"><button class="menu-hint" id="menuUp"></button><button class="menu-hint" id="menuDown"></button></div>
+    </div>
+    <div class="setv" id="setv" hidden role="dialog" aria-label="Ajustes">
+      <div class="setv-head" id="setvHead"><button id="setvPrev" aria-label="Pestaña anterior">‹</button><span id="setvSec"></span><button id="setvNext" aria-label="Pestaña siguiente">›</button><span id="setvPos"></span></div>
+      <div class="setv-list" id="setvList"></div>
     </div>
     <div class="toast" id="toast"></div>
   </section>
@@ -731,7 +770,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <span class="oct-cap" aria-hidden="true">octava</span>
     </div>
   </section>
-  <footer class="foot" aria-hidden="true"><span class="grille"></span><span class="brand">notes</span><span class="grille"></span></footer>
 </main>
 
 <div class="sheet" id="sheet" hidden>
@@ -757,6 +795,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h4>Controles atenuados</h4>
       <p>Un botón o una herramienta atenuados no tienen función en el modo actual (por ejemplo, las pistas vacías en el Mixer) y no responden al toque.</p>
       <h3 class="grp">Pantalla y atajos</h3>
+      <h4>Ajustes en la pantalla</h4>
+      <p>El engranaje de la pantalla abre los ajustes dentro de ella; otro toque, o Esc, los cierra. La primera línea es la pestaña (Aspecto, Tono, Sonido…): con ella marcada, izquierda y derecha cambian de pestaña. Arriba y abajo recorren las filas; izquierda y derecha cambian el valor de la fila marcada; un toque en la perilla (o Enter) la activa: cambia una casilla, ejecuta un botón, marca el tempo o carga y guarda los presets. La rueda mueve el deslizador de la fila marcada. También puedes tocar las filas, las flechas ‹ › y deslizar la lista con el dedo.</p>
+      <p>Mientras los ajustes están abiertos, los botones de acorde siguen sonando, así que oyes cada cambio. Lo que es texto largo o necesita escribir o elegir un archivo (este manual, el diagnóstico, la prueba del micrófono y de la vibración, el código del instrumento, importar una copia, restablecer la app) se abre en la hoja de ajustes, en su sitio.</p>
       <h4>Menús</h4>
       <p>Toca la tonalidad, el sonido o el modo de la pantalla (un toque corto, como los botones gris, amarillo y rojo del aparato) y se abre su menú dentro de la pantalla. Con el joystick, izquierda y derecha cambian el valor, y arriba y abajo pasan a los submenús: en la tonalidad, arriba y abajo suben o bajan la octava de todo; en el sonido, arriba entra en la lista de efectos y ajustes (izquierda y derecha la recorren, arriba cambia la opción, abajo vuelve al sonido; en Reverb y Delay, la rueda regula la cantidad); en el modo, arriba entra en el BPM y abajo en el ajuste del modo (velocidad, kit, variación o nivel). Mantener el joystick a un lado repite el paso. También puedes tocar en la pantalla los vecinos de izquierda y derecha y las indicaciones de abajo.</p>
       <p>El menú se cierra al tocar un acorde, con un toque en la perilla, tocando otra vez la etiqueta o tras unos segundos sin tocar nada. En Notes Hero y Ear Trainer solo se abre el del modo.</p>
@@ -770,11 +811,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> y <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> siguiente modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> tocadas abren el menú de sonido, tonalidad y modo; mantenidas, su selección rápida · <span class="k">←</span> <span class="k">→</span> <span class="k">↑</span> <span class="k">↓</span> navegan por el menú abierto · <span class="k">Esc</span> lo cierra · <span class="k">Espacio</span> con J, K o L mantenidas aleatoriza · <span class="k">←</span> <span class="k">→</span> giran la rueda cuando está seleccionada</p>
       <h3 class="grp">Modos y ritmos</h3>
       <h4>Modos</h4>
-      <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo. En el ordenador, las flechas a los lados de la franja de modos, o la rueda del ratón sobre ella, la desplazan.</p>
+      <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. Para cambiar de modo, toca el modo de la pantalla (abajo a la izquierda) y muévete con el joystick, o mantenlo pulsado para la selección rápida (ver «Menús» y «Selección rápida»); el ajuste de cada modo (velocidad, kit, variación o nivel) está en ese mismo menú, hacia abajo.</p>
       <p><b>Drum</b> cada botón es un golpe; mantén un pad y mueve el joystick para repetirlo. <b>Drum Loop</b> cada botón arranca un ritmo (y lo para). <b>Sequencer</b> añade acordes a una secuencia y reprodúcela con play. <b>Mixer</b> silencia pistas y controla el metrónomo.</p>
       <p>En Sequencer, las teclas de abajo son play y stop, quitar el último paso, borrar y la duración del paso. En Mixer, con una pista seleccionada, son solo, vol −, vol + y borrar.</p>
       <h4>Repeat: trance gate</h4>
-      <p>En Repeat, mantén un acorde y se abre y se cierra al ritmo del tempo siguiendo un patrón fijo de 32 pasos, con silencios y notas ligadas, como un sintetizador de trance. El chip de la derecha cambia la velocidad del pulso (las mismas velocidades que el arpegio). El release se limita a 200 ms para que los cortes queden limpios.</p>
+      <p>En Repeat, mantén un acorde y se abre y se cierra al ritmo del tempo siguiendo un patrón fijo de 32 pasos, con silencios y notas ligadas, como un sintetizador de trance. La velocidad del pulso se cambia en el menú del modo, hacia abajo (las mismas velocidades que el arpegio). El release se limita a 200 ms para que los cortes queden limpios.</p>
       <h4>Fill</h4>
       <p>En Drum Loop, la variación Fill sustituye el cuarto tiempo de cada compás por un redoble de caja y toms. Cada cuatro compases el relleno ocupa la segunda mitad del compás y termina con un platillo en el primer tiempo siguiente.</p>
       <h3 class="grp">Sonido</h3>
@@ -804,14 +845,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
       <h3 class="grp">Practicar</h3>
       <h4>Notes Hero (juego de acordes)</h4>
-      <p>Un juego de ritmo que enseña progresiones reales. Elige nivel con el chip de la derecha (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión); el nivel, el tipo y el título de la canción salen arriba en la pantalla. Pulsa "jugar". Tras una cuenta atrás de cuatro tiempos, los acordes avanzan hacia la línea de golpeo: pulsa su botón justo cuando lleguen y, si el bloque lleva una flecha, mantén también esa dirección del joystick. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
+      <p>Un juego de ritmo que enseña progresiones reales. Elige nivel en el menú del modo, hacia abajo (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión); el nivel, el tipo y el título de la canción salen arriba en la pantalla. Pulsa "jugar". Tras una cuenta atrás de cuatro tiempos, los acordes avanzan hacia la línea de golpeo: pulsa su botón justo cuando lleguen y, si el bloque lleva una flecha, mantén también esa dirección del joystick. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
       <p>"Práctica" juega más despacio: empieza al 75 % y con "vel −" y "vel +" va del 50 al 100 %. Tras los resultados, "siguiente" pasa al nivel siguiente y "repetir" vuelve a jugar el actual. Cada nivel estrena una idea: el acorde 6 (nivel 2), el sus4 con el joystick abajo (3), cambios cada dos tiempos y anticipos (4), el iv prestado con el joystick arriba (5), la mezcla con 2 y 3 (6), séptimas (7), novenas (8), dominantes secundarias (9) y una cadena por quintas (10).</p>
       <h4>Ear Trainer (entrenador de oído)</h4>
-      <p>La app toca algo y tú lo repites. Elige nivel con el chip de la derecha y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
+      <p>La app toca algo y tú lo repites. Elige nivel en el menú del modo, hacia abajo, y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
       <h3 class="grp">Ajustes y mantenimiento</h3>
       <h4>Aspecto</h4>
-      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (LCD industrial), MOSS (LCD verdosa de cuatro tonos) y PHOSPHOR (tubo de osciloscopio). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
+      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (LCD industrial), MOSS (LCD verdosa de cuatro tonos) y PHOSPHOR (tubo de osciloscopio). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. La línea que cruza la pantalla es la traza: en reposo es plana; con «Osciloscopio» activado muestra la onda que suena. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Copia de seguridad</h4>
@@ -1227,7 +1268,8 @@ function loadState() {
 // Durante el juego los ajustes son temporales: no se guardan hasta restaurarlos
 let gameLock = false;
 let quick = null, quickPtr = null; const quickSwallow = new Set();
-let menu = null;   // menú abierto en la pantalla (fase 31): { kind: 'key' | 'sound' | 'fx' | 'mode' | 'bpm' | 'param', fx }
+let menu = null;
+let setv = null;   // ajustes abiertos dentro de la pantalla (fase 33): { sec, row } (row −1 = la cabecera de pestañas)   // menú abierto en la pantalla (fase 31): { kind: 'key' | 'sound' | 'fx' | 'mode' | 'bpm' | 'param', fx }
 let midiAcc = null, midiSent = new Set();
 let wavRec = null, wavTimer = null; const WAV_MAX = 240;   // guardar audio: máximo 4 min
 function saveState() {
@@ -2476,12 +2518,12 @@ function mixerTool(which) {
 // como cualquier lista del iPhone. Si el navegador empieza a desplazar la lista, cancela el toque (pointercancel) y no se elige nada.
 function onChipTap(el, fn, scroller) {
   let st = null;
-  el.addEventListener('pointerdown', e => { st = { id:e.pointerId, x:e.clientX, y:e.clientY, sl:scroller ? scroller.scrollLeft : 0, moved:false }; });
+  el.addEventListener('pointerdown', e => { st = { id:e.pointerId, x:e.clientX, y:e.clientY, sl:scroller ? scroller.scrollLeft : 0, stp:scroller ? scroller.scrollTop : 0, moved:false }; });
   el.addEventListener('pointermove', e => { if (st && e.pointerId === st.id && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 8) st.moved = true; });
   el.addEventListener('pointercancel', () => { st = null; });
   el.addEventListener('pointerup', e => {
     if (!st || e.pointerId !== st.id) return;
-    const moved = st.moved || (scroller && Math.abs(scroller.scrollLeft - st.sl) > 4); st = null;
+    const moved = st.moved || (scroller && (Math.abs(scroller.scrollLeft - st.sl) > 4 || Math.abs(scroller.scrollTop - st.stp) > 4)); st = null;
     if (!moved) { haptic(false); fn(); }
   });
   el.addEventListener('click', e => { if (e.detail === 0) fn(); });   // teclado
@@ -2996,6 +3038,7 @@ function setJoyDir(source, dir) {
   if (dir && source === 'pad') haptic(false);
   if (source === 'pad') padDir = dir; else keyDir = dir;
   if (dir) quickPromote();
+  if (setv && held.length === 0 && !quick) { setvJoy(dir); renderJoy(); return; }
   if (quick) { quickFlip(dir); renderJoy(); return; }
   if (menu && held.length === 0) { menuJoy(dir); renderJoy(); return; }
   // En modo cromático, sin acorde pulsado, izquierda/derecha cambian la tonalidad
@@ -3309,10 +3352,11 @@ function buildJoy() {
 }
 // El clic de la perilla solo sirve para aleatorizar, con la tonalidad, el sonido o el modo mantenidos. El resto de funciones (looper, Seq, Mixer) ya tienen su botón visible,
 // así que en cualquier otro caso la perilla es solo un joystick.
-function joyClickAction() { return (!!menu && !quick) || (!!quick && state.mode !== 'hiro' && state.mode !== 'ear'); }
+function joyClickAction() { return (!!setv && !quick) || (!!menu && !quick) || (!!quick && state.mode !== 'hiro' && state.mode !== 'ear'); }
 function joyClick() {
   quickPromote();
   if (held.length || !joyClickAction()) return;             // con un acorde pulsado no cuenta
+  if (setv && !quick) { setvActivate(); return; }           // en los ajustes de la pantalla, el clic activa la fila
   if (menu && !quick) { menuClose(); return; }              // con un menú abierto, el clic lo cierra (en el aparato, «select/close»)
   const knob = $('knob'); knob.classList.add('click'); setTimeout(() => knob.classList.remove('click'), 130);
   haptic(true);
@@ -3346,6 +3390,9 @@ window.addEventListener('keydown', e => {
   else if ('wasdqezc'.includes(k) && k.length === 1) { dirKeys.add(k); setJoyDir('key', keyboardDir()); }
   else if (k === 'm') setMode(MODES[(MODES.findIndex(m => m.id === state.mode) + 1) % MODES.length].id);
   else if (k === 'j' || k === 'k' || k === 'l') quickArm(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode');
+  else if (setv && MENU_ARROWS[k]) { e.preventDefault(); setvNav(MENU_ARROWS[k]); }
+  else if (setv && k === 'enter') { e.preventDefault(); setvActivate(); }
+  else if (setv && k === 'escape') setvClose();
   else if (menu && MENU_ARROWS[k]) { e.preventDefault(); menuNav(MENU_ARROWS[k]); }
   else if (k === 'escape' && menu) menuClose();
   else if (k === ' ') { e.preventDefault(); quickPromote(); joyClick(); }
@@ -3373,18 +3420,20 @@ window.addEventListener('blur', () => {
 const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGain:'mic gain', reverbAmt:'reverb', delayAmt:'delay' };
 let wheelRot = 0; const wheelMuteFixed = new Set();
 function wheelTarget() {
+  if (setv) { const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }   // en los ajustes de la pantalla: el deslizador de la fila
   if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }   // en el menú de efectos: intensidad
   if (quick) return quick.group === 'key' ? 'attack' : quick.group === 'sound' ? 'release' : 'cutoff';
   if (state.mode === 'mixer') { const b = held.find(x => x < 6 && tracks[x] && tracks[x].buffer); if (b != null) return 'track:' + b; }
   if (state.mode === 'mic') return 'micGain';
   return 'cutoff';
 }
-function renderWheel() { const tg = wheelTarget(), l = $('wheelLbl'); if (l) l.textContent = tg.startsWith('track:') ? 'track ' + (+tg.slice(6) + 1) : WHEEL_NAMES[tg]; }
+function renderWheel() { const tg = wheelTarget(), l = $('wheelLbl'); if (l) l.textContent = tg === 'setv' ? setvRow().s.label.toLowerCase() : tg.startsWith('track:') ? 'track ' + (+tg.slice(6) + 1) : WHEEL_NAMES[tg]; }
 function wheelTurn(px) {   // px > 0 (a la derecha) = más
   quickPromote();
   if (quick) quick.used = true; if (menu) menuPoke();
   wheelRot += px; $('wheelRim').style.setProperty('--rot', wheelRot + 'px');
   const tg = wheelTarget(); let txt;
+  if (tg === 'setv') { const r = setvRow(), el = r.s.el; el.value = Math.max(+el.min, Math.min(+el.max, +el.value + px * (+el.max - +el.min) / 260)); el.dispatchEvent(new Event('input', { bubbles: true })); setvRender(); return; }
   if (tg.startsWith('track:')) {
     const b = +tg.slice(6), tr = tracks[b];
     if (!wheelMuteFixed.has(b)) { wheelMuteFixed.add(b); tr.mute = !tr.mute; applyMutesSafe(); renderPads(); }   // al pulsar se silenció: girar la rueda lo deshace
@@ -3414,6 +3463,125 @@ function wheelDone() { saveState(); syncSettings(); }
 })();
 
 
+
+// ===== AJUSTES DENTRO DE LA PANTALLA (fase 33) =====
+// El icono abre los ajustes dentro de la pantalla. Cada fila maneja el control equivalente de la hoja (mismo evento: change / input),
+// así que se reutiliza toda la lógica de los ajustes. La cabecera (fila −1) cambia de pestaña. Lo que es texto largo o necesita teclado o un archivo
+// (Manual, informes, código del instrumento, importar, restablecer) se abre en la hoja, en su sitio. Los botones de acorde siguen sonando: se oyen los cambios.
+const SETV_WIDE = ['tw_code', 'bk_import', 'diag', 'mic_test', 'hapticTest', 'reset_app', 'lib_clear'];
+let setvRep = null;
+function setvSections() {
+  const out = []; let cur = null;
+  for (const s of SETTINGS) {
+    if (s.section) { cur = { name: s.section, rows: [] }; out.push(cur); continue; }
+    if (!cur) continue;
+    const row = s.el && s.el.closest('.row'); if (row && row.hidden) continue;
+    if (s.type === 'preset') { cur.rows.push({ s, kind: 'load' }, { s, kind: 'save' }); continue; }
+    cur.rows.push({ s, kind: (SETV_WIDE.includes(s.id) || s.type === 'code' || s.type === 'file') ? 'wide' : s.type });
+  }
+  const man = out.find(x => x.name === 'Manual'); if (man) man.rows = [{ s: { id: 'manual', label: 'Abrir el manual' }, kind: 'manual' }];
+  return out.filter(x => x.rows.length);
+}
+function setvRow() { if (!setv) return null; const secs = setvSections(), sec = secs[Math.min(setv.sec, secs.length - 1)]; return sec && setv.row >= 0 ? sec.rows[Math.min(setv.row, sec.rows.length - 1)] : null; }
+function setvLabel(r) { return r.kind === 'load' ? r.s.label + ' · cargar' : r.kind === 'save' ? r.s.label + ' · guardar' : r.s.label; }
+function setvValue(r) {
+  const el = r.s.el;
+  if (r.kind === 'select') return el && el.selectedIndex >= 0 ? el.options[el.selectedIndex].text : '';
+  if (r.kind === 'check') return el && el.checked ? 'On' : 'Off';
+  if (r.kind === 'range') return el && el._out ? el._out.textContent : '';
+  if (r.kind === 'button') return r.s.text || '›';
+  if (r.kind === 'tap') return 'tap';
+  if (r.kind === 'load') return el && el._info ? el._info.textContent : '';
+  if (r.kind === 'save') return '›';
+  return '›';
+}
+function setvChange(r, d) {   // d = ±1: valor anterior / siguiente (deslizadores: BPM, cantidades y ganancias de uno en uno; los de 0–1000 al 1 %)
+  const el = r && r.s.el; if (!el) return;
+  if (r.kind === 'select') { const n = el.options.length; el.selectedIndex = (el.selectedIndex + d + n) % n; el.dispatchEvent(new Event('change', { bubbles: true })); }
+  else if (r.kind === 'check') { el.checked = !el.checked; el.dispatchEvent(new Event('change', { bubbles: true })); }
+  else if (r.kind === 'range') { const min = +el.min, max = +el.max, step = (max - min) > 300 ? Math.round((max - min) / 100) : 1; el.value = Math.max(min, Math.min(max, +el.value + d * step)); el.dispatchEvent(new Event('input', { bubbles: true })); }
+}
+function setvActivate(r) {
+  r = r || setvRow(); if (!r) return;
+  try {
+    if (r.kind === 'select' || r.kind === 'check') setvChange(r, 1);
+    else if (r.kind === 'button') r.s.run();
+    else if (r.kind === 'tap') tapTempo();
+    else if (r.kind === 'load') { if (presets[r.s.slot]) presetLoad(r.s.slot); }
+    else if (r.kind === 'save') presetSave(r.s.slot);
+    else if (r.kind === 'wide' || r.kind === 'manual') {   // a la hoja, en su sitio
+      const sec = setvSections()[setv.sec].name; setvClose(); openSettings(); showTab(sec);
+      if (r.kind === 'wide' && r.s.el) { const row = r.s.el.closest('.row'); setTimeout(() => { row.scrollIntoView({ block: 'center' }); row.classList.add('flash'); setTimeout(() => row.classList.remove('flash'), 1400); }, 60); }
+      return;
+    }
+  } catch (e) { logErr('ajuste', e); errToast(e); }
+  setvRender();
+}
+function setvOpen() {
+  if (menu) menuClose(); if (quick) quickClose();
+  syncSettings();
+  const secs = setvSections(); let i = secs.findIndex(x => x.name === settingsTab); if (i < 0) i = 0;
+  setv = { sec: i, row: -1 }; haptic(false); setvRender(); renderWheel();
+}
+function setvClose() { if (!setv) return; setv = null; clearTimeout(setvRep); setvRender(); renderWheel(); renderScreen(held.length > 0); drawBaseline(); }
+function setvNav(dir) {
+  if (!setv) return;
+  const secs = setvSections(); if (!secs.length) return;
+  setv.sec = Math.min(setv.sec, secs.length - 1);
+  const rows = secs[setv.sec].rows;
+  if (dir === 'u') setv.row = Math.max(-1, setv.row - 1);
+  else if (dir === 'd') setv.row = Math.min(rows.length - 1, setv.row + 1);
+  else if (dir === 'l' || dir === 'r') {
+    const d = dir === 'r' ? 1 : -1;
+    if (setv.row < 0) { setv.sec = (setv.sec + d + secs.length) % secs.length; settingsTab = secs[setv.sec].name; }
+    else setvChange(rows[setv.row], d);
+  }
+  haptic(false); setvRender(); renderWheel();
+}
+function setvJoy(dir) {   // un paso al empujar; mantener repite (arriba/abajo por las filas, izquierda/derecha en los valores)
+  clearTimeout(setvRep); if (!dir || dir.length !== 1) return;
+  setvNav(dir);
+  const again = () => { if (!setv || (padDir || keyDir) !== dir) return; setvNav(dir); setvRep = setTimeout(again, 110); };
+  setvRep = setTimeout(again, 380);
+}
+function setvRender() {
+  const el = $('setv'); if (!el) return;
+  $('screen').classList.toggle('setv-open', !!setv);
+  if (!setv) { el.hidden = true; return; }
+  el.hidden = false;
+  const secs = setvSections(); if (!secs.length) return;
+  setv.sec = Math.min(setv.sec, secs.length - 1);
+  const sec = secs[setv.sec]; setv.row = Math.min(setv.row, sec.rows.length - 1);
+  $('setvSec').textContent = sec.name; $('setvPos').textContent = (setv.sec + 1) + '/' + secs.length;
+  $('setvHead').classList.toggle('cur', setv.row < 0);
+  const list = $('setvList'); list.innerHTML = '';
+  const mk = (tag, cls, txt) => { const e = document.createElement(tag); e.className = cls; e.textContent = txt; return e; };
+  sec.rows.forEach((r, i) => {
+    const row = mk('div', 'setv-row k-' + r.kind + (i === setv.row ? ' cur' : ''), '');
+    const lb = mk('span', 'lb', setvLabel(r)), vl = mk('span', 'vl', '');
+    const adjustable = r.kind === 'select' || r.kind === 'range';
+    if (adjustable) {
+      const dec = mk('button', 'dec', '‹'), v = mk('span', 'v', setvValue(r)), inc = mk('button', 'inc', '›');
+      dec.setAttribute('aria-label', 'Anterior'); inc.setAttribute('aria-label', 'Siguiente');
+      onChipTap(dec, () => { setv.row = i; setvChange(r, -1); setvRender(); }, list);
+      onChipTap(inc, () => { setv.row = i; setvChange(r, 1); setvRender(); }, list);
+      if (r.kind === 'select') onChipTap(v, () => { setv.row = i; setvChange(r, 1); setvRender(); }, list);
+      vl.append(dec, v, inc);
+      onChipTap(lb, () => { setv.row = i; setvRender(); renderWheel(); }, list);
+    } else {
+      vl.textContent = setvValue(r);
+      onChipTap(lb, () => { setv.row = i; setvActivate(r); }, list);
+      onChipTap(vl, () => { setv.row = i; setvActivate(r); }, list);
+    }
+    row.append(lb, vl); list.appendChild(row);
+  });
+  const cur = list.children[setv.row];
+  if (cur) { const top = cur.offsetTop, bot = top + cur.offsetHeight; if (top < list.scrollTop) list.scrollTop = top; else if (bot > list.scrollTop + list.clientHeight) list.scrollTop = bot - list.clientHeight; }
+  else if (setv.row < 0) list.scrollTop = 0;
+}
+onChipTap($('setvPrev'), () => { if (!setv) return; setv.row = -1; setvNav('l'); });
+onChipTap($('setvNext'), () => { if (!setv) return; setv.row = -1; setvNav('r'); });
+
 // ===== MENÚS DEL APARATO EN LA PANTALLA (fase 31) =====
 // Como los tres botones de función del HiChord: un toque en la tonalidad, el sonido o el modo abre su menú DENTRO de la pantalla.
 // Joystick (o toques en la pantalla, o flechas): izquierda/derecha cambian el valor; arriba/abajo pasan a los submenús.
@@ -3432,7 +3600,7 @@ function menuToggle(group) {
   const same = menu && (menu.kind === group || (group === 'sound' && menu.kind === 'fx') || (group === 'mode' && (menu.kind === 'bpm' || menu.kind === 'param')));
   if (same) menuClose(); else menuOpen(group);
 }
-function menuOpen(kind) { menu = { kind, fx: menu ? menu.fx : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+function menuOpen(kind) { if (setv) setvClose(); menu = { kind, fx: menu ? menu.fx : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
 function menuClose() { if (!menu) return; menu = null; clearTimeout(menuTimer); clearTimeout(menuRep); renderMenu(); renderWheel(); renderScreen(held.length > 0); }
 function menuPoke() { clearTimeout(menuTimer); menuTimer = setTimeout(menuClose, MENU_TIMEOUT); }
 function menuJoy(dir) {   // del joystick: un paso al empujar; mantener izquierda/derecha repite
@@ -3743,8 +3911,10 @@ function drawScope() {
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const css = getComputedStyle(document.documentElement);
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  // Persistencia tipo fósforo: el trazo anterior se desvanece en vez de borrarse
-  g.globalAlpha = 0.3; g.fillStyle = css.getPropertyValue('--panel').trim() || '#222'; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+  // Persistencia según la tecnología de la pantalla: fósforo = el trazo se desvanece despacio; LCD = un fantasma mínimo; OLED = ninguna.
+  // El desvanecimiento deja el lienzo TRANSPARENTE (antes lo rellenaba con el color de fondo y tapaba la sombra interior de la pantalla: se veía un rectángulo).
+  const fade = { phosphor: 0.3, moss: 0.65, matrix: 0.6, ember: 1 }[document.documentElement.dataset.screen] || 0.5;
+  g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + fade + ')'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over';
   g.strokeStyle = css.getPropertyValue('--scope').trim() || '#888';
   g.lineWidth = 1.6; g.lineJoin = 'round'; g.beginPath();
   if (analyser && ctx && ctx.state === 'running') {
@@ -3761,8 +3931,20 @@ function drawScope() {
 function setOsc(on) {
   state.osc = !!on; saveState();
   $('screen').classList.toggle('osc', state.osc); $('oscBtn').classList.toggle('on', state.osc);
-  if (state.osc && !scopeRaf) drawScope();
+  if (state.osc && !scopeRaf) drawScope(); else drawBaseline();
 }
+// La traza en reposo (fase 33): sin osciloscopio en vivo, una línea plana en el tono medio de la pantalla (como la línea del mockup)
+function drawBaseline() {
+  if (state.osc || ['hiro', 'ear', 'tuner'].includes(state.mode)) return;
+  const c = $('scope'), g = c && c.getContext && c.getContext('2d'); if (!g) return;
+  const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 0, H = c.clientHeight || 0; if (!W || !H) return;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  g.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--panel-mid').trim() || '#555';
+  g.lineWidth = 1.4; g.beginPath(); g.moveTo(0, Math.round(H / 2) + .5); g.lineTo(W, Math.round(H / 2) + .5); g.stroke();
+}
+window.addEventListener('resize', () => drawBaseline());
+{ const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); }; }   // la traza en reposo sigue a la pantalla, la carcasa y el modo
 
 const SETTINGS = [
   { section:'Aspecto' },
@@ -4094,7 +4276,7 @@ function afterSettingChange() {
   if (held.length) refresh();
 }
 
-function openSettings() { if (menu) menuClose(); syncSettings(); $('sheet').hidden = false; showTab(settingsTab); const n = $('sheetNav'); if (n._fade) { n._fade(); setTimeout(n._fade, 120); } }
+function openSettings() { if (menu) menuClose(); if (setv) setvClose(); syncSettings(); $('sheet').hidden = false; showTab(settingsTab); const n = $('sheetNav'); if (n._fade) { n._fade(); setTimeout(n._fade, 120); } }
 function closeSettings() { $('sheet').hidden = true; }
 
 // ===== PRESETS, AZAR Y COPIA DE SEGURIDAD =====
@@ -4610,7 +4792,7 @@ onTap($('tInv'), toolInversion);
 onTap($('tLock'), toolLock);
 onTap($('tOctDn'), () => toolOct(-1));
 onTap($('tOctUp'), () => toolOct(1));
-$('gear').addEventListener('click', openSettings);
+$('gear').addEventListener('click', () => { if (setv) setvClose(); else setvOpen(); });   // los ajustes se abren DENTRO de la pantalla
 function goneToBackground() {
   held.length = 0; pointers.clear(); padDir = null; dirKeys.clear(); keyDir = null;
   if (ctx) refresh(); else renderPads();
