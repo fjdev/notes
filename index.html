@@ -506,7 +506,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   --scr-glow: 0 0 7px rgba(124,211,155,.22); --chip-glow: 0 0 9px -3px rgba(124,211,155,.4); --chord-font: var(--mono);
   --scr-inset: inset 0 3px 10px rgba(0,0,0,.7), inset 0 0 30px rgba(0,0,0,.45);
   --panel-mid:#1F4A31;
-  --scr-overlay: linear-gradient(rgba(124,211,155,.18), rgba(124,211,155,.18)) center / 100% 1px no-repeat, linear-gradient(90deg, rgba(124,211,155,.18), rgba(124,211,155,.18)) center / 1px 100% no-repeat, repeating-linear-gradient(90deg, rgba(124,211,155,.26) 0 1px, transparent 1px 8px) center / 100% 6px no-repeat, repeating-linear-gradient(0deg, rgba(124,211,155,.26) 0 1px, transparent 1px 8px) center / 6px 100% no-repeat, linear-gradient(rgba(124,211,155,.07) 1px, transparent 1px) 0 0 / 100% 12.5%, linear-gradient(90deg, rgba(124,211,155,.07) 1px, transparent 1px) 0 0 / 10% 100%, repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
+  --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%);   /* limpia: solo el reflejo del cristal (sin retícula, ejes ni marcas) */
 }
 :root[data-screen] .display::after { background: var(--scr-overlay); }
 .display .screen { box-shadow: var(--scr-inset); }
@@ -721,6 +721,21 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .controls .tools.chord .oct-cap { display: block; position: absolute; left: 0; right: 0; bottom: -15px; text-align: center; font: 500 9px/1 var(--sans); letter-spacing: .04em; text-transform: lowercase; color: var(--muted); pointer-events: none; }
 
 
+/* ===== FASE 34 ===== */
+/* Informes dentro de la pantalla (diagnóstico, micrófono, vibración, código del instrumento) */
+.display .setv-text { padding: 6px 6px 8px; font: 500 11.5px/1.45 var(--chord-font, var(--mono)); color: var(--panel-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+:root[data-screen="moss"] .display .setv-text, :root[data-screen="matrix"] .display .setv-text { font: 10.5px/1.5 var(--pixel); letter-spacing: .04em; text-transform: uppercase; }
+.display #setvPos { cursor: pointer; }
+/* Parte de arriba: más aire sobre «notes» y la rueda (el sistema puede difuminar el borde superior), y letras sin capa propia (nítidas) */
+body { padding-top: calc(env(safe-area-inset-top, 0px) + 6px); }
+.topbar { margin: -2px 2px -4px; }
+.topbar .brand { transform: none; opacity: 1; position: relative; top: -1px; color: color-mix(in srgb, var(--ink) 92%, var(--body)); }
+/* Parte de abajo: el grupo de teclas llega hasta el borde derecho (como el joystick toca el izquierdo) y pesa un poco más */
+.controls { justify-content: space-between; }
+.controls .tools { flex: 0 0 auto; }
+.controls .tools.chord { grid-template-columns: repeat(2, 64px); grid-template-rows: 50px 50px; justify-content: end; }
+.controls .tools:not(.chord) { grid-template-columns: repeat(2, 58px); grid-auto-rows: 58px; gap: 24px 12px; justify-content: end; }
+
 </style>
 </head>
 <body>
@@ -797,7 +812,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <h3 class="grp">Pantalla y atajos</h3>
       <h4>Ajustes en la pantalla</h4>
       <p>El engranaje de la pantalla abre los ajustes dentro de ella; otro toque, o Esc, los cierra. La primera línea es la pestaña (Aspecto, Tono, Sonido…): con ella marcada, izquierda y derecha cambian de pestaña. Arriba y abajo recorren las filas; izquierda y derecha cambian el valor de la fila marcada; un toque en la perilla (o Enter) la activa: cambia una casilla, ejecuta un botón, marca el tempo o carga y guarda los presets. La rueda mueve el deslizador de la fila marcada. También puedes tocar las filas, las flechas ‹ › y deslizar la lista con el dedo.</p>
-      <p>Mientras los ajustes están abiertos, los botones de acorde siguen sonando, así que oyes cada cambio. Lo que es texto largo o necesita escribir o elegir un archivo (este manual, el diagnóstico, la prueba del micrófono y de la vibración, el código del instrumento, importar una copia, restablecer la app) se abre en la hoja de ajustes, en su sitio.</p>
+      <p>Mientras los ajustes están abiertos, los botones de acorde siguen sonando, así que oyes cada cambio. Los informes (diagnóstico, prueba del micrófono y de la vibración) y el código del instrumento se leen dentro de la propia pantalla: arriba y abajo (o la rueda) desplazan el texto, izquierda vuelve a la lista y, en el código, «Copiar» lo lleva al portapapeles. «Restablecer la app» pide un segundo toque («¿Seguro?»). Importar una copia abre el selector de archivos del sistema. Solo este manual se abre en la hoja de ajustes.</p>
       <h4>Menús</h4>
       <p>Toca la tonalidad, el sonido o el modo de la pantalla (un toque corto, como los botones gris, amarillo y rojo del aparato) y se abre su menú dentro de la pantalla. Con el joystick, izquierda y derecha cambian el valor, y arriba y abajo pasan a los submenús: en la tonalidad, arriba y abajo suben o bajan la octava de todo; en el sonido, arriba entra en la lista de efectos y ajustes (izquierda y derecha la recorren, arriba cambia la opción, abajo vuelve al sonido; en Reverb y Delay, la rueda regula la cantidad); en el modo, arriba entra en el BPM y abajo en el ajuste del modo (velocidad, kit, variación o nivel). Mantener el joystick a un lado repite el paso. También puedes tocar en la pantalla los vecinos de izquierda y derecha y las indicaciones de abajo.</p>
       <p>El menú se cierra al tocar un acorde, con un toque en la perilla, tocando otra vez la etiqueta o tras unos segundos sin tocar nada. En Notes Hero y Ear Trainer solo se abre el del modo.</p>
@@ -2592,7 +2607,9 @@ async function micOpenStream() {
   toast(micLastError.replace(/ \[.*\]$/, ''));
   return false;
 }
+const DIAG_TITLES = { 'set-diag': 'Diagnóstico', 'set-hapticTest': 'Vibración', 'set-mic_test': 'Micrófono' };
 function showDiag(text, id) {
+  if (setv) { setvShowDetail(DIAG_TITLES[id || 'set-mic_test'] || 'Informe', ((id || 'set-mic_test') === 'set-mic_test' ? String(text).replace(/ · /g, '\n') : String(text)), false); return; }
   const row = $(id || 'set-mic_test').closest('.row'); row.classList.add('wrap');
   let d = row.querySelector('.diag'); if (!d) { d = document.createElement('div'); d.className = 'diag'; row.appendChild(d); }
   d.textContent = text;
@@ -2625,7 +2642,7 @@ async function runDiag() {
 let resetArmed = false;
 async function resetApp() {
   const el = $('set-reset_app');
-  if (!resetArmed) { resetArmed = true; el.textContent = '¿Seguro?'; setTimeout(() => { resetArmed = false; el.textContent = 'Restablecer'; }, 3500); return; }
+  if (!resetArmed) { resetArmed = true; el.textContent = '¿Seguro?'; if (setv) setvRender(); setTimeout(() => { resetArmed = false; el.textContent = 'Restablecer'; if (setv) setvRender(); }, 3500); return; }
   try { for (const k of Object.keys(localStorage)) if (k.startsWith('notes-')) localStorage.removeItem(k); } catch (e) {}
   try { for (const k of await caches.keys()) await caches.delete(k); } catch (e) {}
   try { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); } catch (e) {}
@@ -2917,6 +2934,7 @@ let hapticPending = false, activationQueue = [];
 function hapticLater() { hapticPending = true; }
 // Ejecuta algo en el próximo gesto válido para iOS (levantar el dedo o clic): permisos, audio
 function onActivation(fn) { activationQueue.push(fn); }
+function flushActivation() { if (activationQueue.length) { const q = activationQueue; activationQueue = []; for (const fn of q) fn(); } }
 ['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => {
   if (hapticPending) { hapticPending = false; haptic(true); }
   if (activationQueue.length) { const q = activationQueue; activationQueue = []; for (const fn of q) fn(); }
@@ -3392,7 +3410,7 @@ window.addEventListener('keydown', e => {
   else if (k === 'j' || k === 'k' || k === 'l') quickArm(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode');
   else if (setv && MENU_ARROWS[k]) { e.preventDefault(); setvNav(MENU_ARROWS[k]); }
   else if (setv && k === 'enter') { e.preventDefault(); setvActivate(); }
-  else if (setv && k === 'escape') setvClose();
+  else if (setv && k === 'escape') setvEsc();
   else if (menu && MENU_ARROWS[k]) { e.preventDefault(); menuNav(MENU_ARROWS[k]); }
   else if (k === 'escape' && menu) menuClose();
   else if (k === ' ') { e.preventDefault(); quickPromote(); joyClick(); }
@@ -3417,10 +3435,10 @@ window.addEventListener('blur', () => {
 // El volumen general lo llevan los botones de volumen del dispositivo (una web no puede leerlos), así que la rueda sola barre el FILTRO,
 // como el «Filter Wheel» del aparato. Con la tonalidad mantenida regula el ataque; con el sonido, el release; con el modo, el filtro (como el aparato).
 // En Mixer, con una pista mantenida, su volumen (y no la silencia); en Mic Sample, la ganancia del micro.
-const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGain:'mic gain', reverbAmt:'reverb', delayAmt:'delay' };
+const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGain:'mic gain', reverbAmt:'reverb', delayAmt:'delay', setvText:'scroll' };
 let wheelRot = 0; const wheelMuteFixed = new Set();
 function wheelTarget() {
-  if (setv) { const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }   // en los ajustes de la pantalla: el deslizador de la fila
+  if (setv) { if (setv.detail) return 'setvText'; const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }   // en los ajustes de la pantalla: el deslizador de la fila
   if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }   // en el menú de efectos: intensidad
   if (quick) return quick.group === 'key' ? 'attack' : quick.group === 'sound' ? 'release' : 'cutoff';
   if (state.mode === 'mixer') { const b = held.find(x => x < 6 && tracks[x] && tracks[x].buffer); if (b != null) return 'track:' + b; }
@@ -3431,8 +3449,9 @@ function renderWheel() { const tg = wheelTarget(), l = $('wheelLbl'); if (l) l.t
 function wheelTurn(px) {   // px > 0 (a la derecha) = más
   quickPromote();
   if (quick) quick.used = true; if (menu) menuPoke();
-  wheelRot += px; $('wheelRim').style.setProperty('--rot', wheelRot + 'px');
+  wheelRot += px; $('wheelRim').style.setProperty('--rot', Math.round(wheelRot) + 'px');   // enteros: las estrías se ven nítidas
   const tg = wheelTarget(); let txt;
+  if (tg === 'setvText') { $('setvList').scrollTop += px * 2; return; }
   if (tg === 'setv') { const r = setvRow(), el = r.s.el; el.value = Math.max(+el.min, Math.min(+el.max, +el.value + px * (+el.max - +el.min) / 260)); el.dispatchEvent(new Event('input', { bubbles: true })); setvRender(); return; }
   if (tg.startsWith('track:')) {
     const b = +tg.slice(6), tr = tracks[b];
@@ -3468,7 +3487,6 @@ function wheelDone() { saveState(); syncSettings(); }
 // El icono abre los ajustes dentro de la pantalla. Cada fila maneja el control equivalente de la hoja (mismo evento: change / input),
 // así que se reutiliza toda la lógica de los ajustes. La cabecera (fila −1) cambia de pestaña. Lo que es texto largo o necesita teclado o un archivo
 // (Manual, informes, código del instrumento, importar, restablecer) se abre en la hoja, en su sitio. Los botones de acorde siguen sonando: se oyen los cambios.
-const SETV_WIDE = ['tw_code', 'bk_import', 'diag', 'mic_test', 'hapticTest', 'reset_app', 'lib_clear'];
 let setvRep = null;
 function setvSections() {
   const out = []; let cur = null;
@@ -3477,19 +3495,20 @@ function setvSections() {
     if (!cur) continue;
     const row = s.el && s.el.closest('.row'); if (row && row.hidden) continue;
     if (s.type === 'preset') { cur.rows.push({ s, kind: 'load' }, { s, kind: 'save' }); continue; }
-    cur.rows.push({ s, kind: (SETV_WIDE.includes(s.id) || s.type === 'code' || s.type === 'file') ? 'wide' : s.type });
+    cur.rows.push({ s, kind: s.type });
   }
   const man = out.find(x => x.name === 'Manual'); if (man) man.rows = [{ s: { id: 'manual', label: 'Abrir el manual' }, kind: 'manual' }];
   return out.filter(x => x.rows.length);
 }
 function setvRow() { if (!setv) return null; const secs = setvSections(), sec = secs[Math.min(setv.sec, secs.length - 1)]; return sec && setv.row >= 0 ? sec.rows[Math.min(setv.row, sec.rows.length - 1)] : null; }
-function setvLabel(r) { return r.kind === 'load' ? r.s.label + ' · cargar' : r.kind === 'save' ? r.s.label + ' · guardar' : r.s.label; }
+const SETV_LABEL = { reset_app: 'Restablecer la app', bk_import: 'Importar copia', tw_code: 'Código del instrumento' };
+function setvLabel(r) { if (SETV_LABEL[r.s.id]) return SETV_LABEL[r.s.id]; return r.kind === 'load' ? r.s.label + ' · cargar' : r.kind === 'save' ? r.s.label + ' · guardar' : r.s.label; }
 function setvValue(r) {
   const el = r.s.el;
   if (r.kind === 'select') return el && el.selectedIndex >= 0 ? el.options[el.selectedIndex].text : '';
   if (r.kind === 'check') return el && el.checked ? 'On' : 'Off';
   if (r.kind === 'range') return el && el._out ? el._out.textContent : '';
-  if (r.kind === 'button') return r.s.text || '›';
+  if (r.kind === 'button') return (r.s.id === 'reset_app' && resetArmed) ? '¿Seguro?' : (r.s.text || '›');
   if (r.kind === 'tap') return 'tap';
   if (r.kind === 'load') return el && el._info ? el._info.textContent : '';
   if (r.kind === 'save') return '›';
@@ -3502,21 +3521,33 @@ function setvChange(r, d) {   // d = ±1: valor anterior / siguiente (deslizador
   else if (r.kind === 'range') { const min = +el.min, max = +el.max, step = (max - min) > 300 ? Math.round((max - min) / 100) : 1; el.value = Math.max(min, Math.min(max, +el.value + d * step)); el.dispatchEvent(new Event('input', { bubbles: true })); }
 }
 function setvActivate(r) {
+  if (setv && setv.detail) { if (setv.detail.copy) setvCopy(); else setvBack(); return; }   // en un informe: el clic copia (si se puede) o vuelve
   r = r || setvRow(); if (!r) return;
   try {
     if (r.kind === 'select' || r.kind === 'check') setvChange(r, 1);
-    else if (r.kind === 'button') r.s.run();
+    else if (r.kind === 'button') { r.s.run(); flushActivation(); }
     else if (r.kind === 'tap') tapTempo();
     else if (r.kind === 'load') { if (presets[r.s.slot]) presetLoad(r.s.slot); }
     else if (r.kind === 'save') presetSave(r.s.slot);
-    else if (r.kind === 'wide' || r.kind === 'manual') {   // a la hoja, en su sitio
+    else if (r.kind === 'code') { const snd = curSound(); setvShowDetail('Código del instrumento', snd.id + ' ' + JSON.stringify(state.tweaks[snd.id] || {}), true); return; }
+    else if (r.kind === 'file') { if (r.s.el) r.s.el.click(); return; }   // el selector de archivos es del sistema
+    else if (r.kind === 'manual') {   // el manual es lo único que sigue en la hoja (pendiente: modo hoja de papel)
       const sec = setvSections()[setv.sec].name; setvClose(); openSettings(); showTab(sec);
-      if (r.kind === 'wide' && r.s.el) { const row = r.s.el.closest('.row'); setTimeout(() => { row.scrollIntoView({ block: 'center' }); row.classList.add('flash'); setTimeout(() => row.classList.remove('flash'), 1400); }, 60); }
       return;
     }
   } catch (e) { logErr('ajuste', e); errToast(e); }
   setvRender();
 }
+function setvShowDetail(title, text, copy) {   // un informe o un texto largo DENTRO de la pantalla (sin hoja)
+  if (!setv) return;
+  setv.detail = { title, text, copy: !!copy }; setvRender(); $('setvList').scrollTop = 0; renderWheel();
+}
+function setvBack() { if (!setv || !setv.detail) return; setv.detail = null; setvRender(); renderWheel(); }
+function setvCopy() {
+  const t = setv && setv.detail && setv.detail.text; if (!t) return;
+  try { navigator.clipboard.writeText(t).then(() => toast('Copiado'), () => toast('No se pudo copiar')); } catch (e) { toast('No se pudo copiar'); }
+}
+function setvEsc() { if (setv && setv.detail) setvBack(); else setvClose(); }
 function setvOpen() {
   if (menu) menuClose(); if (quick) quickClose();
   syncSettings();
@@ -3526,6 +3557,10 @@ function setvOpen() {
 function setvClose() { if (!setv) return; setv = null; clearTimeout(setvRep); setvRender(); renderWheel(); renderScreen(held.length > 0); drawBaseline(); }
 function setvNav(dir) {
   if (!setv) return;
+  if (setv.detail) {   // dentro de un informe: izquierda vuelve; arriba y abajo desplazan el texto
+    if (dir === 'l') setvBack(); else if (dir === 'u' || dir === 'd') $('setvList').scrollTop += (dir === 'd' ? 1 : -1) * 26;
+    haptic(false); return;
+  }
   const secs = setvSections(); if (!secs.length) return;
   setv.sec = Math.min(setv.sec, secs.length - 1);
   const rows = secs[setv.sec].rows;
@@ -3549,6 +3584,13 @@ function setvRender() {
   $('screen').classList.toggle('setv-open', !!setv);
   if (!setv) { el.hidden = true; return; }
   el.hidden = false;
+  $('setvNext').style.visibility = setv.detail ? 'hidden' : '';
+  if (setv.detail) {   // informe / texto largo en la pantalla
+    $('setvSec').textContent = setv.detail.title; $('setvPos').textContent = setv.detail.copy ? 'Copiar' : ''; $('setvHead').classList.remove('cur');
+    const list = $('setvList'); list.innerHTML = '';
+    const t = document.createElement('div'); t.className = 'setv-text'; t.textContent = setv.detail.text; list.appendChild(t);
+    return;
+  }
   const secs = setvSections(); if (!secs.length) return;
   setv.sec = Math.min(setv.sec, secs.length - 1);
   const sec = secs[setv.sec]; setv.row = Math.min(setv.row, sec.rows.length - 1);
@@ -3579,8 +3621,9 @@ function setvRender() {
   if (cur) { const top = cur.offsetTop, bot = top + cur.offsetHeight; if (top < list.scrollTop) list.scrollTop = top; else if (bot > list.scrollTop + list.clientHeight) list.scrollTop = bot - list.clientHeight; }
   else if (setv.row < 0) list.scrollTop = 0;
 }
-onChipTap($('setvPrev'), () => { if (!setv) return; setv.row = -1; setvNav('l'); });
-onChipTap($('setvNext'), () => { if (!setv) return; setv.row = -1; setvNav('r'); });
+onChipTap($('setvPrev'), () => { if (!setv) return; if (setv.detail) { setvBack(); return; } setv.row = -1; setvNav('l'); });
+onChipTap($('setvNext'), () => { if (!setv || setv.detail) return; setv.row = -1; setvNav('r'); });
+onChipTap($('setvPos'), () => { if (setv && setv.detail && setv.detail.copy) setvCopy(); });
 
 // ===== MENÚS DEL APARATO EN LA PANTALLA (fase 31) =====
 // Como los tres botones de función del HiChord: un toque en la tonalidad, el sonido o el modo abre su menú DENTRO de la pantalla.
@@ -3913,7 +3956,7 @@ function drawScope() {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   // Persistencia según la tecnología de la pantalla: fósforo = el trazo se desvanece despacio; LCD = un fantasma mínimo; OLED = ninguna.
   // El desvanecimiento deja el lienzo TRANSPARENTE (antes lo rellenaba con el color de fondo y tapaba la sombra interior de la pantalla: se veía un rectángulo).
-  const fade = { phosphor: 0.3, moss: 0.65, matrix: 0.6, ember: 1 }[document.documentElement.dataset.screen] || 0.5;
+  const fade = { phosphor: 1, moss: 0.65, matrix: 0.6, ember: 1 }[document.documentElement.dataset.screen] || 0.5;
   g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + fade + ')'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over';
   g.strokeStyle = css.getPropertyValue('--scope').trim() || '#888';
   g.lineWidth = 1.6; g.lineJoin = 'round'; g.beginPath();
