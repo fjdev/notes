@@ -625,6 +625,21 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 :root[data-screen="ember"] .display .chip { letter-spacing: .09em; }
 :root[data-screen="ember"] .display .chip:not(.on) { color: color-mix(in srgb, var(--panel-ink) 58%, var(--panel)); }   /* crema apagado: el naranja queda para el título y el estado */
 
+
+/* Menús del aparato dentro de la pantalla (fase 31): solo colores y tipografía de la pantalla activa */
+.display .menu { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; padding: 12px 14px 10px; background: var(--panel); color: var(--panel-ink); }
+.display .menu[hidden] { display: none; }
+.display .menu-top { display: flex; gap: 10px; align-items: baseline; padding-right: 30px; font: 9.5px/1.2 var(--pixel); letter-spacing: .08em; text-transform: uppercase; color: var(--panel-dim); }
+.display .menu-top #menuTitle { color: var(--scr-active); }
+.display .menu-row { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.display .menu-val { font: 500 30px/1.05 var(--chord-font, var(--mono)); letter-spacing: -.01em; text-align: center; max-width: 62vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: var(--scr-glow); }
+.display .menu-side { border: 0; background: transparent; color: var(--panel-dim); font: 500 12px/1.2 var(--chord-font, var(--mono)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 10px 0; cursor: pointer; }
+.display #menuPrev { text-align: left; } .display #menuNext { text-align: right; }
+.display .menu-bottom { display: flex; justify-content: space-between; gap: 10px; }
+.display .menu-hint { border: 0; background: transparent; color: var(--panel-dim); font: 9.5px/1.2 var(--pixel); letter-spacing: .08em; text-transform: uppercase; padding: 6px 0; cursor: pointer; }
+.display .menu-hint:disabled { visibility: hidden; }
+.display .screen.menu-open .screen-top, .display .screen.menu-open .chord, .display .screen.menu-open .screen-bottom, .display .screen.menu-open .scope { visibility: hidden; }
+
 /* Rueda del canto superior (fase 24): se ve el borde estriado de una rueda a través de una ranura; al girarla, las estrías se desplazan */
 .topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 24px; margin: -6px 2px -4px; }
 .wheel-lbl { font: 500 9px/1 var(--sans); letter-spacing: .06em; text-transform: lowercase; color: var(--muted); }
@@ -690,6 +705,11 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
         <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
       </span>
     </div>
+    <div class="menu" id="menu" hidden aria-live="polite">
+      <div class="menu-top"><span id="menuTitle"></span><span id="menuPos"></span></div>
+      <div class="menu-row"><button class="menu-side" id="menuPrev" aria-label="Anterior"></button><span class="menu-val" id="menuVal"></span><button class="menu-side" id="menuNext" aria-label="Siguiente"></button></div>
+      <div class="menu-bottom"><button class="menu-hint" id="menuUp"></button><button class="menu-hint" id="menuDown"></button></div>
+    </div>
     <div class="toast" id="toast"></div>
   </section>
 
@@ -732,19 +752,22 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>Actúan sobre el último botón tocado, que se reconoce por su luz verde. INV cambia la inversión. FIJAR deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. Las dos teclas de abajo, unidas como un balancín, suben o bajan una octava solo ese botón.</p>
       <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Sequencer, Mixer, Notes Hero y Ear Trainer las cuatro teclas cambian de función y llevan su etiqueta debajo; en Drum, Drum Loop, Mic Sample y Tuner no se usan y desaparecen.</p>
       <h4>Rueda</h4>
-      <p>La rueda de arriba a la derecha se gira deslizando el dedo a izquierda o derecha (en el ordenador, también con la rueda del ratón o con las flechas cuando está seleccionada). Sola barre el filtro: a la derecha, más brillante; a la izquierda, más oscuro. Con la tonalidad de la pantalla mantenida regula el ataque (Attack); con el sonido, el release; con el modo, el filtro, como en el aparato. En Mixer, con una pista mantenida, regula su volumen, y girarla hace que la pista no se silencie. En Mic Sample, regula la ganancia del micrófono (Mic Gain). El texto pequeño junto a la rueda dice qué regula en cada momento y la pantalla muestra el valor mientras giras.</p>
+      <p>La rueda de arriba a la derecha se gira deslizando el dedo a izquierda o derecha (en el ordenador, también con la rueda del ratón o con las flechas cuando está seleccionada). Sola barre el filtro: a la derecha, más brillante; a la izquierda, más oscuro. Con la tonalidad de la pantalla mantenida regula el ataque (Attack); con el sonido, el release; con el modo, el filtro, como en el aparato. En el menú de efectos, sobre Reverb o Delay, regula su cantidad. En Mixer, con una pista mantenida, regula su volumen, y girarla hace que la pista no se silencie. En Mic Sample, regula la ganancia del micrófono (Mic Gain). El texto pequeño junto a la rueda dice qué regula en cada momento y la pantalla muestra el valor mientras giras.</p>
       <p>El volumen general lo llevan los botones de volumen del dispositivo: una web no puede leerlos, por eso la rueda se dedica al filtro y a lo demás.</p>
       <h4>Controles atenuados</h4>
       <p>Un botón o una herramienta atenuados no tienen función en el modo actual (por ejemplo, las pistas vacías en el Mixer) y no responden al toque.</p>
       <h3 class="grp">Pantalla y atajos</h3>
+      <h4>Menús</h4>
+      <p>Toca la tonalidad, el sonido o el modo de la pantalla (un toque corto, como los botones gris, amarillo y rojo del aparato) y se abre su menú dentro de la pantalla. Con el joystick, izquierda y derecha cambian el valor, y arriba y abajo pasan a los submenús: en la tonalidad, arriba y abajo suben o bajan la octava de todo; en el sonido, arriba entra en la lista de efectos y ajustes (izquierda y derecha la recorren, arriba cambia la opción, abajo vuelve al sonido; en Reverb y Delay, la rueda regula la cantidad); en el modo, arriba entra en el BPM y abajo en el ajuste del modo (velocidad, kit, variación o nivel). Mantener el joystick a un lado repite el paso. También puedes tocar en la pantalla los vecinos de izquierda y derecha y las indicaciones de abajo.</p>
+      <p>El menú se cierra al tocar un acorde, con un toque en la perilla, tocando otra vez la etiqueta o tras unos segundos sin tocar nada. En Notes Hero y Ear Trainer solo se abre el del modo.</p>
       <h4>Selección rápida</h4>
-      <p>Mantén pulsado el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). La primera página es la misma que en el aparato. Sonido: 1 Saw, 2 Sine, 3 FM EPiano, 4 HX7 Piano, 5 Strings, 6 Clarinet, 7 FM Wow; en Drum y Drum Loop elige el kit (1 Tight Kit, 2 x0x Box, 3 x9x Box, 4 Lynn Kit, 5 KR-78, 6 Trap Box, 7 Tight Kit). Modo: 1 Play, 2 Strum, 3 Lead, 4 Drone, 5 Arp, 6 Repeat, 7 Mic Sample. Tonalidad: en Arp elige el patrón (1 Up, 2 Down, 3 Up/Down, 4 Down/Up, 5 Random, 6 Fingerpick) y el 7 cambia las capas (Arp Only, Chord+Arp, Rhythm+Arp); en los demás modos, las notas y las escalas.</p>
+      <p>Mantén pulsado un momento el sonido, la tonalidad o el modo de la pantalla: los siete botones pasan a elegir (el actual queda marcado en oscuro). La primera página es la misma que en el aparato. Sonido: 1 Saw, 2 Sine, 3 FM EPiano, 4 HX7 Piano, 5 Strings, 6 Clarinet, 7 FM Wow; en Drum y Drum Loop elige el kit (1 Tight Kit, 2 x0x Box, 3 x9x Box, 4 Lynn Kit, 5 KR-78, 6 Trap Box, 7 Tight Kit). Modo: 1 Play, 2 Strum, 3 Lead, 4 Drone, 5 Arp, 6 Repeat, 7 Mic Sample. Tonalidad: en Arp elige el patrón (1 Up, 2 Down, 3 Up/Down, 4 Down/Up, 5 Random, 6 Fingerpick) y el 7 cambia las capas (Arp Only, Chord+Arp, Rhythm+Arp); en los demás modos, las notas y las escalas.</p>
       <p>Con el joystick hacia arriba o la derecha pasas a la página siguiente, con el resto de sonidos o de modos; hacia abajo o la izquierda, a la anterior. En el teclado: J (sonido), K (tonalidad) y L (modo), mantenidas. Sonido y tonalidad no responden en Notes Hero ni en Ear Trainer.</p>
       <h4>Aleatorizar con la perilla</h4>
       <p>Mantén la tonalidad, el sonido o el modo de la pantalla y, con el otro dedo, toca la perilla del joystick con un toque corto, sin moverla (como empujar el joystick hacia abajo en el aparato). Tonalidad: cambia todo, es decir, el sonido, los efectos, la tonalidad y el tempo. Sonido: un sonido nuevo (forma de onda y efectos); la tonalidad, el tempo y las inversiones se quedan. Modo: un patrón nuevo (arpegio, ritmo o secuencia, y la disposición de octavas); el sonido se queda. Es lo mismo que hace el aparato en su versión 3.0. No cuenta si hay un acorde pulsado ni en Notes Hero y Ear Trainer.</p>
       <p>En el ordenador, mantén J (sonido), K (tonalidad) o L (modo) y pulsa la barra espaciadora. Para elegir con más control, Ajustes → Presets tiene el azar con más opciones (ver «Presets y azar»).</p>
       <h4>Teclado del ordenador</h4>
-      <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> y <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> siguiente modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> (mantenidas) selección rápida de sonido, tonalidad y modo · <span class="k">Espacio</span> con J, K o L mantenidas aleatoriza · <span class="k">←</span> <span class="k">→</span> giran la rueda cuando está seleccionada</p>
+      <p><span class="k">1</span>–<span class="k">7</span> acordes · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> y <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> siguiente modo · <span class="k">I</span> inversión · <span class="k">F</span> fijar · <span class="k">,</span> <span class="k">.</span> octava · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> tocadas abren el menú de sonido, tonalidad y modo; mantenidas, su selección rápida · <span class="k">←</span> <span class="k">→</span> <span class="k">↑</span> <span class="k">↓</span> navegan por el menú abierto · <span class="k">Esc</span> lo cierra · <span class="k">Espacio</span> con J, K o L mantenidas aleatoriza · <span class="k">←</span> <span class="k">→</span> giran la rueda cuando está seleccionada</p>
       <h3 class="grp">Modos y ritmos</h3>
       <h4>Modos</h4>
       <p><b>Play</b> acorde completo. <b>Strum</b> rasgueo. <b>Lead</b> una nota, la raíz. <b>Drone</b> el acorde se mantiene al soltar. <b>Arp</b> arpegio al tempo. <b>Repeat</b> el acorde pulsa al tempo. El chip punteado de la derecha ajusta el parámetro del modo. En el ordenador, las flechas a los lados de la franja de modos, o la rueda del ratón sobre ella, la desplazan.</p>
@@ -1204,6 +1227,7 @@ function loadState() {
 // Durante el juego los ajustes son temporales: no se guardan hasta restaurarlos
 let gameLock = false;
 let quick = null, quickPtr = null; const quickSwallow = new Set();
+let menu = null;   // menú abierto en la pantalla (fase 31): { kind: 'key' | 'sound' | 'fx' | 'mode' | 'bpm' | 'param', fx }
 let midiAcc = null, midiSent = new Set();
 let wavRec = null, wavTimer = null; const WAV_MAX = 240;   // guardar audio: máximo 4 min
 function saveState() {
@@ -2933,8 +2957,10 @@ function refresh() {
 }
 
 function pressInner(btn) {
+  quickPromote();
   if (!padEnabled(btn)) return;
-  if (quick) { const it = quickItems()[btn]; if (it) { quickSwallow.add(btn); haptic(true); it.pick(); renderPads(); } return; }
+  if (quick) { const it = quickItems()[btn]; if (it) { quickSwallow.add(btn); quick.used = true; haptic(true); it.pick(); renderPads(); } return; }
+  if (menu) menuClose();   // tocar un acorde cierra el menú, como en el aparato
   ensureAudio(); haptic(true); hapticLater();
   if (!held.includes(btn)) held.push(btn);
   target = btn; lastDirUsed[btn] = null;
@@ -2969,7 +2995,9 @@ function setJoyDir(source, dir) {
   if (prev === dir) return;
   if (dir && source === 'pad') haptic(false);
   if (source === 'pad') padDir = dir; else keyDir = dir;
+  if (dir) quickPromote();
   if (quick) { quickFlip(dir); renderJoy(); return; }
+  if (menu && held.length === 0) { menuJoy(dir); renderJoy(); return; }
   // En modo cromático, sin acorde pulsado, izquierda/derecha cambian la tonalidad
   if (state.joy === 'chromatic' && held.length === 0 && (dir === 'l' || dir === 'r')) {
     state.key = (state.key + (dir === 'r' ? 1 : 11)) % 12; saveState();
@@ -3256,6 +3284,7 @@ function buildJoy() {
     try { joy.setPointerCapture(e.pointerId); } catch (err) {}
     const r = joy.getBoundingClientRect();
     const knobR = $('knob').getBoundingClientRect().width / 2 + KNOB_MARGIN;
+    quickPromote();   // tocar la perilla con una etiqueta pulsada = selección rápida al momento (para el azar)
     const onKnob = !held.length && joyClickAction() && Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) <= knobR;
     tap = onKnob ? { t:performance.now(), x:e.clientX, y:e.clientY, moved:false } : null;
     $('knob').classList.toggle('press', onKnob);
@@ -3280,13 +3309,15 @@ function buildJoy() {
 }
 // El clic de la perilla solo sirve para aleatorizar, con la tonalidad, el sonido o el modo mantenidos. El resto de funciones (looper, Seq, Mixer) ya tienen su botón visible,
 // así que en cualquier otro caso la perilla es solo un joystick.
-function joyClickAction() { return !!quick && state.mode !== 'hiro' && state.mode !== 'ear'; }
+function joyClickAction() { return (!!menu && !quick) || (!!quick && state.mode !== 'hiro' && state.mode !== 'ear'); }
 function joyClick() {
+  quickPromote();
   if (held.length || !joyClickAction()) return;             // con un acorde pulsado no cuenta
+  if (menu && !quick) { menuClose(); return; }              // con un menú abierto, el clic lo cierra (en el aparato, «select/close»)
   const knob = $('knob'); knob.classList.add('click'); setTimeout(() => knob.classList.remove('click'), 130);
   haptic(true);
   try {
-    randomize(quick.group === 'sound' ? 'sound' : quick.group === 'mode' ? 'pattern' : 'all');   // como en la Rev 3.0: SONIDO = onda y efectos; KEY = todo; MODO = patrón
+    quick.used = true; randomize(quick.group === 'sound' ? 'sound' : quick.group === 'mode' ? 'pattern' : 'all');   // como en la Rev 3.0: SONIDO = onda y efectos; KEY = todo; MODO = patrón
     renderPads();
   } catch (e) { logErr('clic', e); errToast(e); }
 }
@@ -3314,17 +3345,20 @@ window.addEventListener('keydown', e => {
   if (k >= '1' && k <= '7') { e.preventDefault(); press(+k - 1); }
   else if ('wasdqezc'.includes(k) && k.length === 1) { dirKeys.add(k); setJoyDir('key', keyboardDir()); }
   else if (k === 'm') setMode(MODES[(MODES.findIndex(m => m.id === state.mode) + 1) % MODES.length].id);
-  else if (k === 'j' || k === 'k' || k === 'l') quickOpen(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode');
-  else if (k === ' ') { e.preventDefault(); joyClick(); }
+  else if (k === 'j' || k === 'k' || k === 'l') quickArm(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode');
+  else if (menu && MENU_ARROWS[k]) { e.preventDefault(); menuNav(MENU_ARROWS[k]); }
+  else if (k === 'escape' && menu) menuClose();
+  else if (k === ' ') { e.preventDefault(); quickPromote(); joyClick(); }
   else if (k === 'i') toolInversion();
   else if (k === 'f') toolLock();
   else if (k === ',') toolOct(-1);
   else if (k === '.') toolOct(1);
 });
+const MENU_ARROWS = { arrowleft:'l', arrowright:'r', arrowup:'u', arrowdown:'d' };
 window.addEventListener('keyup', e => {
   const k = e.key.toLowerCase();
   if (k >= '1' && k <= '7') release(+k - 1);
-  else if (k === 'j' || k === 'k' || k === 'l') quickClose();
+  else if (k === 'j' || k === 'k' || k === 'l') { if (quickCancel()) menuToggle(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode'); else quickClose(); }
   else if (dirKeys.delete(k)) setJoyDir('key', keyboardDir());
 });
 window.addEventListener('blur', () => {
@@ -3336,9 +3370,10 @@ window.addEventListener('blur', () => {
 // El volumen general lo llevan los botones de volumen del dispositivo (una web no puede leerlos), así que la rueda sola barre el FILTRO,
 // como el «Filter Wheel» del aparato. Con la tonalidad mantenida regula el ataque; con el sonido, el release; con el modo, el filtro (como el aparato).
 // En Mixer, con una pista mantenida, su volumen (y no la silencia); en Mic Sample, la ganancia del micro.
-const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGain:'mic gain' };
+const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGain:'mic gain', reverbAmt:'reverb', delayAmt:'delay' };
 let wheelRot = 0; const wheelMuteFixed = new Set();
 function wheelTarget() {
+  if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }   // en el menú de efectos: intensidad
   if (quick) return quick.group === 'key' ? 'attack' : quick.group === 'sound' ? 'release' : 'cutoff';
   if (state.mode === 'mixer') { const b = held.find(x => x < 6 && tracks[x] && tracks[x].buffer); if (b != null) return 'track:' + b; }
   if (state.mode === 'mic') return 'micGain';
@@ -3346,6 +3381,8 @@ function wheelTarget() {
 }
 function renderWheel() { const tg = wheelTarget(), l = $('wheelLbl'); if (l) l.textContent = tg.startsWith('track:') ? 'track ' + (+tg.slice(6) + 1) : WHEEL_NAMES[tg]; }
 function wheelTurn(px) {   // px > 0 (a la derecha) = más
+  quickPromote();
+  if (quick) quick.used = true; if (menu) menuPoke();
   wheelRot += px; $('wheelRim').style.setProperty('--rot', wheelRot + 'px');
   const tg = wheelTarget(); let txt;
   if (tg.startsWith('track:')) {
@@ -3375,6 +3412,118 @@ function wheelDone() { saveState(); syncSettings(); }
     if (d) { e.preventDefault(); e.stopPropagation(); wheelTurn(d); clearTimeout(w._t); w._t = setTimeout(wheelDone, 300); }
   });
 })();
+
+
+// ===== MENÚS DEL APARATO EN LA PANTALLA (fase 31) =====
+// Como los tres botones de función del HiChord: un toque en la tonalidad, el sonido o el modo abre su menú DENTRO de la pantalla.
+// Joystick (o toques en la pantalla, o flechas): izquierda/derecha cambian el valor; arriba/abajo pasan a los submenús.
+//   KEY:   izq/der tonalidad · arriba/abajo octava global
+//   SOUND: izq/der sonido · arriba = lista de efectos y ajustes (izq/der recorre, arriba cambia la opción, abajo vuelve; la rueda da la intensidad)
+//   MODE:  izq/der modo · arriba = BPM (izq/der ±1, se repite al mantener) · abajo = ajuste del modo
+// Se cierra al tocar un acorde, con un clic de la perilla, tocando otra vez la etiqueta, con Esc o tras 6 s sin tocar nada.
+const MENU_TIMEOUT = 6000;
+const FX_ITEMS = ['reverb', 'delay', 'chorus', 'flanger', 'drive', 'tape', 'tremolo', 'lfo', 'vocoder', 'voices', 'adsr', 'bass', 'glide', 'scale', 'vlead', 'stereo', 'joy', 'osc'];
+const FX_NAMES = { reverb:'Reverb', delay:'Delay', chorus:'Chorus', flanger:'Flanger', drive:'Drive', tape:'Tape', tremolo:'Tremolo', lfo:'LFO', vocoder:'Vocoder', voices:'Voice', adsr:'ADSR',
+  bass:'Bass', glide:'Glide', scale:'Scale', vlead:'V.Lead', stereo:'Stereo', joy:'Joystick', osc:'OSC View' };
+const MENU_TITLES = { key:'Key', sound:'Sound', fx:'FX', mode:'Mode', bpm:'BPM', param:'Mode' };
+let menuTimer = null, menuRep = null;
+function menuToggle(group) {
+  if (group !== 'mode' && (state.mode === 'hiro' || state.mode === 'ear')) return;   // en los juegos solo el modo
+  const same = menu && (menu.kind === group || (group === 'sound' && menu.kind === 'fx') || (group === 'mode' && (menu.kind === 'bpm' || menu.kind === 'param')));
+  if (same) menuClose(); else menuOpen(group);
+}
+function menuOpen(kind) { menu = { kind, fx: menu ? menu.fx : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+function menuClose() { if (!menu) return; menu = null; clearTimeout(menuTimer); clearTimeout(menuRep); renderMenu(); renderWheel(); renderScreen(held.length > 0); }
+function menuPoke() { clearTimeout(menuTimer); menuTimer = setTimeout(menuClose, MENU_TIMEOUT); }
+function menuJoy(dir) {   // del joystick: un paso al empujar; mantener izquierda/derecha repite
+  clearTimeout(menuRep); if (!dir || dir.length !== 1) return;
+  menuNav(dir);
+  if ((dir === 'l' || dir === 'r') && menu) {
+    const again = () => { if (!menu || (padDir || keyDir) !== dir) return; menuNav(dir); menuRep = setTimeout(again, 110); };
+    menuRep = setTimeout(again, 380);
+  }
+}
+const menuStep = (list, cur, d) => list[(Math.max(0, list.indexOf(cur)) + d + list.length) % list.length];
+function menuSoundList() { return allSounds().filter(s => s.id !== 'micsample' || sampleBuf.mic); }
+function menuModeList() { return MODES.filter(m => m.id !== 'mixer' || loopHasAudio()).map(m => m.id); }
+function fxOptions(id) { const st = SETTINGS.find(s => s.id === id); if (!st) return null; return st.type === 'check' ? [[false, 'Off'], [true, 'On']] : st.options(); }
+function fxValueName(id) {
+  const opts = fxOptions(id); if (!opts) return '';
+  const cur = opts.find(o => String(o[0]) === String(id === 'osc' ? !!state.osc : state[id])); return cur ? cur[1] : '';
+}
+function fxCycle(id) {
+  const opts = fxOptions(id); if (!opts) return;
+  const cur = id === 'osc' ? !!state.osc : state[id], i = opts.findIndex(o => String(o[0]) === String(cur)), next = opts[(i + 1) % opts.length][0];
+  if (id === 'osc') { setOsc(!!next); saveState(); return; }
+  const st = SETTINGS.find(s => s.id === id);
+  quickSet(id, st.type === 'check' ? !!next : st.numeric ? Number(next) : next);
+}
+function menuNav(dir) {
+  if (!menu) return;
+  const h = dir === 'l' ? -1 : dir === 'r' ? 1 : 0, k = menu.kind;
+  if (k === 'key') {
+    if (h) quickSet('key', (state.key + h + 12) % 12);
+    else quickSet('globalOct', Math.max(-2, Math.min(2, (state.globalOct || 0) + (dir === 'u' ? 1 : -1))));
+  } else if (k === 'sound') {
+    if (h) quickSet('sound', menuStep(menuSoundList().map(s => s.id), state.sound, h));
+    else if (dir === 'u') menu.kind = 'fx';
+  } else if (k === 'fx') {
+    if (h) menu.fx = (menu.fx + h + FX_ITEMS.length) % FX_ITEMS.length;
+    else if (dir === 'u') fxCycle(FX_ITEMS[menu.fx]);
+    else menu.kind = 'sound';
+  } else if (k === 'mode') {
+    if (h) setMode(menuStep(menuModeList(), state.mode, h));
+    else if (dir === 'u') menu.kind = 'bpm';
+    else if (modeParam() && state.mode !== 'seq') menu.kind = 'param';
+  } else if (k === 'bpm') {
+    if (h) quickSet('bpm', Math.max(40, Math.min(300, state.bpm + h)));
+    else if (dir === 'd') menu.kind = 'mode';
+  } else if (k === 'param') {
+    const p = modeParam();
+    if (!p) menu.kind = 'mode';
+    else if (h && !gameLocked()) {
+      state[p.key] = menuStep(p.list, state[p.key], h); saveState(); syncSettings(); renderModes();
+      if (state.mode === 'hiro') hiroPrepare(); else if (state.mode === 'ear') earPrepare();
+    } else if (dir === 'u') menu.kind = 'mode';
+  }
+  if (menu) { haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+}
+function renderMenu() {
+  const el = $('menu'); if (!el) return;
+  $('screen').classList.toggle('menu-open', !!menu);
+  if (!menu) { el.hidden = true; return; }
+  el.hidden = false;
+  const k = menu.kind; let title = MENU_TITLES[k], pos = '', val = '', prev = '', next = '', up = '', down = '';
+  const around = (list, cur, name) => { const i = Math.max(0, list.indexOf(cur)), n = list.length; return [name(list[(i - 1 + n) % n]), name(cur), name(list[(i + 1) % n]), (i + 1) + '/' + n]; };
+  if (k === 'key') {
+    const keys = NOTE_NAMES.map((_, i) => i); [prev, val, next] = around(keys, state.key, i => NOTE_NAMES[i]);
+    const o = state.globalOct || 0; pos = SCALES[state.scale].name + ' · Oct ' + (o > 0 ? '+' : '') + o; up = o < 2 ? '▲ Oct' : ''; down = o > -2 ? '▼ Oct' : '';
+  } else if (k === 'sound') {
+    const list = menuSoundList(), name = id => { const s = list.find(x => x.id === id); return s ? s.name : ''; };
+    [prev, val, next, pos] = around(list.map(s => s.id), state.sound, name); up = '▲ FX';
+  } else if (k === 'fx') {
+    const id = FX_ITEMS[menu.fx], n = FX_ITEMS.length;
+    title = FX_NAMES[id]; val = fxValueName(id); pos = (menu.fx + 1) + '/' + n;
+    prev = FX_NAMES[FX_ITEMS[(menu.fx - 1 + n) % n]]; next = FX_NAMES[FX_ITEMS[(menu.fx + 1) % n]];
+    up = '▲ ' + (fxOptions(id) ? (fxOptions(id)[(fxOptions(id).findIndex(o => o[1] === val) + 1) % fxOptions(id).length] || ['', ''])[1] : ''); down = '▼ Sound';
+  } else if (k === 'mode') {
+    const name = id => (MODES.find(m => m.id === id) || {}).name || '';
+    [prev, val, next, pos] = around(menuModeList(), state.mode, name);
+    up = '▲ BPM ' + state.bpm; const p = modeParam(); down = p && state.mode !== 'seq' ? '▼ ' + (p.names[state[p.key]] || '') : '';
+  } else if (k === 'bpm') {
+    val = String(state.bpm); prev = String(Math.max(40, state.bpm - 1)); next = String(Math.min(300, state.bpm + 1)); pos = '40–300'; down = '▼ Mode';
+  } else if (k === 'param') {
+    const p = modeParam(); title = (MODES.find(m => m.id === state.mode) || {}).name || 'Mode';
+    if (p) { [prev, val, next, pos] = around(p.list, state[p.key], v => p.names[v] || String(v)); }
+    up = '▲ Mode';
+  }
+  $('menuTitle').textContent = title; $('menuPos').textContent = pos; $('menuVal').textContent = val;
+  $('menuPrev').textContent = prev; $('menuNext').textContent = next; $('menuUp').textContent = up; $('menuDown').textContent = down;
+  $('menuUp').disabled = !up; $('menuDown').disabled = !down;
+}
+// Toques en la propia pantalla (para quien no use el joystick): vecinos = izquierda/derecha; pistas de abajo = arriba/abajo
+onChipTap($('menuPrev'), () => menuNav('l')); onChipTap($('menuNext'), () => menuNav('r'));
+onChipTap($('menuUp'), () => menuNav('u')); onChipTap($('menuDown'), () => menuNav('d'));
 
 // ===== SELECCIÓN RÁPIDA =====
 // Mantener el sonido, la tonalidad o el modo de la pantalla: los botones de acorde pasan a elegir y el joystick cambia de página.
@@ -3421,7 +3570,8 @@ function quickOpen(group) {
   if (quick || ((group === 'sound' || group === 'key') && (state.mode === 'hiro' || state.mode === 'ear'))) return;
   const pages = quickPages(group);
   let page = pages.findIndex(p => p.some(it => it.on)); if (page < 0) page = 0;
-  quick = { group, page }; renderPads();
+  if (menu) menuClose();
+  quick = { group, page, used: false }; renderPads();
 }
 function quickClose() { if (!quick) return; quick = null; renderPads(); renderScreen(held.length > 0); }
 function quickFlip(dir) {
@@ -3429,15 +3579,27 @@ function quickFlip(dir) {
   const step = ['u','ur','r'].includes(dir) ? 1 : ['d','dl','l'].includes(dir) ? -1 : 0;
   if (!step) return;
   const n = quickPages(quick.group).length;
-  quick.page = (quick.page + step + n) % n; renderPads();
+  quick.page = (quick.page + step + n) % n; quick.used = true; renderPads();
 }
+// Etiquetas de la pantalla (como los botones de función del aparato): un TOQUE corto abre su menú en la pantalla;
+// MANTENER (desde 0,2 s) es la selección rápida (+ toque en la perilla = azar). El retraso evita que las teclas parpadeen en cada toque.
+const QUICK_DELAY = 200;
+let quickPending = null;   // etiqueta pulsada que aún no es «mantener»: { group, timer }
+function quickArm(group) { quickCancel(); quickPending = { group, timer: setTimeout(() => { const g = quickPending.group; quickPending = null; quickOpen(g); }, QUICK_DELAY) }; }
+function quickCancel() { if (!quickPending) return false; clearTimeout(quickPending.timer); quickPending = null; return true; }
+// Si mientras mantienes la etiqueta haces otra cosa (rueda, perilla, un botón, el joystick), la selección rápida se activa al momento
+function quickPromote() { if (!quickPending) return; const g = quickPending.group; quickCancel(); quickOpen(g); if (quick) quick.used = true; }
 function bindQuick(id, group) {
   const el = $(id); el.classList.add('fn');
   el.addEventListener('pointerdown', e => {
     e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (err) {}
-    quickPtr = e.pointerId; quickOpen(group); if (quick) el.classList.add('on');
+    quickPtr = e.pointerId; el.classList.add('on'); quickArm(group);
   });
-  const end = e => { if (e.pointerId !== quickPtr) return; quickPtr = null; el.classList.remove('on'); quickClose(); };
+  const end = e => {
+    if (e.pointerId !== quickPtr) return; quickPtr = null; el.classList.remove('on');
+    if (quickCancel()) { if (e.type === 'pointerup') menuToggle(group); return; }   // toque corto: abre o cierra el menú
+    quickClose();
+  };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   el.addEventListener('contextmenu', e => e.preventDefault());
 }
@@ -3932,7 +4094,7 @@ function afterSettingChange() {
   if (held.length) refresh();
 }
 
-function openSettings() { syncSettings(); $('sheet').hidden = false; showTab(settingsTab); const n = $('sheetNav'); if (n._fade) { n._fade(); setTimeout(n._fade, 120); } }
+function openSettings() { if (menu) menuClose(); syncSettings(); $('sheet').hidden = false; showTab(settingsTab); const n = $('sheetNav'); if (n._fade) { n._fade(); setTimeout(n._fade, 120); } }
 function closeSettings() { $('sheet').hidden = true; }
 
 // ===== PRESETS, AZAR Y COPIA DE SEGURIDAD =====
