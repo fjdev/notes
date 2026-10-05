@@ -429,7 +429,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .cb { --k: var(--btn); color: var(--btn-ink); border-radius: 10px; align-items: flex-start; justify-content: flex-end; padding: 10px 11px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.18), 0 1px 0 rgba(0,0,0,.4); }
 .cb .num { position: absolute; top: 9px; left: 11px; font-family: var(--mono); font-size: 13px; font-weight: 600; line-height: 1; color: var(--btn-muted); }
-.cb .cn { font: 600 clamp(15px, 4.6vw, 20px)/1.1 var(--sans); color: var(--btn-ink); margin: 0; letter-spacing: -.01em; text-align: left; max-width: 100%; overflow-wrap: anywhere; }
+.cb .cn { font: 600 clamp(15px, 4.6vw, 20px)/1.1 var(--sans); color: var(--btn-ink); margin: 0; letter-spacing: -.01em; text-align: left; max-width: 100%; }
+.cb .cn.brk { overflow-wrap: anywhere; }
 .cb .badge { top: 10px; left: auto; right: 24px; font-family: var(--mono); }
 .cb.target::after { top: 11px; right: 10px; width: 7px; height: 7px; background: var(--led); box-shadow: 0 0 6px var(--led); }
 .cb.held { --k: var(--accent2); color: var(--press-ink); transform: translateY(1px);
@@ -3430,24 +3431,33 @@ function padEnabled(b) {
   return true;
 }
 
-// A name that does not fit its key gets a smaller type size (never below 11 px) instead of spilling over the edge
-function fitPadLabel(el) {
-  const cn = el.querySelector('.cn'), txt = cn.textContent, w = el.clientWidth;
-  if (el._fit && el._fit.txt === txt && el._fit.w === w) return;
-  cn.style.fontSize = '';
-  if (!txt || !w || $('pads').classList.contains('bare')) { el._fit = null; return; }
-  const cs = getComputedStyle(el), room = w - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  let fs = parseFloat(getComputedStyle(cn).fontSize);
-  const words = txt.split(/\s+/).length, maxLines = Math.min(2, words);
-  const tooBig = () => cn.scrollWidth > room + 0.5 || cn.getBoundingClientRect().height > fs * 1.1 * maxLines + 1;
-  while (fs > 11 && tooBig()) { fs -= 1; cn.style.fontSize = fs + 'px'; }
-  el._fit = { txt, w, fs: cn.style.fontSize ? fs : 0 };
-}
-function fitPadLabels() {   // every key on the page uses the same size: the one the longest name needs (a printed legend, not seven sizes)
-  padEls.forEach(fitPadLabel);
-  const sizes = padEls.map(el => el._fit && el._fit.fs).filter(Boolean);
-  const fs = sizes.length ? Math.min(...sizes) : 0;
-  padEls.forEach(el => { if (el._fit) el.querySelector('.cn').style.fontSize = fs ? fs + 'px' : ''; });
+// Names on the keys (quick select, or "Notes and numbers on keys"): every key on the page gets the SAME size, the largest that lets the
+// longest word fit its key. Measured with a canvas (exact text width), then checked in the page (scrollWidth), down to 8 px; only if
+// even that does not fit, words may break. (11 px was too big a floor on narrow iPhones / Display Zoom: "Sequencer" spilled out.)
+const padMeasure = document.createElement('canvas').getContext('2d');
+const PAD_SHORT = { 'Sequencer':'Seq', 'Ear Trainer':'Ear', 'Notes Hero':'Hero', 'Drum Loop':'Loop', 'Mic Sample':'Mic' };
+function fitPadLabels(again) {
+  const cns = padEls.map(el => el.querySelector('.cn'));
+  cns.forEach(cn => { cn.style.fontSize = ''; cn.classList.remove('brk'); });
+  if ($('pads').classList.contains('bare')) return;
+  const full = cns.filter(cn => cn.textContent); if (!full.length) return;
+  const cs = getComputedStyle(full[0]), base = parseFloat(cs.fontSize), ls = parseFloat(cs.letterSpacing) || 0;
+  padMeasure.font = cs.fontWeight + ' ' + base + 'px ' + cs.fontFamily;
+  const roomOf = cn => { const el = cn.parentElement, e = getComputedStyle(el); return el.clientWidth - parseFloat(e.paddingLeft) - parseFloat(e.paddingRight) - 3; };
+  let fs = base;
+  full.forEach(cn => {
+    const words = cn.textContent.split(/\s+/), room = roomOf(cn);
+    const widest = Math.max(...words.map(w => padMeasure.measureText(w).width + ls * w.length));
+    if (widest > room) fs = Math.min(fs, base * room / widest);
+    if (words.length > 2) { const all = padMeasure.measureText(cn.textContent).width; if (all > room * 2) fs = Math.min(fs, base * room * 2 / all); }
+  });
+  fs = Math.max(8, Math.floor(fs * 2) / 2);
+  const over = () => full.some(cn => cn.scrollWidth > roomOf(cn) + 3.5 || cn.getBoundingClientRect().height > fs * 1.1 * Math.min(2, cn.textContent.split(/\s+/).length) + 2);
+  const apply = () => full.forEach(cn => { cn.style.fontSize = fs < base ? fs + 'px' : ''; });
+  apply();
+  while (fs > 8 && over()) { fs = Math.max(8, fs - 0.5); apply(); }
+  if (over() && !again && full.some(cn => PAD_SHORT[cn.textContent])) { full.forEach(cn => { if (PAD_SHORT[cn.textContent]) cn.textContent = PAD_SHORT[cn.textContent]; }); fitPadLabels(true); return; }   // very narrow screens: short names before breaking words
+  if (over()) full.forEach(cn => cn.classList.add('brk'));
 }
 function renderPads() {
   for (let b = 0; b < 7; b++) {
@@ -4366,18 +4376,24 @@ function puName(str, cx, y, maxW) { const sc = puWidth(str, 'f5', 2) <= maxW ? 2
 function puGear(x, y) { puCircle(x + 3, y + 3, 2, 0); [[3, 0], [3, 6], [0, 3], [6, 3], [1, 1], [5, 1], [1, 5], [5, 5]].forEach(q => puPx(x + q[0], y + q[1], 0)); }
 function puIcon(name, x, y, t) {
   const R = (a, b, c, d, v) => puRect(x + a, y + b, c, d, v), L = (a, b, c, d) => puLine(x + a, y + b, x + c, y + d), C = (cx, cy, r, f) => puCircle(x + cx, y + cy, r, 1, f);
-  if (name === 'play') { puFrame(x + 1, y + 3, 22, 18); for (let i = 1; i < 4; i++) R(1 + i * 5 + (i > 1 ? 1 : 0), 3, 1, 18); R(5, 3, 3, 10); R(11, 3, 3, 10); R(17, 3, 3, 10); }
+  if (name === 'play') { puFrame(x + 1, y + 3, 22, 18); for (let i = 1; i < 4; i++) R(1 + i * 5 + (i > 1 ? 1 : 0), 3, 1, 18); R(5, 3, 3, 10); R(11, 3, 3, 10); R(17, 3, 3, 10);
+    const k = [0, 2, 1, 3][Math.floor(t * 2.5) % 4]; R([2, 7, 13, 18][k], 14, [3, 4, 3, 4][k], 6); }   // a key goes down
   else if (name === 'strum') { for (let i = 0; i < 6; i++) R(3 + i * 3, 1, 1, 22); const k = Math.floor(t * 6) % 6; for (let i = 0; i <= k; i++) R(2 + i * 3, 11, 3, 2); L(0, 22, 22, 4); }
-  else if (name === 'lead') { C(8, 18, 4, true); R(11, 3, 2, 16); R(11, 3, 9, 3); R(18, 5, 2, 6); }
+  else if (name === 'lead') { const d = [0, -2, -1, -3][Math.floor(t * 3) % 4]; C(8, 18 + d, 4, true); R(11, 3 + d, 2, 16); R(11, 3 + d, 9, 3); R(18, 5 + d, 2, 6); }   // the note moves: a melody
   else if (name === 'drone') { R(1, 11, 22, 2); for (let i = 0; i < 4; i++) { const hh = 4 + ((Math.floor(t * 4) + i) % 3) * 3; R(3 + i * 6, 12 - hh, 2, hh * 2); } }
   else if (name === 'arp') { for (let i = 0; i < 5; i++) R(1 + i * 5, 20 - i * 4 - 3, 4, i * 4 + 4); R(1 + (Math.floor(t * 5) % 5) * 5, 0, 4, 2); }
-  else if (name === 'repeat') { C(12, 12, 9, false); R(8, 2, 10, 4, 0); puTri(x + 13, y + 4, 4, 'r'); R(6, 18, 10, 4, 0); puTri(x + 11, y + 20, 4, 'l'); }
+  else if (name === 'repeat') { C(12, 12, 9, false); R(8, 2, 10, 4, 0); puTri(x + 13, y + 4, 4, 'r'); R(6, 18, 10, 4, 0); puTri(x + 11, y + 20, 4, 'l'); if (Math.floor(t * 4) % 2 === 0) C(12, 12, 3, true); }   // the gate opens and closes
   else if (name === 'seq') { for (let j = 0; j < 2; j++) for (let i = 0; i < 4; i++) { if ((i + j * 4) === Math.floor(t * 3) % 8) R(1 + i * 6, 3 + j * 10, 5, 8); else puFrame(x + 1 + i * 6, y + 3 + j * 10, 5, 8); } }
-  else if (name === 'drum' || name === 'beat') { C(12, 14, 9, false); R(3, 14, 18, 8, 0); puFrame(x + 3, y + 14, 18, 7); R(4, 7, 17, 1); L(2, 1, 11, 9); L(22, 1, 13, 9); if (name === 'beat') { R(9, 17, 6, 1); } }
+  else if (name === 'drum' || name === 'beat') {   // the sticks hit in turn (Drum Loop plays a faster pattern)
+    const st = name === 'beat' ? [1, 0, 2, 0, 1, 2, 0, 2][Math.floor(t * 6) % 8] : Math.floor(t * 3) % 2 + 1;
+    C(12, 14, 9, false); R(3, 14, 18, 8, 0); puFrame(x + 3, y + 14, 18, 7); R(4, 7, 17, 1);
+    if (st === 1) L(2, 1, 11, 7); else L(1, 2, 9, 0);
+    if (st === 2) L(22, 1, 13, 7); else L(23, 2, 15, 0);
+    if (name === 'beat') R(9, 17, 6, 1); }
   else if (name === 'hiro') { R(0, 12, 24, 1); R(17, 5, 1, 15); C(4 + Math.floor(t * 8) % 14, 12, 3, false); }
-  else if (name === 'ear') { C(12, 11, 9, false); C(12, 11, 5, false); R(7, 10, 8, 4, 0); C(11, 11, 2, false); L(12, 20, 14, 23); }
+  else if (name === 'ear') { C(12, 11, 9, false); C(12, 11, 4 + Math.floor(t * 3) % 3, false); R(7, 10, 8, 4, 0); C(11, 11, 2, false); L(12, 20, 14, 23); }   // the ear listens: the inner ring pulses
   else if (name === 'tuner') { for (let a = -50; a <= 50; a += 10) { const r = a * Math.PI / 180 * 0.8; L(12 + Math.sin(r) * 10, 20 - Math.cos(r) * 10, 12 + Math.sin(r) * 13, 20 - Math.cos(r) * 13); } const sw = Math.sin(t * 2) * 30 * Math.PI / 180; L(12, 20, 12 + Math.sin(sw) * 11, 20 - Math.cos(sw) * 11); C(12, 20, 1, true); }
-  else if (name === 'mic') { puFrame(x + 8, y + 1, 8, 13); R(12, 3, 1, 9); L(5, 12, 5, 15); L(5, 15, 8, 18); L(19, 12, 19, 15); L(19, 15, 16, 18); R(8, 18, 8, 1); R(12, 18, 1, 4); R(8, 22, 8, 1); }
+  else if (name === 'mic') { puFrame(x + 8, y + 1, 8, 13); const lv = 2 + Math.round((Math.sin(t * 6) * 0.5 + Math.sin(t * 2.3) * 0.5 + 1) * 4); R(10, 12 - lv, 4, lv);  /* the input level moves */ L(5, 12, 5, 15); L(5, 15, 8, 18); L(19, 12, 19, 15); L(19, 15, 16, 18); R(8, 18, 8, 1); R(12, 18, 1, 4); R(8, 22, 8, 1); }
   else if (name === 'mixer') { for (let i = 0; i < 3; i++) { R(4 + i * 8, 1, 1, 22); const yy = 4 + ((Math.sin(t * 1.6 + i * 2) + 1) * 7 | 0); R(1 + i * 8, yy, 7, 3); } }
   else C(12, 12, 8, false);
 }
@@ -4401,19 +4417,18 @@ function puPlay(t, w, h) {
 }
 function puMenu(t, w, h) {
   const k = menu.kind; puBar(puT('menuTitle'), puT('menuPos'), w);
-  const fx = 8, fy = 11, fw = w - 16, fh = h - 22, mid = fy + Math.floor(fh / 2); puFrame(fx, fy, fw, fh);
+  const fx = 8, fy = 10, fw = w - 16, fh = h - 20, mid = fy + Math.floor(fh / 2), ny = fy + fh - 10; puFrame(fx, fy, fw, fh);
+  const fitName = (s, room) => { while (s.length > 3 && puWidth(s) > room) s = s.slice(0, -1); return s; };   // names: always the 5×8 font, one size for all
   puTri(fx + 9, mid, 5, 'l'); puTri(fx + fw - 10, mid, 5, 'r');   // arrows point OUTWARD (◂ on the left, ▸ on the right)
   const val = puT('menuVal');
   if (k === 'sound') {
-    const n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 11, amp = 8; let prev = null;
+    const band = ny - 4 - (fy + 2), n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 2 + Math.floor(band / 2), amp = Math.max(4, Math.floor(band / 2) - 1); let prev = null;
     for (let i = 0; i < n; i++) { const y = Math.round(gy - pts[i] * amp), y0 = prev == null ? y : prev; puRect(fx + 15 + i, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; }
-    puName(val, Math.floor(w / 2), fy + fh - 16, fw - 24);
-  } else if (k === 'mode') {   // icon box 24×24 + name (5×8) with 5 rows of air; side by side on short screens; name only on very short ones
+    puText(fitName(val, fw - 6), Math.floor(w / 2), ny, { align: 'c' });   // the arrows sit at mid height, so the name can use the full width
+  } else if (k === 'mode') {   // icon box 24×24 on top + name (5×8) on the bottom row; short screens: name only
     const cx = Math.floor(w / 2), room = fw - 28;   // room between the ◂ ▸ arrows
-    let name = val; if (puWidth(name) > room) name = name.replace('Trainer', 'Train').replace('Sequencer', 'Seq');
-    while (name.length > 3 && puWidth(name) > room) name = name.slice(0, -1);
-    if (fh >= 41) { const top = fy + 2 + Math.floor((fh - 4 - 37) / 2); puIcon(state.mode, cx - 12, top, t); puText(name, cx, top + 29, { align: 'c' }); }
-    else puText(name, cx, mid - 4, { align: 'c' });   // short screens: no room for icon + name, so every mode shows its name the same way
+    if (fh >= 43) { puIcon(state.mode, cx - 12, fy + 2, t); puText(fitName(val, fw - 6), cx, ny, { align: 'c' }); }   // icon box on top, name on the bottom row: 7+ rows of air
+    else { let name = val; if (puWidth(name) > room) name = name.replace('Trainer', 'Train').replace('Sequencer', 'Seq'); puText(fitName(name, room), cx, mid - 4, { align: 'c' }); }   // short screens: no room for icon + name, so every mode shows its name the same way
   }
   else puBig(val, Math.floor(w / 2), mid - 8, fw - 24);
   let hl = puT('menuUp').toUpperCase(), hr = puT('menuDown').toUpperCase();   // bottom hints: never collide (drop the BPM number first, then trim the right one)
