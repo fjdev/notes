@@ -708,7 +708,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .controls .tools.idle button { visibility: hidden; }   /* modos sin función (Drums, Ritmos, Mic, Afinador): las teclas se ocultan */
 .oct-cap { display: none; }
 
-/* Fuera de los modos de acordes (Seq, Mixer, Juego, Oído): cuatro teclas cuadradas con su etiqueta debajo, porque las funciones cambian */
+/* (Sustituido en la fase 34c: las teclas son las mismas en todos los modos; esta regla ya no se aplica porque #tools siempre lleva «chord») */
 .controls .tools:not(.chord) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 24px 14px; justify-content: center; align-content: center; }
 
 /* Con acordes: INV y FIJAR sueltos y las dos octavas como un balancín de dos mitades */
@@ -727,15 +727,28 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 :root[data-screen="moss"] .display .setv-text, :root[data-screen="matrix"] .display .setv-text { font: 10.5px/1.5 var(--pixel); letter-spacing: .04em; text-transform: uppercase; }
 .display #setvPos { cursor: pointer; }
 /* Parte de arriba: más aire sobre «notes» y la rueda (el sistema puede difuminar el borde superior), y letras sin capa propia (nítidas) */
-body { padding-top: calc(env(safe-area-inset-top, 0px) + 6px); }
-.topbar { margin: -2px 2px -4px; }
 .topbar .brand { transform: none; opacity: 1; position: relative; top: -1px; color: color-mix(in srgb, var(--ink) 92%, var(--body)); }
-/* Parte de abajo: el grupo de teclas llega hasta el borde derecho (como el joystick toca el izquierdo) y pesa un poco más */
-.controls { justify-content: space-between; }
+/* Parte de abajo: más aire con los bordes. El joystick y el grupo de teclas se alinean con el borde interior de las teclas de acorde (no con el de la bandeja) y todo es algo más pequeño */
+@media not all and (min-width: 700px) and (min-height: 700px) { .app { padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px) * .4); } }   /* solo en móvil: el marco del PC ya tiene su margen */
+@media (min-width: 700px) and (min-height: 700px) { .app { padding-bottom: 22px; } }
+.controls { justify-content: space-between; padding: 0 6px; }
 .controls .tools { flex: 0 0 auto; }
-.controls .tools.chord { grid-template-columns: repeat(2, 64px); grid-template-rows: 50px 50px; justify-content: end; }
-.controls .tools:not(.chord) { grid-template-columns: repeat(2, 58px); grid-auto-rows: 58px; gap: 24px 12px; justify-content: end; }
-
+:root { --joy-size: 140px; --knob-size: 62px; }
+@media (min-height: 741px) { :root { --joy-size: 146px; --knob-size: 64px; } }
+@media (min-height: 800px) { :root { --joy-size: 152px; --knob-size: 66px; } }
+@media (max-height: 640px) { :root { --joy-size: 120px; --knob-size: 54px; } }
+.controls .tools.chord { grid-template-columns: repeat(2, 60px); grid-template-rows: 46px 46px; justify-content: end; }
+.controls .tools:not(.chord) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 22px 12px; justify-content: end; }
+/* Teclas redondas (INV y FIJAR en VERTEX y POCKET): círculo exacto y la luz de estado centrada arriba, dentro del círculo */
+[data-theme="vertex"] .controls .tools.chord #tInv, [data-theme="vertex"] .controls .tools.chord #tLock,
+[data-theme="pocket"] .controls .tools.chord #tInv, [data-theme="pocket"] .controls .tools.chord #tLock { width: 46px; height: 46px; }
+[data-theme="vertex"] .controls .tools.chord #tInv::before, [data-theme="vertex"] .controls .tools.chord #tLock::before,
+[data-theme="pocket"] .controls .tools.chord #tInv::before, [data-theme="pocket"] .controls .tools.chord #tLock::before { top: 6px; right: auto; left: 50%; transform: translateX(-50%); }
+/* Los botones de abajo son LOS MISMOS en todos los modos (fase 34c): en Seq, Mixer, Notes Hero y Oído conservan forma, color y posición; solo cambian icono y texto.
+   Las dos mitades del balancín llevan cada una su texto debajo (en los acordes comparten «octava») */
+.controls .tools.chord { width: 120px; }   /* ancho fijo: los textos de abajo no deben mover los botones */
+.controls .tools.alt #tOctDn span, .controls .tools.alt #tOctUp span { display: block; }
+.controls .tools.alt .oct-cap { display: none; }
 </style>
 </head>
 <body>
@@ -800,10 +813,10 @@ body { padding-top: calc(env(safe-area-inset-top, 0px) + 6px); }
       <h4>Acordes</h4>
       <p>Los siete botones tocan los acordes de la tonalidad: 1, 4 y 5 mayores; 2, 3 y 6 menores; 7 disminuido. Nunca suenan mal entre sí. Prueba 1 → 5 → 6 → 4.</p>
       <p>Mantén un botón y mueve el joystick: cada dirección cambia el color del acorde. Suelta y vuelve al acorde normal. En Ajustes → Acordes eliges entre cinco mapas del joystick.</p>
-      <p>La pantalla muestra el nombre del acorde que suena; si prefieres verlo también en las teclas, activa «Notas y números en las teclas» en Ajustes → Aspecto. En Ajustes → Acordes, «Bass» añade la raíz en grave (Root) o te deja mantener un botón para el bajo y pulsar otro para el acorde (Slash), y «V.Lead» (Voice Leading) elige las inversiones por ti (entonces la tecla INV queda atenuada).</p>
+      <p>La pantalla muestra el nombre del acorde que suena; si prefieres verlo también en las teclas, activa «Notas y números en las teclas» en Ajustes → Aspecto. Esa opción vale para todos los modos: con ella apagada, las teclas van limpias también en Drums, Beats, Mixer, Seq y el resto (solo la selección rápida muestra siempre los nombres). En Ajustes → Acordes, «Bass» añade la raíz en grave (Root) o te deja mantener un botón para el bajo y pulsar otro para el acorde (Slash), y «V.Lead» (Voice Leading) elige las inversiones por ti (entonces la tecla INV queda atenuada).</p>
       <h4>Herramientas</h4>
       <p>Actúan sobre el último botón tocado, que se reconoce por su luz verde. INV cambia la inversión. FIJAR deja ese botón con la última variación que tocaste; vuelve a pulsarlo para liberarlo. Las dos teclas de abajo, unidas como un balancín, suben o bajan una octava solo ese botón.</p>
-      <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Sequencer, Mixer, Notes Hero y Ear Trainer las cuatro teclas cambian de función y llevan su etiqueta debajo; en Drum, Drum Loop, Mic Sample y Tuner no se usan y desaparecen.</p>
+      <p>La luz de cada tecla indica su estado: inversión activa, acorde fijado u octava desplazada hacia abajo o hacia arriba. En Sequencer, Mixer, Notes Hero y Ear Trainer son las mismas cuatro teclas, en el mismo sitio y con los mismos colores: solo cambian el icono y el texto de debajo, que dice qué hace cada una; en Drum, Drum Loop, Mic Sample y Tuner no se usan y desaparecen.</p>
       <h4>Rueda</h4>
       <p>La rueda de arriba a la derecha se gira deslizando el dedo a izquierda o derecha (en el ordenador, también con la rueda del ratón o con las flechas cuando está seleccionada). Sola barre el filtro: a la derecha, más brillante; a la izquierda, más oscuro. Con la tonalidad de la pantalla mantenida regula el ataque (Attack); con el sonido, el release; con el modo, el filtro, como en el aparato. En el menú de efectos, sobre Reverb o Delay, regula su cantidad. En Mixer, con una pista mantenida, regula su volumen, y girarla hace que la pista no se silencie. En Mic Sample, regula la ganancia del micrófono (Mic Gain). El texto pequeño junto a la rueda dice qué regula en cada momento y la pantalla muestra el valor mientras giras.</p>
       <p>El volumen general lo llevan los botones de volumen del dispositivo: una web no puede leerlos, por eso la rueda se dedica al filtro y a lo demás.</p>
@@ -3154,7 +3167,9 @@ function setTool(id, icon, label, opts = {}) {
 }
 function renderTools() {
   const m = state.mode;
-  $('tools').classList.toggle('chord', !['seq', 'mixer', 'hiro', 'ear', 'drum', 'beat', 'mic', 'tuner'].includes(m));
+  // Los mismos botones en todos los modos (misma forma, color y posición): solo cambian el icono y el texto. `alt` = las funciones no son las de los acordes (cada mitad del balancín lleva su propio texto)
+  $('tools').classList.add('chord');
+  $('tools').classList.toggle('alt', ['seq', 'mixer', 'hiro', 'ear'].includes(m));
   $('tools').classList.toggle('idle', ['drum', 'beat', 'mic', 'tuner'].includes(m));   // sin función: las teclas se ocultan
   if (m === 'seq') {
     const none = !seq.steps.length;
@@ -3302,8 +3317,8 @@ function renderPads() {
     el.querySelector('.badge').textContent = quick ? '' : badges.join(' ');
   }
   renderWheel();
-  // Teclas limpias: sin notas ni números en los modos de acordes (salvo que se active la opción); en los demás modos las etiquetas son funcionales
-  $('pads').classList.toggle('bare', !(state.keyLabels || quick || !CHORD_LABEL_MODES.includes(state.mode)));
+  // Teclas limpias en todos los modos: sin notas, números ni nombres (salvo que se active «Notas y números en las teclas»); la selección rápida, que es un menú temporal, sí los muestra
+  $('pads').classList.toggle('bare', !(state.keyLabels || quick));
   renderTools();
 }
 const CHORD_LABEL_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat'];
