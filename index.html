@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="lunar" data-screen="ember">
+<html lang="en" data-theme="lunar" data-screen="vector">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -429,7 +429,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .cb { --k: var(--btn); color: var(--btn-ink); border-radius: 10px; align-items: flex-start; justify-content: flex-end; padding: 10px 11px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.18), 0 1px 0 rgba(0,0,0,.4); }
 .cb .num { position: absolute; top: 9px; left: 11px; font-family: var(--mono); font-size: 13px; font-weight: 600; line-height: 1; color: var(--btn-muted); }
-.cb .cn { font: 600 clamp(15px, 4.6vw, 20px)/1.1 var(--sans); color: var(--btn-ink); margin: 0; letter-spacing: -.01em; text-align: left; }
+.cb .cn { font: 600 clamp(15px, 4.6vw, 20px)/1.1 var(--sans); color: var(--btn-ink); margin: 0; letter-spacing: -.01em; text-align: left; max-width: 100%; overflow-wrap: anywhere; }
 .cb .badge { top: 10px; left: auto; right: 24px; font-family: var(--mono); }
 .cb.target::after { top: 11px; right: 10px; width: 7px; height: 7px; background: var(--led); box-shadow: 0 0 6px var(--led); }
 .cb.held { --k: var(--accent2); color: var(--press-ink); transform: translateY(1px);
@@ -481,7 +481,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
    La pantalla usa un solo sistema monocromo: fondo, principal, atenuado y UN color de estado.
    ========================================================================================== */
 /* ===== PANTALLAS (fase 26): cuatro tecnologías físicas; el mismo contenido, representado de otra manera ===== */
-:root[data-screen="ember"] {   /* EMBER: OLED cálida, negro absoluto que se funde con el marco; nítida, sin textura, brillo mínimo */
+:root[data-screen="vector"] {   /* VECTOR (antes EMBER; evolucionará a la pantalla estilo OP-1): OLED cálida, negro absoluto que se funde con el marco; nítida, sin textura, brillo mínimo */
   --panel:#0B0C0B; --panel-ink:#EDE4CF; --panel-dim:#C9743E; --scr-active:#E8763A; --scope:#EDE4CF; --bezel:#08090A;
   --scr-glow: 0 0 6px rgba(237,228,207,.16); --chip-glow: 0 0 8px -3px rgba(237,228,207,.35); --chord-font: var(--mono);
   --scr-inset: inset 0 0 0 1px rgba(255,255,255,.02); --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.035) 0%, rgba(255,255,255,0) 30%);
@@ -491,7 +491,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 :root {
   --px-gap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Cpath fill='black' fill-opacity='.34' fill-rule='evenodd' d='M0 0h3v3H0zM.34 .34h2.32v2.32H.34z'/%3E%3C/svg%3E");
 }
-:root[data-screen="matrix"] {
+:root[data-screen="pixel"] {
   --panel:#000; --panel-ink:#E4F1FB; --panel-dim:#6F8DA3; --scr-active:#FFFFFF; --scope:#E4F1FB; --bezel:#030507;
   --scr-glow: 0 0 4px rgba(150,205,255,.55), 0 0 12px rgba(100,170,255,.2); --chip-glow: 0 0 6px rgba(150,205,255,.4); --chord-font: "Pixelify Sans", var(--mono);
   --scr-inset: inset 0 0 0 1px rgba(110,160,200,.09), inset 0 0 22px rgba(70,120,170,.07);
@@ -641,10 +641,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 
 /* La franja de modos es PARTE DE LA PANTALLA (fase 30): mismo fondo, mismo vidrio y misma tecnología que el resto del display */
 .display .modes { background: var(--panel); }
-:root[data-screen="moss"] .display .chip, :root[data-screen="matrix"] .display .chip { font-family: var(--chord-font); font-weight: 500; font-size: 13px; letter-spacing: .05em; padding: 8px 10px; }
+:root[data-screen="moss"] .display .chip, :root[data-screen="pixel"] .display .chip { font-family: var(--chord-font); font-weight: 500; font-size: 13px; letter-spacing: .05em; padding: 8px 10px; }
 :root[data-screen="phosphor"] .display .chip { font-family: var(--mono); font-weight: 500; letter-spacing: .1em; }
-:root[data-screen="ember"] .display .chip { letter-spacing: .09em; }
-:root[data-screen="ember"] .display .chip:not(.on) { color: color-mix(in srgb, var(--panel-ink) 58%, var(--panel)); }   /* crema apagado: el naranja queda para el título y el estado */
+:root[data-screen="vector"] .display .chip { letter-spacing: .09em; }
+:root[data-screen="vector"] .display .chip:not(.on) { color: color-mix(in srgb, var(--panel-ink) 58%, var(--panel)); }   /* crema apagado: el naranja queda para el título y el estado */
 
 
 /* Menús del aparato dentro de la pantalla (fase 31): solo colores y tipografía de la pantalla activa */
@@ -690,7 +690,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .display .setv-row.cur { background: var(--panel-ink); }
 .display .setv-row.cur .lb, .display .setv-row.cur .vl { color: var(--panel); }
 .display .screen.setv-open .screen-top, .display .screen.setv-open .chord, .display .screen.setv-open .screen-bottom, .display .screen.setv-open .scope { visibility: hidden; }
-:root[data-screen="moss"] .display .setv-row, :root[data-screen="matrix"] .display .setv-row { font: 11px/1.2 var(--pixel); letter-spacing: .05em; text-transform: uppercase; }   /* fuente de píxel para tamaños pequeños: números inconfundibles */
+:root[data-screen="moss"] .display .setv-row, :root[data-screen="pixel"] .display .setv-row { font: 11px/1.2 var(--pixel); letter-spacing: .05em; text-transform: uppercase; }   /* fuente de píxel para tamaños pequeños: números inconfundibles */
 .row.flash { background: color-mix(in srgb, var(--accent2) 28%, transparent); transition: background .4s; }
 
 /* Rueda del canto superior (fase 24): se ve el borde estriado de una rueda a través de una ranura; al girarla, las estrías se desplazan */
@@ -742,7 +742,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 /* ===== FASE 34 ===== */
 /* Informes dentro de la pantalla (diagnóstico, micrófono, vibración, código del instrumento) */
 .display .setv-text { padding: 6px 6px 8px; font: 500 11.5px/1.45 var(--chord-font, var(--mono)); color: var(--panel-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
-:root[data-screen="moss"] .display .setv-text, :root[data-screen="matrix"] .display .setv-text { font: 10.5px/1.5 var(--pixel); letter-spacing: .04em; text-transform: uppercase; }
+:root[data-screen="moss"] .display .setv-text, :root[data-screen="pixel"] .display .setv-text { font: 10.5px/1.5 var(--pixel); letter-spacing: .04em; text-transform: uppercase; }
 .display #setvPos { cursor: pointer; }
 /* Parte de arriba: más aire sobre «notes» y la rueda (el sistema puede difuminar el borde superior), y letras sin capa propia (nítidas) */
 .topbar .brand { transform: none; opacity: 1; position: relative; top: -1px; color: color-mix(in srgb, var(--ink) 92%, var(--body)); }
@@ -777,37 +777,37 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 
 
 /* ===== FASE 36 · MATRIX = OLED del HiChord / Orchid: barra de título invertida, selectores con marco y triángulos ◂ ▸, forma de onda del sonido ===== */
-:root[data-screen="matrix"] .display .screen-top { background: #D9E8F4; color: #000; margin: -6px -8px 4px; padding: 7px 44px 6px 10px; box-shadow: var(--scr-glow); }
-:root[data-screen="matrix"] .display .screen-top, :root[data-screen="matrix"] .display .screen-top span { color: #000 !important; opacity: 1 !important; font-weight: 700; }
-:root[data-screen="matrix"] .display .gear { color: #000; }
-:root[data-screen="matrix"] .display .gear svg { stroke: #000; }
-:root[data-screen="matrix"] .display .screen-bottom { color: var(--panel-ink); }
-:root[data-screen="matrix"] .display .menu { padding: 0 0 10px; }
-:root[data-screen="matrix"] .display .menu-top { background: #D9E8F4; padding: 8px 44px 6px 12px; box-shadow: var(--scr-glow); color: #000; }
-:root[data-screen="matrix"] .display .menu-top #menuTitle, :root[data-screen="matrix"] .display .menu-top span { color: #000 !important; font-weight: 700; }
-:root[data-screen="matrix"] .display .menu-row { position: relative; margin: 8px 14px 4px; border: 3px solid var(--panel-ink); box-shadow: var(--scr-glow), inset 0 0 8px rgba(140,200,255,.1); grid-template-columns: 30px 1fr 30px; gap: 0; }
-:root[data-screen="matrix"] .display .menu-side { font-size: 0; position: relative; height: 100%; padding: 0; }
-:root[data-screen="matrix"] .display .menu-side::before { content: ""; position: absolute; top: 50%; left: 50%; margin-top: -9px; width: 0; height: 0; border: 9px solid transparent; filter: drop-shadow(0 0 3px rgba(150,205,255,.55)); }
-:root[data-screen="matrix"] .display #menuPrev::before { margin-left: -12px; border-right: 12px solid var(--panel-ink); border-left: 0; }
-:root[data-screen="matrix"] .display #menuNext::before { margin-left: 0; border-left: 12px solid var(--panel-ink); border-right: 0; }
-:root[data-screen="matrix"] .display .menu-val { font-size: 34px; max-width: none; }
-:root[data-screen="matrix"] .display .menu-bottom { padding: 0 14px; }
-:root[data-screen="matrix"] .display .setv-head { background: #D9E8F4; color: #000; margin: -4px -6px 4px; padding: 7px 44px 6px 4px; box-shadow: var(--scr-glow); }
-:root[data-screen="matrix"] .display .setv-head button, :root[data-screen="matrix"] .display .setv-head #setvSec, :root[data-screen="matrix"] .display .setv-head #setvPos { color: #000; }
-:root[data-screen="matrix"] .display .setv-head.cur #setvSec { background: #000; color: var(--panel-ink); }
-:root[data-screen="matrix"] .display .chip.on { background: var(--panel-ink); color: #000; }
+:root[data-screen="pixel"] .display .screen-top { background: #D9E8F4; color: #000; margin: -6px -8px 4px; padding: 7px 44px 6px 10px; box-shadow: var(--scr-glow); }
+:root[data-screen="pixel"] .display .screen-top, :root[data-screen="pixel"] .display .screen-top span { color: #000 !important; opacity: 1 !important; font-weight: 700; }
+:root[data-screen="pixel"] .display .gear { color: #000; }
+:root[data-screen="pixel"] .display .gear svg { stroke: #000; }
+:root[data-screen="pixel"] .display .screen-bottom { color: var(--panel-ink); }
+:root[data-screen="pixel"] .display .menu { padding: 0 0 10px; }
+:root[data-screen="pixel"] .display .menu-top { background: #D9E8F4; padding: 8px 44px 6px 12px; box-shadow: var(--scr-glow); color: #000; }
+:root[data-screen="pixel"] .display .menu-top #menuTitle, :root[data-screen="pixel"] .display .menu-top span { color: #000 !important; font-weight: 700; }
+:root[data-screen="pixel"] .display .menu-row { position: relative; margin: 8px 14px 4px; border: 3px solid var(--panel-ink); box-shadow: var(--scr-glow), inset 0 0 8px rgba(140,200,255,.1); grid-template-columns: 30px 1fr 30px; gap: 0; }
+:root[data-screen="pixel"] .display .menu-side { font-size: 0; position: relative; height: 100%; padding: 0; }
+:root[data-screen="pixel"] .display .menu-side::before { content: ""; position: absolute; top: 50%; left: 50%; margin-top: -9px; width: 0; height: 0; border: 9px solid transparent; filter: drop-shadow(0 0 3px rgba(150,205,255,.55)); }
+:root[data-screen="pixel"] .display #menuPrev::before { margin-left: -12px; border-right: 12px solid var(--panel-ink); border-left: 0; }
+:root[data-screen="pixel"] .display #menuNext::before { margin-left: 0; border-left: 12px solid var(--panel-ink); border-right: 0; }
+:root[data-screen="pixel"] .display .menu-val { font-size: 34px; max-width: none; }
+:root[data-screen="pixel"] .display .menu-bottom { padding: 0 14px; }
+:root[data-screen="pixel"] .display .setv-head { background: #D9E8F4; color: #000; margin: -4px -6px 4px; padding: 7px 44px 6px 4px; box-shadow: var(--scr-glow); }
+:root[data-screen="pixel"] .display .setv-head button, :root[data-screen="pixel"] .display .setv-head #setvSec, :root[data-screen="pixel"] .display .setv-head #setvPos { color: #000; }
+:root[data-screen="pixel"] .display .setv-head.cur #setvSec { background: #000; color: var(--panel-ink); }
+:root[data-screen="pixel"] .display .chip.on { background: var(--panel-ink); color: #000; }
 /* forma de onda del sonido dentro del marco (el aparato dibuja una representación de todo lo representable); solo en MATRIX */
 .display .menu-glyph { display: none; }
-:root[data-screen="matrix"] .display .menu.has-glyph .menu-glyph { display: block; position: absolute; left: 30px; top: 6px; width: calc(100% - 60px); height: calc(100% - 12px - var(--glyph-name, 30px)); pointer-events: none; filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
-:root[data-screen="matrix"] .display .menu.has-glyph .menu-val { align-self: end; justify-self: center; font-size: 22px; line-height: 1; padding-bottom: 5px; position: relative; z-index: 1; }
-@media (max-height: 700px) { :root[data-screen="matrix"] .display .menu.has-glyph { --glyph-name: 22px; } :root[data-screen="matrix"] .display .menu.has-glyph .menu-val { font-size: 16px; padding-bottom: 3px; } :root[data-screen="matrix"] .display .menu-val { font-size: 26px; } }
+:root[data-screen="pixel"] .display .menu.has-glyph .menu-glyph { display: block; position: absolute; left: 30px; top: 6px; width: calc(100% - 60px); height: calc(100% - 12px - var(--glyph-name, 30px)); pointer-events: none; filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
+:root[data-screen="pixel"] .display .menu.has-glyph .menu-val { align-self: end; justify-self: center; font-size: 22px; line-height: 1; padding-bottom: 5px; position: relative; z-index: 1; }
+@media (max-height: 700px) { :root[data-screen="pixel"] .display .menu.has-glyph { --glyph-name: 22px; } :root[data-screen="pixel"] .display .menu.has-glyph .menu-val { font-size: 16px; padding-bottom: 3px; } :root[data-screen="pixel"] .display .menu-val { font-size: 26px; } }
 
 /* ===== FASE 37 · píxeles de verdad y traza de borde a borde ===== */
 /* Un lienzo «de píxel» se dibuja a resolución lógica (MATRIX 3 px CSS por píxel, MOSS 2) y se amplía sin suavizar; la máscara pone el hueco entre píxeles DENTRO de cada píxel
    (alineada con el propio lienzo), así nunca hay píxeles cortados a la mitad como con una rejilla superpuesta a toda la pantalla. */
 :root { --px: 1; }
 canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-mask: var(--px-mask) 0 0 / var(--cw, 3px) var(--ch, 3px); mask: var(--px-mask) 0 0 / var(--cw, 3px) var(--ch, 3px); }
-:root[data-screen="matrix"] canvas.px { filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
+:root[data-screen="pixel"] canvas.px { filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
 /* la línea del osciloscopio ocupa todo el ancho de la pantalla: entra por un borde y sale por el otro */
 .display .screen:not(.hiro):not(.ear):not(.tuner) .scope { margin-left: -14px; margin-right: -14px; width: calc(100% + 28px); }
 
@@ -832,7 +832,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 .display .menu.has-glyph .menu-glyph { display: block; position: absolute; left: 0; top: 4px; width: 100%; height: calc(100% - 38px); pointer-events: none; }
 .display .menu.has-glyph .menu-val { font-size: 22px; line-height: 1; padding-bottom: 4px; position: relative; z-index: 1; }
 .display .menu.has-glyph .menu-side { align-self: end; }
-:root[data-screen="ember"] .display .menu-glyph { filter: drop-shadow(0 0 3px rgba(237,228,207,.3)); }
+:root[data-screen="vector"] .display .menu-glyph { filter: drop-shadow(0 0 3px rgba(237,228,207,.3)); }
 :root[data-screen="phosphor"] .display .menu.has-glyph .menu-row { position: static; }
 :root[data-screen="phosphor"] .display .menu.has-glyph .menu-glyph { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; filter: drop-shadow(0 0 2px rgba(150,255,190,.8)) drop-shadow(0 0 7px rgba(50,230,120,.4)); }
 :root[data-screen="phosphor"] .display .menu.has-glyph .menu-val, :root[data-screen="phosphor"] .display .menu.has-glyph .menu-side { position: relative; z-index: 1; }
@@ -843,22 +843,22 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 
 /* ===== PHASE 41 · MATRIX «Pixel display» (pilot) ===== */
 .display #pxui { display: none; }
-:root[data-screen="matrix"] .display .screen.pxui > *:not(#pxui) { opacity: 0 !important; }   /* the DOM keeps working (taps, long-press) but is invisible: the canvas draws it as pixels */
-:root[data-screen="matrix"] .display .screen.pxui #pxui { display: block; position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; pointer-events: none; z-index: 3; }
+:root[data-screen="pixel"] .display .screen.pxui > *:not(#pxui) { opacity: 0 !important; }   /* the DOM keeps working (taps, long-press) but is invisible: the canvas draws it as pixels */
+:root[data-screen="pixel"] .display .screen.pxui #pxui { display: block; position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; pointer-events: none; z-index: 3; }
 
 /* settings geometry in pixel mode: rows 27 px (= 9 logical pixels) so the drawn rows and the tap areas coincide */
-:root[data-screen="matrix"] .display .screen.pxui .setv { padding: 0; }
-:root[data-screen="matrix"] .display .screen.pxui .gear { top: 0 !important; right: 0 !important; width: 36px !important; height: 27px !important; padding: 0 !important; }   /* the gear's tap area = the pixel gear in the title bar (it must not cover the first row) */
-:root[data-screen="matrix"] .display .screen.pxui .gear::after { inset: 0 !important; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-head { flex: 0 0 27px; height: 27px; margin: 0; padding: 0 33px 0 0; gap: 0; box-shadow: none; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-head #setvPrev, :root[data-screen="matrix"] .display .screen.pxui .setv-head #setvNext { width: 30px; padding: 0; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-head #setvSec { flex: 1 1 auto; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-head #setvPos { flex: 0 0 90px; width: 90px; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-list { margin-top: 0; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-row { flex: 0 0 27px; height: 27px; min-height: 27px; padding: 0; gap: 0; border-radius: 0; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-row.k-select .vl, :root[data-screen="matrix"] .display .screen.pxui .setv-row.k-range .vl { flex: 0 0 52%; max-width: 52%; justify-content: space-between; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-row .vl .v { flex: 1 1 auto; text-align: center; }
-:root[data-screen="matrix"] .display .screen.pxui .setv-text { padding: 0; }
+:root[data-screen="pixel"] .display .screen.pxui .setv { padding: 0; }
+:root[data-screen="pixel"] .display .screen.pxui .gear { top: 0 !important; right: 0 !important; width: 36px !important; height: 27px !important; padding: 0 !important; }   /* the gear's tap area = the pixel gear in the title bar (it must not cover the first row) */
+:root[data-screen="pixel"] .display .screen.pxui .gear::after { inset: 0 !important; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-head { flex: 0 0 27px; height: 27px; margin: 0; padding: 0 33px 0 0; gap: 0; box-shadow: none; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-head #setvPrev, :root[data-screen="pixel"] .display .screen.pxui .setv-head #setvNext { width: 30px; padding: 0; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-head #setvSec { flex: 1 1 auto; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-head #setvPos { flex: 0 0 90px; width: 90px; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-list { margin-top: 0; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-row { flex: 0 0 27px; height: 27px; min-height: 27px; padding: 0; gap: 0; border-radius: 0; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-row.k-select .vl, :root[data-screen="pixel"] .display .screen.pxui .setv-row.k-range .vl { flex: 0 0 52%; max-width: 52%; justify-content: space-between; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-row .vl .v { flex: 1 1 auto; text-align: center; }
+:root[data-screen="pixel"] .display .screen.pxui .setv-text { padding: 0; }
 </style>
 </head>
 <body>
@@ -937,9 +937,10 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h3 class="grp">Screen and shortcuts</h3>
       <h4>Settings on the screen</h4>
       <p>The gear on the screen opens the settings inside it; another tap, or Esc, closes them. The first line is the tab (Look, Music, Sound…): with it selected, left and right change tab. Up and down move through the rows; left and right change the value of the selected row; a tap on the knob (or Enter) activates it: it toggles a checkbox, runs a button, sets the tempo or loads and saves presets. The wheel moves the slider of the selected row. You can also tap the rows and the ‹ › arrows, and slide the list with your finger.</p>
-      <p>While the settings are open, the chord buttons keep sounding, so you hear every change. Reports (diagnostics, microphone test and vibration test) and the instrument code are read inside the screen itself: up and down (or the wheel) scroll the text, left goes back to the list and, for the code, "Copy" puts it on the clipboard. "Reset the app" asks for a second tap ("Sure?"). Importing a backup opens the system file picker. Only this manual opens in the settings sheet.</p>
+      <p>While the settings are open, the chord buttons keep sounding, so you hear every change. Reports (diagnostics, microphone test and vibration test) and the instrument code are read inside the screen itself: up and down (or the wheel) scroll the text, left goes back to the list and, for the code, "Copy" puts it on the clipboard. "Reset the app" asks for a second tap ("Sure?"). Importing a backup opens the system file picker. The result of an action (for example "Sound reset") appears for a moment in the title bar of the settings. Only this manual opens in the settings sheet.</p>
       <h4>Menus</h4>
       <p>Tap the key, the sound or the mode on the screen (a short tap, like the grey, yellow and red buttons of the device) and its menu opens inside the screen. With the joystick, left and right change the value, and up and down move to the submenus: on the key, up and down raise or lower the octave of everything; on the sound, up enters the list of effects and settings (left and right move through it, up changes the option, down goes back to the sound; on Reverb and Delay the wheel sets the amount); on the mode, up enters the BPM and down enters the mode setting (speed, kit, variation or level). Holding the joystick to one side repeats the step. You can also tap the neighbours on the left and right and the hints at the bottom of the screen.</p>
+      <p>The sound menu draws the sound itself: one note of it, played silently with your current settings (Attack, Release, brightness, pair detune), so you see its real shape, how it starts, holds and fades. When the shape seems to breathe or flatten for a moment, that is the detuned pair of oscillators drifting against each other, which is also what you hear; with Pair detune at 0 the shape keeps steady.</p>
       <p>The menu closes when you play a chord, with a tap on the knob, by tapping the label again, or after a few seconds of doing nothing. In Notes Hero and Ear Trainer only the mode menu opens.</p>
       <h4>Quick select</h4>
       <p>Hold the sound, the key or the mode on the screen for a moment: the seven buttons turn into choices (the current one is marked dark). The first page is the same as on the device. Sound: 1 Saw, 2 Sine, 3 FM EPiano, 4 HX7 Piano, 5 Strings, 6 Clarinet, 7 FM Wow; in Drum and Drum Loop it chooses the kit (1 Tight Kit, 2 x0x Box, 3 x9x Box, 4 Lynn Kit, 5 KR-78, 6 Trap Box, 7 Tight Kit). Mode: 1 Play, 2 Strum, 3 Lead, 4 Drone, 5 Arp, 6 Repeat, 7 Mic Sample. Key: in Arp it chooses the pattern (1 Up, 2 Down, 3 Up/Down, 4 Down/Up, 5 Random, 6 Fingerpick) and 7 changes the layers (Arp Only, Chord+Arp, Rhythm+Arp); in the other modes, the notes and the scales.</p>
@@ -982,7 +983,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>The microphone is closed as soon as you finish using it, so Safari may ask for permission every time. To stop it asking, tap "aA" in the address bar → Website Settings → Microphone → Allow; the app will still close the microphone when it finishes. In Settings → Sound, "Test microphone" shows the state: "granted" means Safari already remembers it and "prompt" that it will ask again.</p>
       <p>Alternative: turn on "Keep microphone open" in Settings → Sound. The microphone stays open but muted while the app is open (the iPhone's orange dot may stay on) and is released when you leave the app or after 15 minutes of not using it.</p>
       <h4>If the microphone does not work</h4>
-      <p>If the notice says it is blocked, in Safari tap "aA" in the address bar, go to Website Settings and allow the microphone. If it says iOS could not start the audio, close Safari completely and open the page again; if it is still the same, restart the iPhone. "Test microphone", in Settings → Sound, shows the full state.</p>
+      <p>If the notice says it is blocked, in Safari tap "aA" in the address bar, go to Website Settings and allow the microphone. If it says iOS could not start the audio, close Safari completely and open the page again; if it is still the same, restart the iPhone. "Test microphone", in Settings → Sound, shows the full state. If the app ever stops responding while using the microphone, open Diagnostics afterwards: it lists the last microphone steps, which tells where it stopped.</p>
       <h3 class="grp">Practice</h3>
       <h4>Notes Hero (chord game)</h4>
       <p>A rhythm game that teaches real songwriting moves. Choose a level in the mode menu, downwards (10 levels in five tiers: Folk, Rock, Modern, Jazz and Fusion); the level, the tier and the song title appear at the top of the screen. Press "play". The screen shows a single lane: at the top left, a circle with the button you need (and next to it an arrow if you must move the joystick), at the top right the key, at the bottom left the name of the chord and at the bottom right how many you have done. After a four-beat count-in, one ball per chord travels from left to right towards the hit line (with the hit zone shaded): press its button just as the ball reaches the line and, if it has an arrow above it, also hold that joystick direction. The thin stroke between two balls is how long that chord lasts. The ball fills in when you hit and is crossed out when you miss. The closer to the beat, the better the grade: Perfect, Great, OK or Miss. Your streak and best streak are counted. Each song sets its own key, sound and rhythm; your settings come back when it ends.</p>
@@ -993,7 +994,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>If you get stuck, "tonic" plays the base note again and "replay" repeats the question. Your streak and best streak are counted. On levels with modifications, a miss shows an arrow with the correct joystick direction. While you play, your settings are replaced by the trainer's and come back when it ends.</p>
       <h3 class="grp">Settings and maintenance</h3>
       <h4>Look</h4>
-      <p>notes is a single instrument built in six editions, which you choose in Settings → Look → Case: CARBON (black), LUNAR (ivory with black controls and orange touches), VERTEX (90s console-pad grey, with coloured buttons), POCKET (beige with an olive screen and aubergine buttons, like an 80s handheld), AMBER (warm charcoal with cream and mustard keys, like a boutique synth) and GHOST (smoked plastic that shows the circuit board). The screen is independent and represents another technology: EMBER (warm OLED), MATRIX (the 1-bit OLED of the HiChord and the Orchid: cool white on black, visible pixels, inverted title bar, selectors with a frame and triangles at the sides, and on the sound selector the waveform of the sound), MOSS (green reflective LCD, like the first Game Boy: the grid only hints inside the dark parts and the frame casts its shadow at the top and left) and PHOSPHOR (analogue oscilloscope: black screen where the beam draws everything in green; the graticule is engraved in the glass with its centre cross and the signal is drawn relative to that cross, with the sweep triggered so the wave stays still and an automatic volts/div). On every screen, the sound selector draws the waveform of the sound, animated: it appears, is held and fades out the way that sound does. "By case" uses each edition's own, and you can combine them however you like. With MATRIX selected, "Pixel display" (Settings → Look) redraws the screen as a real grid of about 120 × 63 pixels with a bitmap font, like the OLED of the device: everything is made of whole pixels. It covers everything on the screen: the play screens, the menus, the settings (with short labels), Notes Hero, Ear Trainer and the tuner. "Automatic" picks CARBON or LUNAR depending on the device's dark or light mode. The line that crosses the screen is the wave: it runs from one edge to the other; at rest it is flat; with "Wave" on it shows the signal that is sounding. In PHOSPHOR that line does not exist: a simulated oscilloscope replaces it (an electron beam that moves, with the glow the phosphor leaves as it fades), always on. In "Time (Y-T)" the sweep triggers on a rising edge so the wave stays still, with automatic volts/div and time/div that you can read at the bottom; in "XY (figures)" the signal is drawn against itself shifted by 90° and Lissajous figures appear (Settings → Modes → "Oscilloscope", only available with the PHOSPHOR screen). The chord keys are clean, without notes or numbers; turn them on with "Notes and numbers on keys". "Test vibration" checks whether your device can vibrate from the app and, if not, why: on the iPhone you need iOS 18 or later and System Haptics turned on (iPhone Settings → Sounds &amp; Haptics).</p>
+      <p>notes is a single instrument built in six editions, which you choose in Settings → Look → Case: CARBON (black), LUNAR (ivory with black controls and orange touches), VERTEX (90s console-pad grey, with coloured buttons), POCKET (beige with an olive screen and aubergine buttons, like an 80s handheld), AMBER (warm charcoal with cream and mustard keys, like a boutique synth) and GHOST (smoked plastic that shows the circuit board). The screen is independent and represents another technology: VECTOR (warm, high-definition OLED), PIXEL (the small 1-bit OLED of the HiChord: the whole screen is a grid of about 120 × 63 real pixels with a bitmap font, inverted title bars, framed selectors with arrows at the sides, an icon for every mode and the animated waveform of each sound), MOSS (green reflective LCD, like the first Game Boy: the grid only hints inside the dark parts and the frame casts its shadow at the top and left) and PHOSPHOR (analogue oscilloscope: black screen where the beam draws everything in green; the graticule is engraved in the glass with its centre cross and the signal is drawn relative to that cross, with the sweep triggered so the wave stays still and an automatic volts/div). On every screen, the sound selector draws the waveform of the sound, animated: it appears, is held and fades out the way that sound does. "By case" uses each edition's own, and you can combine them however you like.  "Automatic" picks CARBON or LUNAR depending on the device's dark or light mode. The line that crosses the screen is the wave: it runs from one edge to the other; at rest it is flat; with "Wave" on it shows the signal that is sounding. In PHOSPHOR that line does not exist: a simulated oscilloscope replaces it (an electron beam that moves, with the glow the phosphor leaves as it fades), always on. In "Time (Y-T)" the sweep triggers on a rising edge so the wave stays still, with automatic volts/div and time/div that you can read at the bottom; in "XY (figures)" the signal is drawn against itself shifted by 90° and Lissajous figures appear (Settings → Modes → "Oscilloscope", only available with the PHOSPHOR screen). The chord keys are clean, without notes or numbers; turn them on with "Notes and numbers on keys". "Test vibration" checks whether your device can vibrate from the app and, if not, why: on the iPhone you need iOS 18 or later and System Haptics turned on (iPhone Settings → Sounds &amp; Haptics).</p>
       <h4>MIDI</h4>
       <p>PC only (Chrome or Edge) and Android; Safari on iPhone does not support it, which is why the setting does not appear there. Turn it on in Settings → Sound. The white keys of any octave play buttons 1 to 7 (C is 1). The chord that sounds goes out as MIDI notes on every connected output (if an output sends the notes back to the input, the app ignores that echo). In Arp and Repeat the held chord is sent, not every hit.</p>
       <h4>Backup</h4>
@@ -1369,7 +1370,7 @@ const DEFAULT_STATE = {
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
   library:[],
-  scopeMode:'yt', pixelUi:false, hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
+  scopeMode:'yt', hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
   micGain:1, micHold:false, midi:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
@@ -1427,7 +1428,11 @@ let needsRebuild = false, justBuilt = false;
 // Sesión de audio de iOS: «playback» solo mientras suena; en reposo «ambient», que hace que iOS retire el aviso de «reproduciendo»
 let audioAsleep = false, lastBusy = Date.now();
 function setSession(t) { try { if (navigator.audioSession && navigator.audioSession.type !== t) navigator.audioSession.type = t; } catch (e) {} }
-function applySession() { setSession((audioAsleep || !ctx) ? 'ambient' : (micStream ? 'play-and-record' : 'playback')); }
+function applySession() { setSession((micStream || micPending) ? 'play-and-record' : (audioAsleep || !ctx) ? 'ambient' : 'playback'); }   // never leave play-and-record while the microphone is open or being asked for
+// Microphone trace: the last steps are kept in the phone, so Diagnostics can tell where it stopped even if the app froze
+function micTrace(step) {
+  try { const k = 'notes-mic-trace', a = JSON.parse(localStorage.getItem(k) || '[]'); a.push(new Date().toTimeString().slice(0, 8) + ' ' + step + (ctx ? ' [' + ctx.state + ']' : '')); localStorage.setItem(k, JSON.stringify(a.slice(-14))); } catch (e) {}
+}
 function audioBusy() {
   return (!!wavRec && !wavRec.full) || held.length > 0 || voices.size > 0 || !!beat.style || !!clock.timer || !!auto.timer || seq.playing || micUsers.size > 0 ||
     droneBtn != null || !!micTake || hiro.phase === 'count' || hiro.phase === 'play' || ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback' || tracks.some(t => t.state === 'rec' || t.state === 'armed' || t.state === 'finishing' || (t.buffer && !loop.paused));
@@ -1454,7 +1459,12 @@ const SLOT_GAIN = [116, 110, 104, 99, 93, 86].map(v => v / 127);
 const lastSlotMidi = [null, null, null, null, null, null];
 
 function ensureAudio() {
-  if (ctx && (needsRebuild || ctx.state === 'interrupted' || ctx.state === 'closed')) {
+  // iOS puts the context in 'interrupted' while the microphone permission sheet is up and while capture starts: closing it then
+  // (with the capture starting) froze the whole app. An interrupted context is only resumed; a rebuild first closes the microphone.
+  if (ctx && ctx.state === 'closed') ctx = null;
+  if (ctx && needsRebuild && !micPending) {
+    micTrace('rebuild audio');
+    if (micStream) micRelease();
     try { ctx.close(); } catch (e) {}
     ctx = null;
   }
@@ -2695,6 +2705,7 @@ function micErrorText(e) {
 }
 let micPending = null;
 async function micStart(user) {
+  micTrace('start ' + user);
   micUsers.add(user);
   ensureAudio();
   clearTimeout(micIdleTimer); micIdleTimer = null;
@@ -2720,12 +2731,16 @@ async function micOpenStream() {
   for (const a of attempts) {
     try {
       if (a.pause && ctx && ctx.state === 'running') { try { await ctx.suspend(); } catch (e) {} }
+      micTrace('asking for the mic' + (a.pause ? ' (output paused)' : ''));
       micStream = await navigator.mediaDevices.getUserMedia({ audio:a.audio, video:false });
+      micTrace('mic granted');
       micLastError = '';
-      if (a.pause && ctx) { try { ctx.resume(); } catch (e) {} }
+      applySession();
+      if (ctx && ctx.state !== 'running') { try { const r = ctx.resume(); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
       return true;
     } catch (e) {
       micLastError = micErrorText(e) + (e && e.name ? ' [' + e.name + (e.message ? ': ' + e.message : '') + ']' : '');
+      micTrace('mic error ' + (e && e.name));
       if (e && ['NotAllowedError', 'PermissionDeniedError', 'SecurityError', 'NotFoundError'].includes(e.name)) break;
       await new Promise(r => setTimeout(r, 250));
     }
@@ -2764,6 +2779,7 @@ async function runDiag() {
   t('estado', 'mode ' + state.mode + ' · ' + NOTE_NAMES[state.key] + ' · scale ' + state.scale + ' · sound ' + state.sound + ' · theme ' + state.theme + ' · quick select ' + (quick ? 'OPEN' : 'cerrada'));
   try { t('caches', (await caches.keys()).join(', ') || 'ninguna'); } catch (e) { t('caches', 'not queryable'); }
   try { const r = await navigator.serviceWorker.getRegistrations(); t('service worker', r.length ? 'activo' + (navigator.serviceWorker.controller ? ' and controls the page' : '') : 'ninguno'); } catch (e) {}
+  try { const tr = JSON.parse(localStorage.getItem('notes-mic-trace') || '[]'); t('microphone steps', tr.length ? '\n' + tr.map(x => ' · ' + x).join('\n') : 'none'); } catch (e) {}
   t('errores', errLog.length ? '\n' + errLog.map(e => ' · ' + e.t + ' [' + e.src + '] ' + e.msg + (e.where ? ' @ ' + e.where : '')).join('\n') : 'ninguno');
   showDiag(L.join('\n'), 'set-diag');
 }
@@ -2791,6 +2807,7 @@ async function runMicTest() {
 function micAttach() {
   if (!ctx || !micStream) return;
   if (!micSource || micSource.context !== ctx) {
+    micTrace('mic connected');
     micSource = ctx.createMediaStreamSource(micStream);
     micGain = ctx.createGain(); pv(micGain.gain, state.micGain);
     micAnalyser = ctx.createAnalyser(); micAnalyser.fftSize = 2048;
@@ -2801,6 +2818,7 @@ function micAttach() {
   }
 }
 function micRelease() {   // cierra el micrófono de verdad
+  if (micStream) micTrace('mic closed');
   clearTimeout(micIdleTimer); micIdleTimer = null;
   try { if (micSource) micSource.disconnect(); if (micGain) micGain.disconnect(); if (micSink) micSink.disconnect(); } catch (e) {}
   if (micStream) { for (const t of micStream.getTracks()) t.stop(); }
@@ -2871,7 +2889,8 @@ function micRingWrite(f, L, R) {
 }
 async function micRecordStart() {
   if (!(await micStart('sampler'))) return;
-  await workletReady;
+  await Promise.race([workletReady, new Promise(r => setTimeout(r, 1500))]);   // if the context was rebuilt meanwhile, the old promise never resolves
+  micAttach(); if (!micGain || micGain.context !== ctx) { micTrace('record: no mic chain'); return; }
   if (!micCap || micCap.context !== ctx) {
     micRing.len = Math.round(ctx.sampleRate * 8); micRing.L = new Float32Array(micRing.len);
     micCap = makeCapture(micGain, micRingWrite);
@@ -2879,7 +2898,7 @@ async function micRecordStart() {
   if (micTake) return;
   const t0 = ctx.currentTime + 0.02;
   micTake = { f0:Math.round(t0 * ctx.sampleRate) };
-  micTake.timer = setTimeout(micRecordStop, MIC_MAX * 1000);
+  micTake.timer = setTimeout(micRecordStop, MIC_MAX * 1000); micTrace('recording');
   haptic(true); renderScreen(false); renderPads();
 }
 function micRecordStop() {
@@ -3331,6 +3350,11 @@ function renderTools() {
 const $ = id => document.getElementById(id);
 let toastTimer = null;
 function toast(msg) {
+  if (setv && $('sheet').hidden) {   // on-screen settings: the result replaces the title bar for a moment (it never covers the rows)
+    setv.msg = String(msg); setvRender(); clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { if (setv) { setv.msg = null; setvRender(); } }, 1800);
+    return;
+  }
   const el = $('sheet').hidden ? $('toast') : $('sheetToast');
   el.textContent = msg; el.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').classList.remove('show'); $('sheetToast').classList.remove('show'); }, 1800);
@@ -3406,6 +3430,25 @@ function padEnabled(b) {
   return true;
 }
 
+// A name that does not fit its key gets a smaller type size (never below 11 px) instead of spilling over the edge
+function fitPadLabel(el) {
+  const cn = el.querySelector('.cn'), txt = cn.textContent, w = el.clientWidth;
+  if (el._fit && el._fit.txt === txt && el._fit.w === w) return;
+  cn.style.fontSize = '';
+  if (!txt || !w || $('pads').classList.contains('bare')) { el._fit = null; return; }
+  const cs = getComputedStyle(el), room = w - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  let fs = parseFloat(getComputedStyle(cn).fontSize);
+  const words = txt.split(/\s+/).length, maxLines = Math.min(2, words);
+  const tooBig = () => cn.scrollWidth > room + 0.5 || cn.getBoundingClientRect().height > fs * 1.1 * maxLines + 1;
+  while (fs > 11 && tooBig()) { fs -= 1; cn.style.fontSize = fs + 'px'; }
+  el._fit = { txt, w, fs: cn.style.fontSize ? fs : 0 };
+}
+function fitPadLabels() {   // every key on the page uses the same size: the one the longest name needs (a printed legend, not seven sizes)
+  padEls.forEach(fitPadLabel);
+  const sizes = padEls.map(el => el._fit && el._fit.fs).filter(Boolean);
+  const fs = sizes.length ? Math.min(...sizes) : 0;
+  padEls.forEach(el => { if (el._fit) el.querySelector('.cn').style.fontSize = fs ? fs + 'px' : ''; });
+}
 function renderPads() {
   for (let b = 0; b < 7; b++) {
     const el = padEls[b];
@@ -3434,6 +3477,8 @@ function renderPads() {
     if (state.inv[b] && !state.vlead) badges.push('inv' + state.inv[b]);
     el.querySelector('.badge').textContent = quick ? '' : badges.join(' ');
   }
+  $('pads').classList.toggle('bare', !(state.keyLabels || quick));
+  fitPadLabels();
   renderWheel();
   // Teclas limpias en todos los modos: sin notas, números ni nombres (salvo que se active «Notas y números en las teclas»); la selección rápida, que es un menú temporal, sí los muestra
   $('pads').classList.toggle('bare', !(state.keyLabels || quick));
@@ -3721,7 +3766,8 @@ function setvRender() {
   el.hidden = false;
   $('setvNext').style.visibility = setv.detail ? 'hidden' : '';
   if (setv.detail) {   // informe / texto largo en la pantalla
-    $('setvSec').textContent = setv.detail.title; $('setvPos').textContent = setv.detail.copy ? 'Copy' : ''; $('setvHead').classList.remove('cur');
+    $('setvSec').textContent = setv.msg || setv.detail.title; $('setvPos').textContent = setv.detail.copy && !setv.msg ? 'Copy' : ''; $('setvHead').classList.remove('cur'); $('setvHead').classList.toggle('msg', !!setv.msg);
+    $('setvPrev').style.visibility = setv.msg ? 'hidden' : '';
     const list = $('setvList'); list.innerHTML = '';
     const t = document.createElement('div'); t.className = 'setv-text'; t.textContent = setv.detail.text; list.appendChild(t);
     return;
@@ -3729,8 +3775,9 @@ function setvRender() {
   const secs = setvSections(); if (!secs.length) return;
   setv.sec = Math.min(setv.sec, secs.length - 1);
   const sec = secs[setv.sec]; setv.row = Math.min(setv.row, sec.rows.length - 1);
-  $('setvSec').textContent = sec.name; $('setvPos').textContent = (setv.sec + 1) + '/' + secs.length;
-  $('setvHead').classList.toggle('cur', setv.row < 0);
+  $('setvSec').textContent = setv.msg || sec.name; $('setvPos').textContent = setv.msg ? '' : (setv.sec + 1) + '/' + secs.length;
+  $('setvHead').classList.toggle('cur', setv.row < 0 && !setv.msg); $('setvHead').classList.toggle('msg', !!setv.msg);
+  $('setvPrev').style.visibility = $('setvNext').style.visibility = setv.msg ? 'hidden' : '';
   const list = $('setvList'); list.innerHTML = '';
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); e.className = cls; e.textContent = txt; return e; };
   sec.rows.forEach((r, i) => {
@@ -3862,7 +3909,7 @@ function envAt(e, t, hold) {   // 0..1 en el instante t de una nota que se suelt
   if (t < hold) return lvl(t);
   const l0 = lvl(hold), u = (t - hold) / Math.max(0.05, e.r); return u >= 1 ? 0 : l0 * (1 - u);
 }
-function glyphPoints(snd, n, t) {   // n valores entre −1 y 1: unos 2,5 ciclos del sonido, en el instante t (s) de una nota que suena y se suelta
+function glyphPointsSynth(snd, n, t) {   // (reserve drawing while the real render is not ready) n valores entre −1 y 1: unos 2,5 ciclos del sonido, en el instante t (s) de una nota que suena y se suelta
   const layers = glyphLayers(snd), cycles = 2.5, pts = new Array(n).fill(0), env = glyphEnv(snd);
   const sustained = env.s > 0.25, hold = sustained ? 1.5 : Math.min(0.9, env.a + env.d + 0.25), T = hold + Math.min(1.2, env.r) + 0.5, tt = t % T;
   const amp = Math.max(0.06, envAt(env, tt, hold)), drift = tt * 0.9;   // la onda corre (fase) y crece / decae como el sonido
@@ -3881,6 +3928,63 @@ function glyphPoints(snd, n, t) {   // n valores entre −1 y 1: unos 2,5 ciclos
   const mx = Math.max(0.001, ...pts.map(Math.abs)); return pts.map(v => v / mx * (l_amp(snd, amp)));
 }
 function l_amp(snd, amp) { return Math.min(1, amp); }
+// ===== The sound-selector drawing IS the sound: one note rendered offline with the real engine =====
+// SlotVoice is built inside an OfflineAudioContext (the engine globals ctx/vibGain/waveCache are swapped for a moment, synchronously),
+// so the drawing carries everything the sound really does: oscillators and their detuned pair, FM and its decay, filter and brightness,
+// the real recording (from its true start), tuned noise, library layers, and the envelope the app actually uses (Attack/Release settings).
+const GLYPH_SR = 32000, GLYPH_MIDI = 60;
+const glyphRenders = new Map(); let glyphBusy = false;
+function glyphTimeline() {
+  const e = currentEnv(), hold = e.s > 0.25 ? 1.5 : Math.min(0.9, e.a + e.d + 0.25), rel = Math.min(1.2, Math.max(0.05, e.r));
+  return { hold, rel, r: e.r, T: hold + rel + 0.5 };
+}
+function glyphKey(snd) { return snd.id + '|' + JSON.stringify(tweak(snd)) + '|' + state.attack + '|' + state.release + '|' + state.adsr + '|' + (state.mode === 'repeat') + '|' + (snd.id === 'micsample' && sampleBuf.mic ? sampleBuf.mic.length : 0); }
+function glyphRender(snd) {
+  const key = glyphKey(snd), have = glyphRenders.get(key);
+  if (have) return have.data ? have : null;
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if (glyphBusy || !OAC || snd !== curSound()) return null;
+  const slots = snd.layers ? 6 : 1, engs = Array.from({ length: slots }, (_, k) => engineFor(snd, k));
+  const missing = engs.filter(e => e.sample && !sampleBuf[e.sample]);
+  if (missing.length) { missing.forEach(e => loadSample(e.sample)); return null; }   // the recording is still decoding: try again next frame
+  const tl = glyphTimeline(), len = Math.ceil((tl.hold + Math.min(2, tl.r * 1.6) + 0.15) * GLYPH_SR);
+  let off; try { off = new OAC(1, len, GLYPH_SR); } catch (e) { return null; }
+  const keep = { ctx, vibGain, waveCache, noiseBuf, last: lastSlotMidi.slice() }, entry = { data: null };
+  glyphBusy = true;
+  try {
+    ctx = off; waveCache = {}; vibGain = off.createGain(); pv(vibGain.gain, 0);
+    if (!noiseBuf) noiseBuf = makeNoise(2, 0);
+    lastSlotMidi.fill(null);
+    const bus = off.createGain(); bus.connect(off.destination);
+    for (let k = 0; k < slots; k++) new SlotVoice(k, GLYPH_MIDI, { dest: bus, pan: 0 }).release(tl.r, tl.hold);
+  } catch (e) { glyphBusy = false; logErr('glyph render', e); glyphRenders.set(key, entry); return null; }
+  finally { ctx = keep.ctx; vibGain = keep.vibGain; waveCache = keep.waveCache; if (keep.noiseBuf) noiseBuf = keep.noiseBuf; lastSlotMidi.splice(0, 6, ...keep.last); }
+  glyphRenders.set(key, entry);
+  const minOff = Math.min(...engs.map(e => e.offset || 0));
+  const p = off.startRendering(), fin = buf => {
+    const d = buf.getChannelData(0); let pk = 0; for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > pk) pk = a; }
+    Object.assign(entry, { data: d, peak: pk || 1, tl, per: GLYPH_SR / mtof(GLYPH_MIDI + minOff) }); glyphBusy = false;
+    if (glyphRenders.size > 120) glyphRenders.delete(glyphRenders.keys().next().value);
+  };
+  if (p && p.then) p.then(fin, () => { glyphBusy = false; glyphRenders.delete(key); }); else off.oncomplete = e => fin(e.renderedBuffer);
+  return null;
+}
+function glyphPoints(snd, n, t) {   // n values in −1..1: about 2.5 cycles of the REAL sound at time t (s) of a note that is held and released
+  const r = glyphRender(snd);
+  if (!r) return (typeof OfflineAudioContext !== 'undefined' || window.webkitOfflineAudioContext) ? new Array(n).fill(0) : glyphPointsSynth(snd, n, t);
+  const { data, peak, per, tl } = r, tt = t % tl.T, span = 2.5 * per, out = new Array(n);
+  // Windows start on whole periods of the note (so the shape stands still like a triggered scope) and drift slowly (the wave seems to run)
+  const start = Math.round(tt * GLYPH_SR / per) * per + ((tt * 0.9) % 1) * per;
+  let wp = 0;
+  for (let i = 0; i < n; i++) {
+    const x = start + (i / Math.max(1, n - 1)) * span, i0 = Math.floor(x), f = x - i0;
+    const a = data[i0] || 0, b = data[i0 + 1] || 0; out[i] = a + (b - a) * f; wp = Math.max(wp, Math.abs(out[i]));
+  }
+  // Shape at full size, height by loudness on a square-root scale: a piano's tail still reads as a waveform while it fades, and silence is a flat line
+  const lvl = wp / peak, k = lvl < 0.004 ? 0 : Math.sqrt(lvl) / wp;
+  for (let i = 0; i < n; i++) out[i] = Math.max(-1, Math.min(1, out[i] * k));
+  return out;
+}
 let glyphRaf = null, glyphT0 = 0, glyphLast = 0;
 function drawMenuGlyph(now) {
   const c = $('menuGlyph'); if (!c || !c.clientWidth) return;
@@ -4149,11 +4253,11 @@ const pct = { to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.roun
 const opts = list => () => list;
 const DIV_OPTS = [['off','Off'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16T'],['1/32','1/32']];
 
-const SCREENS = [['auto','By case'],['ember','EMBER'],['matrix','MATRIX'],['moss','MOSS'],['phosphor','PHOSPHOR']];
-const SCREEN_OF = { vertex:'ember', pocket:'moss', carbon:'matrix', lunar:'ember', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa (AMBER: la OLED negra del Orchid)   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
+const SCREENS = [['auto','By case'],['vector','VECTOR'],['pixel','PIXEL'],['moss','MOSS'],['phosphor','PHOSPHOR']];
+const SCREEN_OF = { vertex:'vector', pocket:'moss', carbon:'pixel', lunar:'vector', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa (AMBER: la OLED negra del Orchid)   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
 const THEMES = [['auto','Automatic'],['carbon','CARBON'],['lunar','LUNAR'],['vertex','VERTEX'],['pocket','POCKET'],['amber','AMBER'],['ghost','GHOST']];
 const OLD_THEME = { dark:'carbon', light:'lunar', olive:'pocket', blue:'ghost', burgundy:'amber', alt:'ghost' };   // pieles de la fase 17 → carcasas
-const OLD_SCREEN = { oled:'ember', lcdg:'moss', lcdb:'matrix', hichord:'matrix' };
+const OLD_SCREEN = { oled:'vector', ember:'vector', lcdg:'moss', lcdb:'pixel', hichord:'pixel', matrix:'pixel' };   // renamed: «matrix» → «pixel», «ember» → «vector» (phase 43)
 const THEME_COLOR = { lunar:'#E0D9CF', carbon:'#29292A', vertex:'#BDBCBD', pocket:'#CCC4B5', amber:'#312E29', ghost:'#2E3532' };
 function applyTheme() {
   let t = state.theme;
@@ -4236,13 +4340,13 @@ function scopeAutoVdiv(pk) {
   else scopeLow = 0;
   scopeVdiv = VDIV_STEPS[i];
 }
-// ===== MATRIX «Pixel display» (pilot) =====
+// ===== PIXEL screen (was MATRIX + «Pixel display»; always on since phase 43) =====
 // The whole screen mirrored as a REAL 1-bit framebuffer (≈120×63 logical pixels, 3 CSS px each), like the HiChord OLED: bitmap font (Spleen 5×8 / 8×16, BSD-2, Frederic Cambus), icons, frames.
 // The DOM underneath keeps working and keeps its tap areas but is invisible (opacity 0); the canvas only reads its texts and draws them as pixels, so every behaviour (taps, long-press quick select, menus) is unchanged.
-// Settings, games, tuner keep the regular screen in this pilot. Setting «Pixel display» (MATRIX only).
+// Everything on the screen is drawn here (play screens, menus, settings, games, tuner); only the Manual opens apart.
 function pxuiState() { return (window.__pxui = window.__pxui || { raf: null, last: 0, fb: null, w: 0, h: 0, font: null }); }
 function pxFont() { const u = pxuiState(); return u.font || (u.font = JSON.parse(`{"f5":{"w":5,"h":8,"g":{" ":[0,0,0,0,0,0,0,0],"!":[4,4,4,4,4,0,4,0],"\\"":[10,10,10,0,0,0,0,0],"#":[0,10,31,10,10,31,10,0],"$":[4,14,20,12,6,6,28,4],"%":[2,18,20,4,8,10,18,16],"&":[4,10,10,12,21,18,13,0],"'":[4,4,4,0,0,0,0,0],"(":[2,4,8,8,8,8,4,2],")":[8,4,2,2,2,2,4,8],"*":[0,0,18,12,30,12,18,0],"+":[0,0,4,4,31,4,4,0],",":[0,0,0,0,0,4,4,8],"-":[0,0,0,0,30,0,0,0],".":[0,0,0,0,0,0,4,0],"/":[2,2,4,4,8,8,16,16],"0":[0,12,18,22,26,18,12,0],"1":[0,4,12,4,4,4,14,0],"2":[0,12,18,2,12,16,30,0],"3":[0,12,18,4,2,18,12,0],"4":[0,16,20,20,30,4,4,0],"5":[0,30,16,28,2,2,28,0],"6":[0,12,16,28,18,18,12,0],"7":[0,30,18,2,4,8,8,0],"8":[0,12,18,12,18,18,12,0],"9":[0,12,18,18,14,2,12,0],":":[0,0,0,4,0,0,4,0],";":[0,0,0,4,0,4,4,8],"<":[0,2,4,8,8,4,2,0],"=":[0,0,0,30,0,30,0,0],">":[0,8,4,2,2,4,8,0],"?":[12,18,2,4,8,0,8,0],"@":[0,12,18,22,22,16,14,0],"A":[0,12,18,18,30,18,18,0],"B":[0,28,18,28,18,18,28,0],"C":[0,14,16,16,16,16,14,0],"D":[0,28,18,18,18,18,28,0],"E":[0,14,16,28,16,16,14,0],"F":[0,14,16,16,28,16,16,0],"G":[0,14,16,22,18,18,14,0],"H":[0,18,18,30,18,18,18,0],"I":[0,14,4,4,4,4,14,0],"J":[0,14,4,4,4,4,24,0],"K":[0,18,18,28,18,18,18,0],"L":[0,16,16,16,16,16,14,0],"M":[0,18,30,30,18,18,18,0],"N":[0,18,26,26,22,22,18,0],"O":[0,12,18,18,18,18,12,0],"P":[0,28,18,18,28,16,16,0],"Q":[0,12,18,18,18,18,12,6],"R":[0,28,18,18,28,18,18,0],"S":[0,14,16,12,2,2,28,0],"T":[0,31,4,4,4,4,4,0],"U":[0,18,18,18,18,18,14,0],"V":[0,18,18,18,18,12,12,0],"W":[0,18,18,18,30,30,18,0],"X":[0,18,18,12,12,18,18,0],"Y":[0,18,18,18,14,2,28,0],"Z":[0,30,2,4,8,16,30,0],"[":[14,8,8,8,8,8,8,14],"\\\\":[16,16,8,8,4,4,2,2],"]":[14,2,2,2,2,2,2,14],"^":[0,4,10,17,0,0,0,0],"_":[0,0,0,0,0,0,0,30],"\`":[8,4,0,0,0,0,0,0],"a":[0,0,12,2,14,18,14,0],"b":[16,16,28,18,18,18,28,0],"c":[0,0,14,16,16,16,14,0],"d":[2,2,14,18,18,18,14,0],"e":[0,0,14,18,30,16,14,0],"f":[6,8,8,28,8,8,8,0],"g":[0,0,14,18,18,12,2,28],"h":[16,16,28,18,18,18,18,0],"i":[0,4,0,12,4,4,6,0],"j":[0,4,0,4,4,4,4,24],"k":[16,16,18,20,24,20,18,0],"l":[8,8,8,8,8,8,6,0],"m":[0,0,18,30,30,18,18,0],"n":[0,0,28,18,18,18,18,0],"o":[0,0,12,18,18,18,12,0],"p":[0,0,28,18,18,28,16,16],"q":[0,0,14,18,18,14,2,2],"r":[0,0,14,18,16,16,16,0],"s":[0,0,14,16,12,2,28,0],"t":[8,8,28,8,8,8,6,0],"u":[0,0,18,18,18,18,14,0],"v":[0,0,18,18,18,12,12,0],"w":[0,0,18,18,30,30,18,0],"x":[0,0,18,12,12,18,18,0],"y":[0,0,18,18,18,14,2,28],"z":[0,0,30,2,4,8,30,0],"{":[6,8,8,24,24,8,8,6],"|":[4,4,4,4,4,4,4,4],"}":[24,4,4,6,6,4,4,24],"~":[0,0,0,9,22,0,0,0]}},"f8":{"w":8,"h":16,"g":{" ":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"!":[0,0,24,24,24,24,24,24,24,0,24,24,0,0,0,0],"\\"":[0,102,102,102,102,0,0,0,0,0,0,0,0,0,0,0],"#":[0,0,108,108,254,108,108,108,108,254,108,108,0,0,0,0],"$":[0,16,126,208,208,208,124,22,22,22,22,252,16,0,0,0],"%":[0,0,6,102,108,12,24,24,48,54,102,96,0,0,0,0],"&":[0,0,56,108,108,108,56,112,218,204,204,122,0,0,0,0],"'":[0,24,24,24,24,0,0,0,0,0,0,0,0,0,0,0],"(":[0,14,24,48,48,96,96,96,96,48,48,24,14,0,0,0],")":[0,112,24,12,12,6,6,6,6,12,12,24,112,0,0,0],"*":[0,0,0,0,102,60,24,255,24,60,102,0,0,0,0,0],"+":[0,0,0,0,0,24,24,126,24,24,0,0,0,0,0,0],",":[0,0,0,0,0,0,0,0,0,0,24,24,48,0,0,0],"-":[0,0,0,0,0,0,0,126,0,0,0,0,0,0,0,0],".":[0,0,0,0,0,0,0,0,0,0,24,24,0,0,0,0],"/":[0,6,6,12,12,24,24,48,48,96,96,192,192,0,0,0],"0":[0,0,124,198,198,206,222,246,230,198,198,124,0,0,0,0],"1":[0,0,24,56,120,88,24,24,24,24,24,126,0,0,0,0],"2":[0,0,124,198,6,6,12,24,48,96,198,254,0,0,0,0],"3":[0,0,124,198,6,6,60,6,6,6,198,124,0,0,0,0],"4":[0,0,192,192,204,204,204,204,254,12,12,12,0,0,0,0],"5":[0,0,254,198,192,192,252,6,6,6,198,124,0,0,0,0],"6":[0,0,124,198,192,192,252,198,198,198,198,124,0,0,0,0],"7":[0,0,254,198,6,6,12,24,48,48,48,48,0,0,0,0],"8":[0,0,124,198,198,198,124,198,198,198,198,124,0,0,0,0],"9":[0,0,124,198,198,198,198,126,6,6,198,124,0,0,0,0],":":[0,0,0,0,0,24,24,0,0,0,24,24,0,0,0,0],";":[0,0,0,0,0,24,24,0,0,0,24,24,48,0,0,0],"<":[0,0,6,12,24,48,96,96,48,24,12,6,0,0,0,0],"=":[0,0,0,0,0,126,0,0,126,0,0,0,0,0,0,0],">":[0,0,96,48,24,12,6,6,12,24,48,96,0,0,0,0],"?":[0,0,124,198,6,12,24,48,48,0,48,48,0,0,0,0],"@":[0,0,0,124,194,218,218,218,218,222,192,124,0,0,0,0],"A":[0,0,124,198,198,198,254,198,198,198,198,198,0,0,0,0],"B":[0,0,252,198,198,198,252,198,198,198,198,252,0,0,0,0],"C":[0,0,126,192,192,192,192,192,192,192,192,126,0,0,0,0],"D":[0,0,252,198,198,198,198,198,198,198,198,252,0,0,0,0],"E":[0,0,126,192,192,192,248,192,192,192,192,126,0,0,0,0],"F":[0,0,126,192,192,192,248,192,192,192,192,192,0,0,0,0],"G":[0,0,126,192,192,192,222,198,198,198,198,126,0,0,0,0],"H":[0,0,198,198,198,198,254,198,198,198,198,198,0,0,0,0],"I":[0,0,126,24,24,24,24,24,24,24,24,126,0,0,0,0],"J":[0,0,126,24,24,24,24,24,24,24,24,240,0,0,0,0],"K":[0,0,198,198,198,204,248,204,198,198,198,198,0,0,0,0],"L":[0,0,192,192,192,192,192,192,192,192,192,126,0,0,0,0],"M":[0,0,198,238,254,214,198,198,198,198,198,198,0,0,0,0],"N":[0,0,198,198,230,230,214,214,206,206,198,198,0,0,0,0],"O":[0,0,124,198,198,198,198,198,198,198,198,124,0,0,0,0],"P":[0,0,252,198,198,198,252,192,192,192,192,192,0,0,0,0],"Q":[0,0,124,198,198,198,198,198,198,214,214,124,24,12,0,0],"R":[0,0,252,198,198,198,252,198,198,198,198,198,0,0,0,0],"S":[0,0,126,192,192,192,124,6,6,6,6,252,0,0,0,0],"T":[0,0,255,24,24,24,24,24,24,24,24,24,0,0,0,0],"U":[0,0,198,198,198,198,198,198,198,198,198,126,0,0,0,0],"V":[0,0,198,198,198,198,198,198,198,108,56,16,0,0,0,0],"W":[0,0,198,198,198,198,198,198,214,254,238,198,0,0,0,0],"X":[0,0,198,198,198,108,56,108,198,198,198,198,0,0,0,0],"Y":[0,0,198,198,198,198,126,6,6,6,6,252,0,0,0,0],"Z":[0,0,254,6,6,12,24,48,96,192,192,254,0,0,0,0],"[":[0,62,48,48,48,48,48,48,48,48,48,48,62,0,0,0],"\\\\":[0,192,192,96,96,48,48,24,24,12,12,6,6,0,0,0],"]":[0,124,12,12,12,12,12,12,12,12,12,12,124,0,0,0],"^":[0,16,56,108,198,0,0,0,0,0,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,254,0],"\`":[0,48,24,12,0,0,0,0,0,0,0,0,0,0,0,0],"a":[0,0,0,0,0,124,6,126,198,198,198,126,0,0,0,0],"b":[0,0,192,192,192,252,198,198,198,198,198,252,0,0,0,0],"c":[0,0,0,0,0,126,192,192,192,192,192,126,0,0,0,0],"d":[0,0,6,6,6,126,198,198,198,198,198,126,0,0,0,0],"e":[0,0,0,0,0,126,198,198,254,192,192,126,0,0,0,0],"f":[0,0,30,48,48,48,124,48,48,48,48,48,0,0,0,0],"g":[0,0,0,0,0,126,198,198,198,198,198,124,6,6,252,0],"h":[0,0,192,192,192,252,198,198,198,198,198,198,0,0,0,0],"i":[0,0,24,24,0,56,24,24,24,24,24,28,0,0,0,0],"j":[0,0,24,24,0,24,24,24,24,24,24,24,24,24,112,0],"k":[0,0,192,192,192,204,216,240,240,216,204,198,0,0,0,0],"l":[0,0,48,48,48,48,48,48,48,48,48,28,0,0,0,0],"m":[0,0,0,0,0,236,214,214,214,214,198,198,0,0,0,0],"n":[0,0,0,0,0,252,198,198,198,198,198,198,0,0,0,0],"o":[0,0,0,0,0,124,198,198,198,198,198,124,0,0,0,0],"p":[0,0,0,0,0,252,198,198,198,198,198,252,192,192,192,0],"q":[0,0,0,0,0,126,198,198,198,198,198,126,6,6,6,0],"r":[0,0,0,0,0,126,198,192,192,192,192,192,0,0,0,0],"s":[0,0,0,0,0,126,192,192,124,6,6,252,0,0,0,0],"t":[0,0,48,48,48,124,48,48,48,48,48,30,0,0,0,0],"u":[0,0,0,0,0,198,198,198,198,198,198,126,0,0,0,0],"v":[0,0,0,0,0,198,198,198,198,108,56,16,0,0,0,0],"w":[0,0,0,0,0,198,198,214,214,214,214,110,0,0,0,0],"x":[0,0,0,0,0,198,108,56,56,108,198,198,0,0,0,0],"y":[0,0,0,0,0,198,198,198,198,198,198,126,6,6,252,0],"z":[0,0,0,0,0,254,6,12,24,48,96,254,0,0,0,0],"{":[0,14,24,24,24,24,112,112,24,24,24,24,14,0,0,0],"|":[0,24,24,24,24,24,24,24,24,24,24,24,24,0,0,0],"}":[0,112,24,24,24,24,14,14,24,24,24,24,112,0,0,0],"~":[0,0,0,0,0,0,50,126,76,0,0,0,0,0,0,0],"á":[0,12,24,48,0,124,6,126,198,198,198,126,0,0,0,0],"é":[0,12,24,48,0,126,198,198,254,192,192,126,0,0,0,0],"í":[0,12,24,48,0,56,24,24,24,24,24,28,0,0,0,0],"ó":[0,12,24,48,0,124,198,198,198,198,198,124,0,0,0,0],"ú":[0,12,24,48,0,198,198,198,198,198,198,126,0,0,0,0],"ñ":[0,50,126,76,0,252,198,198,198,198,198,198,0,0,0,0],"Ñ":[50,76,0,198,230,230,214,214,206,206,198,198,0,0,0,0],"ü":[0,0,108,108,0,198,198,198,198,198,198,126,0,0,0,0],"Á":[24,48,0,124,198,198,198,254,198,198,198,198,0,0,0,0],"É":[24,48,0,126,192,192,192,248,192,192,192,126,0,0,0,0],"Í":[12,24,0,126,24,24,24,24,24,24,24,126,0,0,0,0],"Ó":[24,48,0,124,198,198,198,198,198,198,198,124,0,0,0,0],"Ú":[24,48,0,198,198,198,198,198,198,198,198,126,0,0,0,0],"¿":[0,0,24,24,0,24,24,48,96,192,198,124,0,0,0,0],"¡":[0,0,24,24,0,24,24,24,24,24,24,24,0,0,0,0],"°":[0,56,108,108,56,0,0,0,0,0,0,0,0,0,0,0],"·":[0,0,0,0,0,0,0,24,24,0,0,0,0,0,0,0],"±":[0,0,0,0,0,24,24,126,24,24,0,126,0,0,0,0],"×":[0,0,0,0,0,198,108,56,56,108,198,0,0,0,0,0],"÷":[0,0,0,0,24,24,0,126,0,24,24,0,0,0,0,0],"µ":[0,0,0,0,0,204,204,204,204,204,204,246,192,192,192,0],"▲":[0,0,0,0,0,16,56,56,124,124,254,254,0,0,0,0],"▼":[0,0,0,0,0,254,254,124,124,56,56,16,0,0,0,0],"‹":[0,0,0,0,0,0,12,24,48,24,12,0,0,0,0,0],"›":[0,0,0,0,0,0,48,24,12,24,48,0,0,0,0,0]}}}`)); }
-function puWanted() { return !!state.pixelUi && document.documentElement.dataset.screen === 'matrix' && !document.hidden; }   // everything is drawn in pixels: play screens, menus, settings, games and tuner
+function puWanted() { return document.documentElement.dataset.screen === 'pixel' && !document.hidden; }   // everything is drawn in pixels: play screens, menus, settings, games and tuner
 function puPx(x, y, v) { const u = pxuiState(); x = Math.round(x); y = Math.round(y); if (x >= 0 && x < u.w && y >= 0 && y < u.h) u.fb[y * u.w + x] = v === 0 ? 0 : 1; }
 function puRect(x, y, w, h, v) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) puPx(x + i, y + j, v); }
 function puFrame(x, y, w, h, v) { puRect(x, y, w, 1, v); puRect(x, y + h - 1, w, 1, v); puRect(x, y, 1, h, v); puRect(x + w - 1, y, 1, h, v); }
@@ -4304,11 +4408,17 @@ function puMenu(t, w, h) {
     const n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 11, amp = 8; let prev = null;
     for (let i = 0; i < n; i++) { const y = Math.round(gy - pts[i] * amp), y0 = prev == null ? y : prev; puRect(fx + 15 + i, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; }
     puName(val, Math.floor(w / 2), fy + fh - 16, fw - 24);
-  } else if (k === 'mode') { puIcon(state.mode, Math.floor(w / 2) - 12, fy + 3, t); puText(val, Math.floor(w / 2), fy + fh - 11, { align: 'c' }); }   // mode name: small (5×8) so it never touches the icon
+  } else if (k === 'mode') {   // icon box 24×24 + name (5×8) with 5 rows of air; side by side on short screens; name only on very short ones
+    const cx = Math.floor(w / 2), room = fw - 28;   // room between the ◂ ▸ arrows
+    let name = val; if (puWidth(name) > room) name = name.replace('Trainer', 'Train').replace('Sequencer', 'Seq');
+    while (name.length > 3 && puWidth(name) > room) name = name.slice(0, -1);
+    if (fh >= 41) { const top = fy + 2 + Math.floor((fh - 4 - 37) / 2); puIcon(state.mode, cx - 12, top, t); puText(name, cx, top + 29, { align: 'c' }); }
+    else puText(name, cx, mid - 4, { align: 'c' });   // short screens: no room for icon + name, so every mode shows its name the same way
+  }
   else puBig(val, Math.floor(w / 2), mid - 8, fw - 24);
   let hl = puT('menuUp').toUpperCase(), hr = puT('menuDown').toUpperCase();   // bottom hints: never collide (drop the BPM number first, then trim the right one)
-  if (puWidth(hl) + puWidth(hr) + 6 > w) hl = hl.replace(/\s*\d+$/, '');
-  if (puWidth(hl) + puWidth(hr) + 6 > w) hr = hr.slice(0, Math.max(3, Math.floor((w - puWidth(hl) - 12) / 6)));
+  if (puWidth(hl) + puWidth(hr) + 12 > w) hl = hl.replace(/\s*\d+$/, '');
+  if (puWidth(hl) + puWidth(hr) + 12 > w) hr = hr.slice(0, Math.max(3, Math.floor((w - puWidth(hl) - 12) / 6)));
   puText(hl, 2, h - 8); puText(hr, w - 2, h - 8, { align: 'r' });
 }
 // --- settings in pixels: rows are drawn exactly where the (invisible) DOM rows are, so every tap still lands on its row ---
@@ -4323,7 +4433,7 @@ function puShortL(s) { s = String(s).toUpperCase().replace(/ · /g, ' ').trim();
 const PU_SHORT_V = { 'AUTOMATIC':'AUTO', 'ARP ONLY':'ARP', 'CHORD+ARP':'CHD+ARP', 'RHYTHM+ARP':'RHY+ARP', 'UP/DOWN':'UP/DN', 'DOWN/UP':'DN/UP', 'FINGERPICK':'FINGER', 'SWING 8TH':'SWING8', 'SWING 16TH':'SWING16' };
 function puShortV(s) { s = String(s).toUpperCase().replace(/\s*\(.*\)\s*/g, '').replace('›', '>').replace(' CENTS', 'C').trim(); return PU_SHORT_V[s] || s; }
 function puWrap(text, cols) {
-  const out = [];
+  cols = Math.max(1, cols | 0); const out = [];
   String(text).toUpperCase().split('\n').forEach(par => { let line = ''; par.split(/\s+/).forEach(word => { while (word.length > cols) { if (line) { out.push(line); line = ''; } out.push(word.slice(0, cols)); word = word.slice(cols); } if (!word) return; if ((line ? line.length + 1 : 0) + word.length > cols) { out.push(line); line = word; } else line = line ? line + ' ' + word : word; }); out.push(line); });
   return out;
 }
@@ -4336,7 +4446,10 @@ function puSettings(t, w, h) {
     if (tdiv && +tdiv.dataset.pl !== lines.length) { tdiv.dataset.pl = lines.length; tdiv.style.height = (lines.length * 27 + 12) + 'px'; tdiv.style.overflow = 'hidden'; }
     const off = Math.max(0, Math.round(list.scrollTop / 27));
     for (let i = 0; i < 6; i++) { const ln = lines[off + i]; if (ln) puText(ln, 2, 11 + i * 9); }
-    puRect(0, 0, w, 9, 1); puText('<', 2, 0, { v: 0 }); puText(puShortL(setv.detail.title), 10, 0, { v: 0 }); if (setv.detail.copy) puText('COPY', w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+    puRect(0, 0, w, 9, 1);
+    if (setv.msg) puText(puShortL(setv.msg).slice(0, Math.floor((w - 16) / 6)), 2, 0, { v: 0 });
+    else { puText('<', 2, 0, { v: 0 }); puText(puShortL(setv.detail.title), 10, 0, { v: 0 }); if (setv.detail.copy) puText('COPY', w - 13, 0, { v: 0, align: 'r' }); }
+    puGear(w - 10, 1);
     return;
   }
   list.querySelectorAll('.setv-row').forEach(row => {
@@ -4354,6 +4467,7 @@ function puSettings(t, w, h) {
   // header drawn last (covers rows scrolled under it)
   puRect(0, 0, w, 9, 1);
   const head = $('setvHead'), headCur = head.classList.contains('cur'), nx = LX($('setvNext').getBoundingClientRect()), name = puShortL($('setvSec').textContent).slice(0, Math.max(3, Math.floor((nx - 12) / 6)));
+  if (head.classList.contains('msg')) { puText(puShortL($('setvSec').textContent).slice(0, Math.floor((w - 16) / 6)), 2, 0, { v: 0 }); puGear(w - 10, 1); return; }
   puText('<', 2, 0, { v: 0 });
   if (headCur) { puRect(9, 0, puWidth(name) + 2, 9, 0); puText(name, 10, 0); } else puText(name, 10, 0, { v: 0 });
   puText('>', nx + 1, 0, { v: 0 }); puText($('setvPos').textContent, w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
@@ -4507,7 +4621,7 @@ function drawScope() {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   // Persistencia según la tecnología de la pantalla: fósforo = el trazo se desvanece despacio; LCD = un fantasma mínimo; OLED = ninguna.
   // El desvanecimiento deja el lienzo TRANSPARENTE (antes lo rellenaba con el color de fondo y tapaba la sombra interior de la pantalla: se veía un rectángulo).
-  const fade = { phosphor: 1, moss: 0.65, matrix: 0.6, ember: 1 }[screenSkin] || 0.5;
+  const fade = { phosphor: 1, moss: 0.65, pixel: 0.6, vector: 1 }[screenSkin] || 0.5;
   g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + fade + ')'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over';
   g.strokeStyle = css.getPropertyValue('--scope').trim() || '#888';
   g.lineWidth = 1.6; g.lineJoin = 'round';
@@ -4555,7 +4669,7 @@ function drawBaseline() {
   const PX = pxScale(), css = getComputedStyle(document.documentElement), pxm = pxCanvas(c, PX);
   if (pxm) {   // MATRIX / MOSS: una fila de píxeles de borde a borde
     const { w, h } = pxm; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
-    const rgb = cssRgb(css.getPropertyValue(document.documentElement.dataset.screen === 'matrix' ? '--panel-dim' : '--scope'));
+    const rgb = cssRgb(css.getPropertyValue(document.documentElement.dataset.screen === 'pixel' ? '--panel-dim' : '--scope'));
     g.fillStyle = 'rgb(' + rgb.join(',') + ')'; g.fillRect(0, Math.round(h / 2), w, 1); return;
   }
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 0, H = c.clientHeight || 0; if (!W || !H) return;
@@ -4577,7 +4691,6 @@ const SETTINGS = [
   { section:'Look' },
   { id:'theme', label:'Case', type:'select', options:opts(THEMES) },
   { id:'screen', label:'Screen', type:'select', options:opts(SCREENS) },
-  { id:'pixelUi', label:'Pixel display', type:'check', when:() => document.documentElement.dataset.screen === 'matrix' },   // pilot: MATRIX drawn as a real 1-bit pixel grid
   { id:'keyLabels', label:'Notes and numbers on keys', type:'check' },
   { id:'osc', label:'Wave', type:'check', when:() => document.documentElement.dataset.screen !== 'phosphor' },   // en PHOSPHOR la sustituye el osciloscopio
   { id:'scopeMode', label:'Oscilloscope', type:'select', options:opts([['yt','Time (Y-T)'],['xy','XY (figures)']]), when:() => document.documentElement.dataset.screen === 'phosphor' },   // solo existe con la pantalla PHOSPHOR
@@ -4621,7 +4734,7 @@ const SETTINGS = [
   { id:'tw_fmIndex', label:'FM: amount', type:'range', min:0, max:80, tweak:'fmIndex', fmOnly:true, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) },
   { id:'tw_fmDecay', label:'FM: decay', type:'range', min:5, max:300, tweak:'fmDecay', fmOnly:true, to:v => v / 100, from:v => Math.round(v * 100), fmt:v => v.toFixed(2) + ' s' },
   { id:'tw_code', label:'Instrument code', type:'code' },
-  { id:'tw_reset', label:'Back to original values', type:'button', text:'Reset', run:() => { delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Instrument reset'); } },
+  { id:'tw_reset', label:'Back to original values', type:'button', text:'Reset', run:() => { delete state.tweaks[curSound().id]; saveState(); syncSettings(); toast('Sound reset'); } },
   { section:'Effects' },
   { id:'reverb', label:'Reverb', type:'select', options:opts([['off','Off'],['room','Room'],['hall','Hall'],['plate','Plate'],['spring','Spring'],['ambient','Ambient']]) },
   { id:'reverbAmt', label:'Reverb amount', type:'range', min:0, max:100, ...pct },
@@ -5468,6 +5581,7 @@ onTap($('tOctDn'), () => toolOct(-1));
 onTap($('tOctUp'), () => toolOct(1));
 $('gear').addEventListener('click', () => { if (setv) setvClose(); else setvOpen(); });   // los ajustes se abren DENTRO de la pantalla
 function goneToBackground() {
+  if (micPending) { micTrace('page hidden while asking for the mic (ignored)'); return; }   // the iOS permission sheet can hide the page: do not tear the audio down under it
   held.length = 0; pointers.clear(); padDir = null; dirKeys.clear(); keyDir = null;
   if (ctx) refresh(); else renderPads();
   renderJoy(); $('knob').style.transform = '';
