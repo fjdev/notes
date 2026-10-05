@@ -522,16 +522,8 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   --scr-inset: inset 0 0 50px rgba(0,0,0,.9), inset 0 0 100px rgba(0,0,0,.5);
   --panel-mid:#16502F;
   --gr: rgba(255,146,46,.42); --gr2: rgba(255,146,46,.17); --cell: calc(var(--screen-h) / 6);
-  --scr-overlay:
-    linear-gradient(90deg, transparent calc(50% - .5px), var(--gr) calc(50% - .5px), var(--gr) calc(50% + .5px), transparent calc(50% + .5px)) 0 0 / 100% 100% no-repeat,
-    linear-gradient(transparent calc(50% - .5px), var(--gr) calc(50% - .5px), var(--gr) calc(50% + .5px), transparent calc(50% + .5px)) 0 0 / 100% 100% no-repeat,
-    linear-gradient(90deg, var(--gr2) 1px, transparent 1px) calc(50% + var(--cell) / 2) 0 / var(--cell) 100%,
-    linear-gradient(var(--gr2) 1px, transparent 1px) 0 calc(50% + var(--cell) / 2) / 100% var(--cell),
-    linear-gradient(90deg, var(--gr) 1px, transparent 1px) calc(50% + var(--cell) / 10) 50% / calc(var(--cell) / 5) 7px repeat-x,
-    linear-gradient(var(--gr) 1px, transparent 1px) 50% calc(50% + var(--cell) / 10) / 7px calc(var(--cell) / 5) repeat-y,
-    linear-gradient(150deg, rgba(210,255,225,.05) 0%, rgba(210,255,225,0) 26%);
+  --scr-overlay: linear-gradient(150deg, rgba(210,255,225,.05) 0%, rgba(210,255,225,0) 26%);
 }
-:root[data-screen="phosphor"] .display::after { -webkit-mask-image: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.42) 0%, rgba(0,0,0,.6) 55%, #000 100%); mask-image: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.42) 0%, rgba(0,0,0,.6) 55%, #000 100%); }   /* iluminada por el borde: la retícula brilla más hacia fuera */
 :root[data-screen="phosphor"] .display .screen { background-image: radial-gradient(ellipse at 50% 50%, #040D08 0%, #020604 70%, #010302 100%); text-shadow: 0 0 5px rgba(120,255,170,.45); }
 :root[data-screen="phosphor"] .display #scope { filter: drop-shadow(0 0 2px rgba(150,255,190,.85)) drop-shadow(0 0 8px rgba(50,230,120,.5)); }
 :root[data-screen] .display::after { background: var(--scr-overlay); }
@@ -674,7 +666,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 /* Sin franja de modos: el modo se cambia en su menú (toque en el modo de la pantalla) o con la selección rápida; la pantalla gana su altura */
 .display .modes { display: none; }
 .display .screen { border-radius: 6px; }
-/* Acorde grande y traza a la vez (en los modos de tocar): la traza es una línea en reposo y la onda en vivo si el osciloscopio está activado */
+/* Acorde grande y onda a la vez (en los modos de tocar): la onda es una línea en reposo y la señal en vivo si «Onda» está activada */
 .display .screen:not(.hiro):not(.ear):not(.tuner) .scope { display: block; }
 .display .screen:not(.hiro):not(.ear):not(.tuner) .chord { font-size: clamp(38px, 11vw, 50px); margin: 0; }
 /* El tono medio de cada pantalla (en MOSS, el cuarto verde): indicadores apagados */
@@ -805,7 +797,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 :root[data-screen="matrix"] .display .setv-head.cur #setvSec { background: #000; color: var(--panel-ink); }
 :root[data-screen="matrix"] .display .chip.on { background: var(--panel-ink); color: #000; }
 /* forma de onda del sonido dentro del marco (el aparato dibuja una representación de todo lo representable); solo en MATRIX */
-.display .menu-glyph { display: none; image-rendering: pixelated; }
+.display .menu-glyph { display: none; }
 :root[data-screen="matrix"] .display .menu.has-glyph .menu-glyph { display: block; position: absolute; left: 30px; top: 6px; width: calc(100% - 60px); height: calc(100% - 12px - var(--glyph-name, 30px)); pointer-events: none; filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
 :root[data-screen="matrix"] .display .menu.has-glyph .menu-val { align-self: end; justify-self: center; font-size: 22px; line-height: 1; padding-bottom: 5px; position: relative; z-index: 1; }
 @media (max-height: 700px) { :root[data-screen="matrix"] .display .menu.has-glyph { --glyph-name: 22px; } :root[data-screen="matrix"] .display .menu.has-glyph .menu-val { font-size: 16px; padding-bottom: 3px; } :root[data-screen="matrix"] .display .menu-val { font-size: 26px; } }
@@ -818,6 +810,36 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 :root[data-screen="matrix"] canvas.px { filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
 /* la línea del osciloscopio ocupa todo el ancho de la pantalla: entra por un borde y sale por el otro */
 .display .screen:not(.hiro):not(.ear):not(.tuner) .scope { margin-left: -14px; margin-right: -14px; width: calc(100% + 28px); }
+
+/* ===== FASE 38 · PHOSPHOR como un osciloscopio de verdad ===== */
+/* La retícula está grabada en el cristal de la propia pantalla (no en el marco): su cruz central ES el centro de la pantalla, y la traza se dibuja en ese mismo sistema:
+   0 V (la línea sin señal) cae EXACTAMENTE sobre el eje horizontal, y la amplitud se mide en divisiones. Divisiones cuadradas (--cell), 1/5 de división de marcas en la cruz. */
+:root[data-screen="phosphor"] .display .screen { isolation: isolate; }
+:root[data-screen="phosphor"] .display .screen::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - .5px), var(--gr) calc(50% - .5px), var(--gr) calc(50% + .5px), transparent calc(50% + .5px)) 0 0 / 100% 100% no-repeat,
+    linear-gradient(transparent calc(50% - .5px), var(--gr) calc(50% - .5px), var(--gr) calc(50% + .5px), transparent calc(50% + .5px)) 0 0 / 100% 100% no-repeat,
+    linear-gradient(90deg, var(--gr2) 1px, transparent 1px) calc(50% + var(--cell) / 2) 0 / var(--cell) 100%,
+    linear-gradient(var(--gr2) 1px, transparent 1px) 0 calc(50% + var(--cell) / 2) / 100% var(--cell),
+    linear-gradient(90deg, var(--gr) 1px, transparent 1px) calc(50% + var(--cell) / 10) 50% / calc(var(--cell) / 5) 7px repeat-x,
+    linear-gradient(var(--gr) 1px, transparent 1px) 50% calc(50% + var(--cell) / 10) / 7px calc(var(--cell) / 5) repeat-y;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.45) 0%, rgba(0,0,0,.62) 55%, #000 100%); mask-image: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.45) 0%, rgba(0,0,0,.62) 55%, #000 100%); }
+/* el lienzo de la traza cubre TODA la pantalla (detrás del texto): su centro vertical es el eje de la retícula y entra y sale por los cuatro bordes */
+:root[data-screen="phosphor"] .display .screen:not(.hiro):not(.ear):not(.tuner) .scope { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; z-index: -1; pointer-events: none; }
+
+/* ===== FASE 38 · forma de onda animada del sonido en TODAS las pantallas ===== */
+.display .menu.has-glyph .menu-row { position: relative; align-items: end; padding-bottom: 4px; }
+.display .menu.has-glyph .menu-glyph { display: block; position: absolute; left: 0; top: 4px; width: 100%; height: calc(100% - 38px); pointer-events: none; }
+.display .menu.has-glyph .menu-val { font-size: 22px; line-height: 1; padding-bottom: 4px; position: relative; z-index: 1; }
+.display .menu.has-glyph .menu-side { align-self: end; }
+:root[data-screen="ember"] .display .menu-glyph { filter: drop-shadow(0 0 3px rgba(237,228,207,.3)); }
+:root[data-screen="phosphor"] .display .menu.has-glyph .menu-row { position: static; }
+:root[data-screen="phosphor"] .display .menu.has-glyph .menu-glyph { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; filter: drop-shadow(0 0 2px rgba(150,255,190,.8)) drop-shadow(0 0 7px rgba(50,230,120,.4)); }
+:root[data-screen="phosphor"] .display .menu.has-glyph .menu-val, :root[data-screen="phosphor"] .display .menu.has-glyph .menu-side { position: relative; z-index: 1; }
+
+/* ===== FASE 39 · PHOSPHOR: osciloscopio simulado ===== */
+.display .scope-read { display: none; }
+:root[data-screen="phosphor"] .display .screen:not(.hiro):not(.ear):not(.tuner):not(.menu-open):not(.setv-open) .scope-read { display: block; position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); font: 10px/1 var(--mono); letter-spacing: .04em; color: var(--panel-dim); opacity: .85; white-space: nowrap; pointer-events: none; z-index: 1; }
 </style>
 </head>
 <body>
@@ -829,11 +851,12 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
     <button class="gear" id="gear" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
     <div class="chord idle" id="chordName">—</div>
     <canvas class="scope" id="scope" aria-hidden="true"></canvas>
+    <span class="scope-read" id="scopeRead" aria-hidden="true"></span>
     <div class="screen-bottom">
       <span id="sMode"></span>
       <span style="display:flex;gap:10px;align-items:center">
         <button class="oscbtn" id="wavBtn" aria-label="Guardar audio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button>
-        <button class="oscbtn" id="oscBtn" aria-label="Osciloscopio"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
+        <button class="oscbtn" id="oscBtn" aria-label="Onda"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
         <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
       </span>
     </div>
@@ -929,7 +952,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>El círculo arma la pista seleccionada; otro toque empieza a grabar. En modo libre, un tercer toque para. Con compases, hay cuenta atrás de cuatro tiempos y para sola. Las pistas 2 a 6 esperan al inicio del siguiente loop para empezar (su botón parpadea; tócalo para cancelar) y se paran solas al terminar la vuelta.</p>
       <p>Toca una pista para seleccionarla; mantenla para borrarla. Borrar la pista 1 borra todo. ▶/⏸ pausa y reanuda; mantenlo para borrar todo. Grabar con un ritmo de Drum Loop sonando lo pasa a la pista.</p>
       <h4>Guardar audio</h4>
-      <p>El botón del círculo, junto al osciloscopio, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
+      <p>El botón del círculo, junto a la onda, graba lo que suena (acordes, batería, loops y vocoder) hasta un máximo de cuatro minutos; la pantalla muestra el tiempo. Al volver a tocarlo se detiene y se abre el menú de compartir del iPhone, donde eliges «Guardar en Archivos»; en el PC se descarga un archivo WAV estéreo de 16 bits. Si la app pasa a segundo plano durante la grabación, sigue donde estaba al volver, sin el hueco. No incluye el micrófono directo.</p>
       <h4>Mic Sample (sampler)</h4>
       <p>Graba un sonido con el micrófono y lo convierte en un instrumento. Entra en el modo Mic Sample y concede el permiso. Mantén pulsado el botón 1 mientras cantas, hablas o haces el sonido; puedes grabar hasta tres segundos. Al soltar, la app detecta la nota, la lleva a Do y cambia al modo Lead con el instrumento "Mic Sample": los botones tocan tu sonido a distintas alturas. Para grabar otro, vuelve a entrar en el modo Mic Sample; la nueva toma sustituye a la anterior, y la última se conserva al cerrar la app. En este modo solo funciona el botón 1; el resto está atenuado.</p>
       <h4>Tuner (afinador)</h4>
@@ -950,7 +973,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
       <h3 class="grp">Ajustes y mantenimiento</h3>
       <h4>Aspecto</h4>
-      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (la OLED de 1 bit del HiChord y del Orchid: blanco frío sobre negro, píxeles visibles, barra de título invertida, selectores con marco y triángulos a los lados, y en el selector de sonido, la forma de onda del sonido, animada: aparece, se sostiene y se apaga como lo hace ese sonido), MOSS (LCD reflectante verde, como la de la primera Game Boy: la rejilla solo se insinúa dentro de lo oscuro y el marco proyecta su sombra arriba y a la izquierda) y PHOSPHOR (osciloscopio analógico: pantalla negra donde todo, trazas y texto, lo dibuja el haz en verde, con la retícula ámbar iluminada por el borde). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. La línea que cruza la pantalla es la traza: va de un borde al otro; en reposo es plana; con «Osciloscopio» activado muestra la onda que suena. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
+      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (la OLED de 1 bit del HiChord y del Orchid: blanco frío sobre negro, píxeles visibles, barra de título invertida, selectores con marco y triángulos a los lados, y en el selector de sonido, la forma de onda del sonido), MOSS (LCD reflectante verde, como la de la primera Game Boy: la rejilla solo se insinúa dentro de lo oscuro y el marco proyecta su sombra arriba y a la izquierda) y PHOSPHOR (osciloscopio analógico: pantalla negra donde todo lo dibuja el haz en verde; la retícula está grabada en el cristal con su cruz central y la señal se dibuja respecto a esa cruz, con el barrido disparado para que la onda quede quieta y un volts/div automático). En todas las pantallas, el selector de sonido dibuja la forma de onda del sonido, animada: aparece, se sostiene y se apaga como lo hace ese sonido. «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. La línea que cruza la pantalla es la onda: va de un borde al otro; en reposo es plana; con «Onda» activada muestra la señal que suena. En PHOSPHOR esa línea no existe: la sustituye un osciloscopio simulado (un haz de electrones que se mueve, con el brillo que le deja el fósforo al apagarse), siempre activo. En «Tiempo (Y-T)» el barrido se dispara en un flanco ascendente para que la onda quede quieta, con volts/div y time/div automáticos que se leen abajo; en «XY (figuras)» la señal se dibuja contra sí misma desfasada 90° y salen figuras de Lissajous (Ajustes → Modos → «Osciloscopio (PHOSPHOR)»). Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Copia de seguridad</h4>
@@ -1326,7 +1349,7 @@ const DEFAULT_STATE = {
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
   library:[],
-  hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
+  scopeMode:'yt', hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
   micGain:1, micHold:false, midi:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
@@ -1477,7 +1500,7 @@ function unlockAudio() {
 ['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlockAudio, true));
 
 // Grabaciones: se decodifican una vez y se reutilizan aunque se reconstruya el motor
-const sampleBuf = {}, sampleLoading = {};
+const sampleBuf = {}, sampleLoading = {}; let sampleDecoder = null;
 function loadSample(id) {
   if (sampleBuf[id] || sampleLoading[id] || typeof SAMPLE_DATA === 'undefined' || !SAMPLE_DATA[id]) return;
   sampleLoading[id] = true;
@@ -1493,7 +1516,9 @@ function loadSample(id) {
     buf._root = m.root; sampleBuf[id] = buf; sampleLoading[id] = false; /* el bucle de animación ya la redibuja */
   };
   try {
-    const p = ctx.decodeAudioData(bytes.buffer, done, () => { sampleLoading[id] = false; });
+    // Antes de la primera pulsación aún no hay AudioContext: se decodifica con uno «offline» (no necesita gesto), así el selector de sonido ya puede dibujar la onda real
+    const dctx = ctx || (sampleDecoder = sampleDecoder || new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 44100));
+    const p = dctx.decodeAudioData(bytes.buffer, done, () => { sampleLoading[id] = false; });
     if (p && p.then) p.then(done, () => { sampleLoading[id] = false; });
   } catch (e) { sampleLoading[id] = false; }
 }
@@ -3835,26 +3860,42 @@ function glyphPoints(snd, n, t) {   // n valores entre −1 y 1: unos 2,5 ciclos
 function l_amp(snd, amp) { return Math.min(1, amp); }
 let glyphRaf = null, glyphT0 = 0, glyphLast = 0;
 function drawMenuGlyph(now) {
-  const c = $('menuGlyph'); if (!c || !c.clientWidth || document.documentElement.dataset.screen !== 'matrix') return;
-  const PX = pxScale(), pxm = pxCanvas(c, PX); if (!pxm) return;
-  const { w, h } = pxm, g = c.getContext('2d'), t = ((now || performance.now()) - glyphT0) / 1000;
-  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
-  const snd = curSound(), pts = glyphPoints(snd, w - 12, t), css = getComputedStyle(document.documentElement);
-  g.fillStyle = css.getPropertyValue('--panel-ink').trim() || '#fff';
-  const mid = Math.round(h / 2), amp = Math.floor(h / 2) - 2;
-  g.globalAlpha = 0.28; g.fillRect(4, mid, w - 8, 1); g.globalAlpha = 1;   // el eje, tenue
-  let prev = null;
-  for (let x = 0; x < pts.length; x++) {   // línea de 1 píxel: cada columna une con la anterior
-    const y = Math.round(mid - pts[x] * amp);
-    const y0 = prev == null ? y : prev; g.fillRect(x + 6, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y;
+  const c = $('menuGlyph'); if (!c || !c.clientWidth) return;
+  const root = document.documentElement, skin = root.dataset.screen, css = getComputedStyle(root), PX = pxScale(), pxm = pxCanvas(c, PX);
+  const t = ((now || performance.now()) - glyphT0) / 1000, snd = curSound(), ink = css.getPropertyValue('--panel-ink').trim() || '#fff';
+  if (pxm) {   // MATRIX y MOSS: línea de 1 píxel (1 bit), a resolución de píxel
+    const { w, h } = pxm, g = c.getContext('2d'), pts = glyphPoints(snd, w - 12, t);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h); g.fillStyle = ink;
+    const mid = Math.round(h / 2), amp = Math.floor(h / 2) - 2;
+    g.globalAlpha = 0.28; g.fillRect(4, mid, w - 8, 1); g.globalAlpha = 1;   // el eje, tenue
+    let prev = null;
+    for (let x = 0; x < pts.length; x++) {   // cada columna une con la anterior
+      const y = Math.round(mid - pts[x] * amp), y0 = prev == null ? y : prev; g.fillRect(x + 6, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y;
+    }
+    return;
   }
+  const g = c.getContext('2d'), dpr = window.devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.lineJoin = 'round'; g.lineCap = 'round';
+  if (skin === 'phosphor') {   // el lienzo cubre toda la pantalla: 0 V = eje central de la retícula; el haz entra y sale por los bordes
+    const cell = H / 6, N = Math.round(W / 1.5), pts = glyphPoints(snd, N, t), ys = pts.map(v => H / 2 - v * cell * 1.05);
+    const bins = [[], [], []];
+    for (let i = 1; i < N; i++) { const sp = Math.abs(ys[i] - ys[i - 1]); bins[sp < 0.5 ? 0 : sp < 2.2 ? 1 : 2].push(i); }
+    const pass = (lw, col, al) => { g.lineWidth = lw; g.strokeStyle = col; bins.forEach((b, k) => { g.globalAlpha = al[k]; g.beginPath(); for (const i of b) { g.moveTo((i - 1) / (N - 1) * W, ys[i - 1]); g.lineTo(i / (N - 1) * W, ys[i]); } g.stroke(); }); };
+    pass(5, 'rgb(40,230,110)', [0.16, 0.09, 0.04]); pass(2.6, 'rgb(90,255,150)', [0.5, 0.3, 0.14]); pass(1.3, 'rgb(225,255,235)', [1, 0.7, 0.4]); g.globalAlpha = 1;
+    return;
+  }
+  // EMBER (y cualquier otra pantalla nativa): línea fina y limpia sobre un eje tenue
+  const pad = 14, N = Math.round((W - pad * 2) / 2), pts = glyphPoints(snd, N, t), mid = H / 2, amp = H / 2 - 4;
+  g.strokeStyle = ink; g.globalAlpha = 0.18; g.lineWidth = 1; g.beginPath(); g.moveTo(pad, mid); g.lineTo(W - pad, mid); g.stroke(); g.globalAlpha = 1;
+  g.lineWidth = 2; g.beginPath(); pts.forEach((v, i) => { const x = pad + i / (N - 1) * (W - pad * 2), y = mid - v * amp; if (i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke();
 }
 function glyphLoop(now) {   // 20 fotogramas por segundo, como una pantalla pequeña
   glyphRaf = null; if (!menu || menu.kind !== 'sound') return;
-  if (now - glyphLast > 48) { glyphLast = now; drawMenuGlyph(now); }
+  if (now - glyphLast > (pxScale() > 1 ? 48 : 24)) { glyphLast = now; drawMenuGlyph(now); }
   glyphRaf = requestAnimationFrame(glyphLoop);
 }
-function glyphStart() { glyphT0 = performance.now(); if (!glyphRaf && document.documentElement.dataset.screen === 'matrix') glyphRaf = requestAnimationFrame(glyphLoop); }
+function glyphStart() { glyphT0 = performance.now(); if (!glyphRaf) glyphRaf = requestAnimationFrame(glyphLoop); }
 function renderMenu() {
   const el = $('menu'); if (!el) return;
   $('screen').classList.toggle('menu-open', !!menu);
@@ -4119,10 +4160,90 @@ function pxThreshold(g, w, h, rgb, thr) {   // 1 bit: cada píxel o está encend
   g.putImageData(im, 0, 0);
 }
 function cssRgb(str) { str = (str || '').trim(); const m = /^#([0-9a-f]{6})$/i.exec(str); if (m) { const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; } const r = /rgba?\((\d+)[ ,]+(\d+)[ ,]+(\d+)/.exec(str); return r ? [+r[1], +r[2], +r[3]] : [255, 255, 255]; }
+// Muestras del analizador, con decimales y sin continua (acoplamiento AC): {v, n, pk}
+function scopeSamples() {
+  const n = scopeData.length, v = new Float32Array(n); let mean = 0;
+  if (analyser.getFloatTimeDomainData) analyser.getFloatTimeDomainData(v);   // con decimales: la onda sale suave aunque sea muy pequeña (los bytes dan escalones de 1/128)
+  else { analyser.getByteTimeDomainData(scopeData); for (let i = 0; i < n; i++) v[i] = (scopeData[i] - 128) / 128; }
+  for (let i = 0; i < n; i++) mean += v[i]; mean /= n;
+  let pk = 0; for (let i = 0; i < n; i++) { v[i] -= mean; if (Math.abs(v[i]) > pk) pk = Math.abs(v[i]); }
+  return { v, n, pk };
+}
+// Cruces ascendentes por 0 V (con histéresis) y su periodo mediano
+function scopeCrossings(sm) {
+  const { v, n, pk } = sm, h = Math.max(0.004, pk * 0.04), cr = []; let armed = v[0] < -h;
+  for (let i = 1; i < n; i++) { if (v[i] < -h) armed = true; else if (armed && v[i] >= 0) { const fr = v[i - 1] === v[i] ? 0 : (0 - v[i - 1]) / (v[i] - v[i - 1]); cr.push(i - 1 + Math.max(0, Math.min(1, fr))); armed = false; } }
+  let P = 0; if (cr.length >= 2) { const ds = []; for (let i = 1; i < cr.length; i++) ds.push(cr[i] - cr[i - 1]); ds.sort((x, y) => x - y); P = ds[Math.floor(ds.length / 2)]; }
+  return { cr, P };
+}
+// Disparo de un osciloscopio: devuelve f(u) para u en 0..1 (0 = borde izquierdo de la pantalla = instante del disparo, 1 = borde derecho)
+function scopeTrigger(live) {
+  if (!live) { const z = () => 0; z.pk = 0; return z; }
+  const sm = scopeSamples(), { v, n, pk } = sm;
+  if (pk < 0.004) { const z = () => 0; z.pk = 0; return z; }   // sin señal: recta sobre el eje (0 V)
+  const { cr, P } = scopeCrossings(sm);
+  const span = Math.max(60, Math.min(Math.round(P ? P * 3 : 700), n - 80));   // muestras entre los dos bordes
+  let c0 = cr.find(c => c + span < n - 1); if (c0 == null) c0 = 0;
+  const f = u => { const x = c0 + u * span, i = Math.floor(x), fr = x - i; return v[i] + (v[Math.min(n - 1, i + 1)] - v[i]) * fr; };
+  f.pk = pk; f.span = span; return f;
+}
+// Volts/div automático (como el «autoset» de un osciloscopio): escalones 1-2-5 con histéresis, para que la onda se vea siempre entre ±2,7 divisiones sin saltar de un fotograma a otro
+const VDIV_STEPS = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1];
+let scopeVdiv = 0.1;
+function scopeAutoVdiv(pk) { let i = VDIV_STEPS.indexOf(scopeVdiv); if (i < 0) i = 5; if (pk / scopeVdiv > 2.7 && i < VDIV_STEPS.length - 1) i++; else if (pk / scopeVdiv < 0.9 && i > 0) i--; scopeVdiv = VDIV_STEPS[i]; }
+function scopeWanted() { return !document.hidden && (state.osc || document.documentElement.dataset.screen === 'phosphor'); }
+function scopeKick() { if (!scopeRaf && scopeWanted()) scopeRaf = requestAnimationFrame(drawScope); }
+// ===== PHOSPHOR: osciloscopio simulado =====
+// Un haz de electrones es un PUNTO que se mueve; lo que se ve es el rastro que deja el fósforo al decaer. Aquí: (1) un lienzo acumulador que se desvanece cada fotograma (persistencia del fósforo P31),
+// (2) el recorrido del haz dibujado en suma de luz («lighter») con núcleo, cuerpo y halo, (3) luz de cada tramo ∝ 1/velocidad (las crestas y los puntos donde el haz casi se para brillan más).
+// Modo Y-T: barrido con disparo por flanco ascendente y base de tiempos automática. Modo XY: x = señal retrasada 1/4 de periodo (desfase de 90°), y = señal → figuras de Lissajous (el audio de
+// la app es una sola señal; con dos canales, uno a cada eje, saldrían las figuras del «arte de osciloscopio»).
+const SCOPE_BINS = 6;
+function fmt125(x) { const e = Math.pow(10, Math.floor(Math.log10(x))), m = x / e, q = m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10; return q * e; }
+function scopeUnit(x, u0) { const units = [[1e-9, 'n' + u0], [1e-6, 'µ' + u0], [1e-3, 'm' + u0], [1, u0]], q = fmt125(x); let r = units[0]; for (const u of units) if (q >= u[0] * 0.999) r = u; return Math.round(q / r[0] * 100) / 100 + ' ' + r[1]; }
+let scopeReadT = 0;
+function phosphorScope() {
+  const c = $('scope'), g = c.getContext && c.getContext('2d'); if (!g) return;
+  c.classList.remove('px');
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = c.clientWidth || 300, H = c.clientHeight || 100;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  const xy = state.scopeMode === 'xy', live = analyser && ctx && ctx.state === 'running', cell = H / 6;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.lineJoin = 'round'; g.lineCap = 'round';
+  g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + (xy ? 0.34 : 0.72) + ')'; g.fillRect(0, 0, W, H);   // decaimiento del fósforo
+  g.globalCompositeOperation = 'lighter';
+  const sm = live ? scopeSamples() : null, sig = sm && sm.pk >= 0.004;
+  if (sig) scopeAutoVdiv(sm.pk);
+  const unit = cell / scopeVdiv;   // píxeles por unidad de señal
+  let xs, ys, readT = '';
+  if (!xy) {
+    const frame = scopeTrigger(live), N = Math.max(64, Math.min(900, Math.round(W * 1.5)));
+    xs = new Array(N); ys = new Array(N);
+    for (let i = 0; i < N; i++) { xs[i] = i / (N - 1) * W; ys[i] = H / 2 - frame(i / (N - 1)) * unit; }
+    if (frame.span && ctx) readT = scopeUnit(frame.span / ctx.sampleRate / (W / cell), 's') + '/div';
+  } else if (sig) {
+    const { cr, P } = scopeCrossings(sm), d = Math.max(4, Math.round((P || 96) / 4)), M = Math.min(sm.n - d - 1, 640), i0 = sm.n - M;
+    xs = new Array(M); ys = new Array(M);
+    for (let k = 0; k < M; k++) { const i = i0 + k; xs[k] = W / 2 + sm.v[i - d] * unit; ys[k] = H / 2 - sm.v[i] * unit; }
+  } else { xs = [W / 2, W / 2 + 0.01]; ys = [H / 2, H / 2]; }
+  // luz por tramo ∝ 1/velocidad, en SCOPE_BINS niveles
+  const bins = Array.from({ length: SCOPE_BINS }, () => []);
+  for (let i = 1; i < xs.length; i++) { const sp = Math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]); bins[Math.min(SCOPE_BINS - 1, Math.floor(Math.min(1, sp / (xy ? 9 : 5)) * (SCOPE_BINS - 1)))].push(i); }
+  const gain = xy ? 0.3 : 1;
+  const pass = (w, col, a0) => { g.lineWidth = w; g.strokeStyle = col; bins.forEach((b, k) => { if (!b.length) return; g.globalAlpha = Math.max(0.03, a0 * (1 - k / SCOPE_BINS * 0.92)) * gain; g.beginPath(); for (const i of b) { g.moveTo(xs[i - 1], ys[i - 1]); g.lineTo(xs[i], ys[i]); } g.stroke(); }); };
+  pass(6, 'rgb(30,200,95)', 0.11); pass(2.8, 'rgb(80,255,150)', 0.34); pass(1.2, 'rgb(215,255,230)', 0.85);
+  // el punto del haz (en XY es el último punto; sin señal, el punto quieto del centro)
+  const lx = xs[xs.length - 1], ly = ys[ys.length - 1];
+  if (xy) { g.globalAlpha = sig ? 0.55 : 0.9; const rg = g.createRadialGradient(lx, ly, 0, lx, ly, sig ? 7 : 9); rg.addColorStop(0, 'rgba(235,255,240,1)'); rg.addColorStop(0.25, 'rgba(110,255,170,.7)'); rg.addColorStop(1, 'rgba(30,220,110,0)'); g.fillStyle = rg; g.beginPath(); g.arc(lx, ly, sig ? 7 : 9, 0, 7); g.fill(); }
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  // lectura de las escalas (calibradas en pantalla): volts/div y time/div
+  const t = performance.now(); if (t - scopeReadT > 250) { scopeReadT = t; const el = $('scopeRead'); if (el) el.textContent = (xy ? 'X-Y  ' : 'CH1  ') + scopeUnit(scopeVdiv, 'V') + '/div' + (readT ? '  ' + readT : ''); }
+}
 function drawScope() {
   scopeRaf = null;
-  if (!state.osc || document.hidden) return;
+  if (!scopeWanted()) return;
   if (OWN_TITLE.includes(state.mode)) { scopeRaf = requestAnimationFrame(drawScope); return; }   // el afinador usa el mismo lienzo
+  if (document.documentElement.dataset.screen === 'phosphor') { if (!(menu || setv)) phosphorScope(); scopeRaf = requestAnimationFrame(drawScope); return; }   // PHOSPHOR: osciloscopio simulado
+  if (!state.osc) return;
   const c = $('scope'), g = c.getContext && c.getContext('2d');
   if (!g) return;
   const css = getComputedStyle(document.documentElement), screenSkin = document.documentElement.dataset.screen, PX = pxScale();
@@ -4149,13 +4270,15 @@ function drawScope() {
   g.strokeStyle = css.getPropertyValue('--scope').trim() || '#888';
   g.lineWidth = 1.6; g.lineJoin = 'round';
   if (screenSkin === 'phosphor') {
-    // Haz de electrones: la luz de cada tramo es inversamente proporcional a la velocidad del haz (las crestas, donde casi se detiene, brillan más
-    // y los flancos rápidos se ven tenues); núcleo casi blanco y halo verde del fósforo P31. Entra y sale por los bordes de la pantalla.
-    const N = 700, ys = new Array(N);
-    if (live) { analyser.getByteTimeDomainData(scopeData); for (let i = 0; i < N; i++) ys[i] = H / 2 - ((scopeData[i] - 128) / 128) * H * 0.46; }
-    else for (let i = 0; i < N; i++) ys[i] = H / 2;
+    // OSCILOSCOPIO: la señal se dibuja respecto a 0 V (el eje horizontal de la retícula) con un volts/div automático, y el BARRIDO se DISPARA (trigger): empieza siempre
+    // en un flanco ascendente que cruza 0 V, así la onda queda quieta (estable) en vez de correr. Base de tiempos automática: unos 3 periodos entre los dos bordes.
+    // Sin señal (disparo automático / «bright line») el haz barre una recta sobre el eje. Luz del haz ∝ 1/velocidad: crestas brillantes, flancos tenues; núcleo casi blanco y halo verde.
+    const cell = H / 6, N = Math.max(64, Math.min(900, Math.round(W * 2))), ys = new Array(N);
+    const frame = scopeTrigger(live); if (frame.pk) scopeAutoVdiv(frame.pk);
+    const gain = cell / scopeVdiv;   // píxeles por unidad de señal: 1 división de la retícula = scopeVdiv
+    for (let i = 0; i < N; i++) ys[i] = H / 2 - frame(i / (N - 1)) * gain;
     const bins = [[], [], []];   // lento, medio, rápido
-    for (let i = 1; i < N; i++) { const sp = Math.abs(ys[i] - ys[i - 1]); bins[sp < 0.35 ? 0 : sp < 1.6 ? 1 : 2].push(i); }
+    for (let i = 1; i < N; i++) { const sp = Math.abs(ys[i] - ys[i - 1]); bins[sp < 0.5 ? 0 : sp < 2.2 ? 1 : 2].push(i); }
     const pass = (w, col, alphas) => { g.lineWidth = w; g.strokeStyle = col; bins.forEach((b, k) => { g.globalAlpha = alphas[k]; g.beginPath(); for (const i of b) { g.moveTo((i - 1) / (N - 1) * W, ys[i - 1]); g.lineTo(i / (N - 1) * W, ys[i]); } g.stroke(); }); };
     pass(5, 'rgb(40,230,110)', [0.16, 0.09, 0.04]);
     pass(2.6, 'rgb(90,255,150)', [0.5, 0.3, 0.14]);
@@ -4179,11 +4302,13 @@ function setOsc(on) {
   state.osc = !!on; saveState();
   $('screen').classList.toggle('osc', state.osc); $('oscBtn').classList.toggle('on', state.osc);
   if (state.osc && !scopeRaf) drawScope(); else drawBaseline();
+  scopeKick();
 }
 // La traza en reposo (fase 33): sin osciloscopio en vivo, una línea plana en el tono medio de la pantalla (como la línea del mockup)
 function drawBaseline() {
   if (['hiro', 'ear', 'tuner'].includes(state.mode)) { const c0 = $('scope'); if (c0) c0.classList.remove('px'); return; }
   if (state.osc) return;
+  if (document.documentElement.dataset.screen === 'phosphor') return;   // PHOSPHOR: la sustituye el osciloscopio simulado
   const c = $('scope'), g = c && c.getContext && c.getContext('2d'); if (!g) return;
   const PX = pxScale(), css = getComputedStyle(document.documentElement), pxm = pxCanvas(c, PX);
   if (pxm) {   // MATRIX / MOSS: una fila de píxeles de borde a borde
@@ -4203,14 +4328,16 @@ function drawBaseline() {
   g.lineWidth = 1.4; g.beginPath(); g.moveTo(-4, Math.round(H / 2) + .5); g.lineTo(W + 4, Math.round(H / 2) + .5); g.stroke();
 }
 window.addEventListener('resize', () => drawBaseline());
-{ const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); }; }   // la traza en reposo sigue a la pantalla, la carcasa y el modo
+{ const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); scopeKick(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); scopeKick(); }; }
+document.addEventListener('visibilitychange', () => scopeKick());   // la traza en reposo sigue a la pantalla, la carcasa y el modo
 
 const SETTINGS = [
   { section:'Aspecto' },
   { id:'theme', label:'Carcasa', type:'select', options:opts(THEMES) },
   { id:'screen', label:'Pantalla', type:'select', options:opts(SCREENS) },
   { id:'keyLabels', label:'Notas y números en las teclas', type:'check' },
-  { id:'osc', label:'Osciloscopio', type:'check' },
+  { id:'osc', label:'Onda', type:'check' },
+  { id:'scopeMode', label:'Osciloscopio (PHOSPHOR)', type:'select', options:opts([['yt','Tiempo (Y-T)'],['xy','XY (figuras)']]) },
   { id:'haptics', label:'Vibración', type:'check' },
   { id:'hapticTest', label:'Probar la vibración', type:'button', text:'Probar', run:() => hapticTest() },
   { id:'swipe', label:'Deslizar sobre los botones', type:'check' },
