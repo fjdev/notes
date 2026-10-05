@@ -845,6 +845,20 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 .display #pxui { display: none; }
 :root[data-screen="matrix"] .display .screen.pxui > *:not(#pxui) { opacity: 0 !important; }   /* the DOM keeps working (taps, long-press) but is invisible: the canvas draws it as pixels */
 :root[data-screen="matrix"] .display .screen.pxui #pxui { display: block; position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; pointer-events: none; z-index: 3; }
+
+/* settings geometry in pixel mode: rows 27 px (= 9 logical pixels) so the drawn rows and the tap areas coincide */
+:root[data-screen="matrix"] .display .screen.pxui .setv { padding: 0; }
+:root[data-screen="matrix"] .display .screen.pxui .gear { top: 0 !important; right: 0 !important; width: 36px !important; height: 27px !important; padding: 0 !important; }   /* the gear's tap area = the pixel gear in the title bar (it must not cover the first row) */
+:root[data-screen="matrix"] .display .screen.pxui .gear::after { inset: 0 !important; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-head { flex: 0 0 27px; height: 27px; margin: 0; padding: 0 33px 0 0; gap: 0; box-shadow: none; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-head #setvPrev, :root[data-screen="matrix"] .display .screen.pxui .setv-head #setvNext { width: 30px; padding: 0; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-head #setvSec { flex: 1 1 auto; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-head #setvPos { flex: 0 0 90px; width: 90px; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-list { margin-top: 0; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-row { flex: 0 0 27px; height: 27px; min-height: 27px; padding: 0; gap: 0; border-radius: 0; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-row.k-select .vl, :root[data-screen="matrix"] .display .screen.pxui .setv-row.k-range .vl { flex: 0 0 52%; max-width: 52%; justify-content: space-between; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-row .vl .v { flex: 1 1 auto; text-align: center; }
+:root[data-screen="matrix"] .display .screen.pxui .setv-text { padding: 0; }
 </style>
 </head>
 <body>
@@ -979,7 +993,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>If you get stuck, "tonic" plays the base note again and "replay" repeats the question. Your streak and best streak are counted. On levels with modifications, a miss shows an arrow with the correct joystick direction. While you play, your settings are replaced by the trainer's and come back when it ends.</p>
       <h3 class="grp">Settings and maintenance</h3>
       <h4>Look</h4>
-      <p>notes is a single instrument built in six editions, which you choose in Settings → Look → Case: CARBON (black), LUNAR (ivory with black controls and orange touches), VERTEX (90s console-pad grey, with coloured buttons), POCKET (beige with an olive screen and aubergine buttons, like an 80s handheld), AMBER (warm charcoal with cream and mustard keys, like a boutique synth) and GHOST (smoked plastic that shows the circuit board). The screen is independent and represents another technology: EMBER (warm OLED), MATRIX (the 1-bit OLED of the HiChord and the Orchid: cool white on black, visible pixels, inverted title bar, selectors with a frame and triangles at the sides, and on the sound selector the waveform of the sound), MOSS (green reflective LCD, like the first Game Boy: the grid only hints inside the dark parts and the frame casts its shadow at the top and left) and PHOSPHOR (analogue oscilloscope: black screen where the beam draws everything in green; the graticule is engraved in the glass with its centre cross and the signal is drawn relative to that cross, with the sweep triggered so the wave stays still and an automatic volts/div). On every screen, the sound selector draws the waveform of the sound, animated: it appears, is held and fades out the way that sound does. "By case" uses each edition's own, and you can combine them however you like. With MATRIX selected, "Pixel display" (Settings → Look) redraws the screen as a real grid of about 120 × 63 pixels with a bitmap font, like the OLED of the device: everything is made of whole pixels. It covers the play screens and the menus; settings, games and the tuner keep the regular screen. "Automatic" picks CARBON or LUNAR depending on the device's dark or light mode. The line that crosses the screen is the wave: it runs from one edge to the other; at rest it is flat; with "Wave" on it shows the signal that is sounding. In PHOSPHOR that line does not exist: a simulated oscilloscope replaces it (an electron beam that moves, with the glow the phosphor leaves as it fades), always on. In "Time (Y-T)" the sweep triggers on a rising edge so the wave stays still, with automatic volts/div and time/div that you can read at the bottom; in "XY (figures)" the signal is drawn against itself shifted by 90° and Lissajous figures appear (Settings → Modes → "Oscilloscope", only available with the PHOSPHOR screen). The chord keys are clean, without notes or numbers; turn them on with "Notes and numbers on keys". "Test vibration" checks whether your device can vibrate from the app and, if not, why: on the iPhone you need iOS 18 or later and System Haptics turned on (iPhone Settings → Sounds &amp; Haptics).</p>
+      <p>notes is a single instrument built in six editions, which you choose in Settings → Look → Case: CARBON (black), LUNAR (ivory with black controls and orange touches), VERTEX (90s console-pad grey, with coloured buttons), POCKET (beige with an olive screen and aubergine buttons, like an 80s handheld), AMBER (warm charcoal with cream and mustard keys, like a boutique synth) and GHOST (smoked plastic that shows the circuit board). The screen is independent and represents another technology: EMBER (warm OLED), MATRIX (the 1-bit OLED of the HiChord and the Orchid: cool white on black, visible pixels, inverted title bar, selectors with a frame and triangles at the sides, and on the sound selector the waveform of the sound), MOSS (green reflective LCD, like the first Game Boy: the grid only hints inside the dark parts and the frame casts its shadow at the top and left) and PHOSPHOR (analogue oscilloscope: black screen where the beam draws everything in green; the graticule is engraved in the glass with its centre cross and the signal is drawn relative to that cross, with the sweep triggered so the wave stays still and an automatic volts/div). On every screen, the sound selector draws the waveform of the sound, animated: it appears, is held and fades out the way that sound does. "By case" uses each edition's own, and you can combine them however you like. With MATRIX selected, "Pixel display" (Settings → Look) redraws the screen as a real grid of about 120 × 63 pixels with a bitmap font, like the OLED of the device: everything is made of whole pixels. It covers everything on the screen: the play screens, the menus, the settings (with short labels), Notes Hero, Ear Trainer and the tuner. "Automatic" picks CARBON or LUNAR depending on the device's dark or light mode. The line that crosses the screen is the wave: it runs from one edge to the other; at rest it is flat; with "Wave" on it shows the signal that is sounding. In PHOSPHOR that line does not exist: a simulated oscilloscope replaces it (an electron beam that moves, with the glow the phosphor leaves as it fades), always on. In "Time (Y-T)" the sweep triggers on a rising edge so the wave stays still, with automatic volts/div and time/div that you can read at the bottom; in "XY (figures)" the signal is drawn against itself shifted by 90° and Lissajous figures appear (Settings → Modes → "Oscilloscope", only available with the PHOSPHOR screen). The chord keys are clean, without notes or numbers; turn them on with "Notes and numbers on keys". "Test vibration" checks whether your device can vibrate from the app and, if not, why: on the iPhone you need iOS 18 or later and System Haptics turned on (iPhone Settings → Sounds &amp; Haptics).</p>
       <h4>MIDI</h4>
       <p>PC only (Chrome or Edge) and Android; Safari on iPhone does not support it, which is why the setting does not appear there. Turn it on in Settings → Sound. The white keys of any octave play buttons 1 to 7 (C is 1). The chord that sounds goes out as MIDI notes on every connected output (if an output sends the notes back to the input, the app ignores that echo). In Arp and Repeat the held chord is sent, not every hit.</p>
       <h4>Backup</h4>
@@ -2968,6 +2982,7 @@ function tunerStop() {
 }
 // Escala de ±50 cents con un punto que marca la desviación, y una línea fina con el nivel que oye el micrófono
 function drawTunerMeter(cents, inTune, level) {
+  window.__tun = { cents, inTune, level };   // the pixel display reads it
   const c = $('scope'), g = c.getContext && c.getContext('2d'); if (!g) return;
   c.classList.remove('px');
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
@@ -4227,7 +4242,7 @@ function scopeAutoVdiv(pk) {
 // Settings, games, tuner keep the regular screen in this pilot. Setting «Pixel display» (MATRIX only).
 function pxuiState() { return (window.__pxui = window.__pxui || { raf: null, last: 0, fb: null, w: 0, h: 0, font: null }); }
 function pxFont() { const u = pxuiState(); return u.font || (u.font = JSON.parse(`{"f5":{"w":5,"h":8,"g":{" ":[0,0,0,0,0,0,0,0],"!":[4,4,4,4,4,0,4,0],"\\"":[10,10,10,0,0,0,0,0],"#":[0,10,31,10,10,31,10,0],"$":[4,14,20,12,6,6,28,4],"%":[2,18,20,4,8,10,18,16],"&":[4,10,10,12,21,18,13,0],"'":[4,4,4,0,0,0,0,0],"(":[2,4,8,8,8,8,4,2],")":[8,4,2,2,2,2,4,8],"*":[0,0,18,12,30,12,18,0],"+":[0,0,4,4,31,4,4,0],",":[0,0,0,0,0,4,4,8],"-":[0,0,0,0,30,0,0,0],".":[0,0,0,0,0,0,4,0],"/":[2,2,4,4,8,8,16,16],"0":[0,12,18,22,26,18,12,0],"1":[0,4,12,4,4,4,14,0],"2":[0,12,18,2,12,16,30,0],"3":[0,12,18,4,2,18,12,0],"4":[0,16,20,20,30,4,4,0],"5":[0,30,16,28,2,2,28,0],"6":[0,12,16,28,18,18,12,0],"7":[0,30,18,2,4,8,8,0],"8":[0,12,18,12,18,18,12,0],"9":[0,12,18,18,14,2,12,0],":":[0,0,0,4,0,0,4,0],";":[0,0,0,4,0,4,4,8],"<":[0,2,4,8,8,4,2,0],"=":[0,0,0,30,0,30,0,0],">":[0,8,4,2,2,4,8,0],"?":[12,18,2,4,8,0,8,0],"@":[0,12,18,22,22,16,14,0],"A":[0,12,18,18,30,18,18,0],"B":[0,28,18,28,18,18,28,0],"C":[0,14,16,16,16,16,14,0],"D":[0,28,18,18,18,18,28,0],"E":[0,14,16,28,16,16,14,0],"F":[0,14,16,16,28,16,16,0],"G":[0,14,16,22,18,18,14,0],"H":[0,18,18,30,18,18,18,0],"I":[0,14,4,4,4,4,14,0],"J":[0,14,4,4,4,4,24,0],"K":[0,18,18,28,18,18,18,0],"L":[0,16,16,16,16,16,14,0],"M":[0,18,30,30,18,18,18,0],"N":[0,18,26,26,22,22,18,0],"O":[0,12,18,18,18,18,12,0],"P":[0,28,18,18,28,16,16,0],"Q":[0,12,18,18,18,18,12,6],"R":[0,28,18,18,28,18,18,0],"S":[0,14,16,12,2,2,28,0],"T":[0,31,4,4,4,4,4,0],"U":[0,18,18,18,18,18,14,0],"V":[0,18,18,18,18,12,12,0],"W":[0,18,18,18,30,30,18,0],"X":[0,18,18,12,12,18,18,0],"Y":[0,18,18,18,14,2,28,0],"Z":[0,30,2,4,8,16,30,0],"[":[14,8,8,8,8,8,8,14],"\\\\":[16,16,8,8,4,4,2,2],"]":[14,2,2,2,2,2,2,14],"^":[0,4,10,17,0,0,0,0],"_":[0,0,0,0,0,0,0,30],"\`":[8,4,0,0,0,0,0,0],"a":[0,0,12,2,14,18,14,0],"b":[16,16,28,18,18,18,28,0],"c":[0,0,14,16,16,16,14,0],"d":[2,2,14,18,18,18,14,0],"e":[0,0,14,18,30,16,14,0],"f":[6,8,8,28,8,8,8,0],"g":[0,0,14,18,18,12,2,28],"h":[16,16,28,18,18,18,18,0],"i":[0,4,0,12,4,4,6,0],"j":[0,4,0,4,4,4,4,24],"k":[16,16,18,20,24,20,18,0],"l":[8,8,8,8,8,8,6,0],"m":[0,0,18,30,30,18,18,0],"n":[0,0,28,18,18,18,18,0],"o":[0,0,12,18,18,18,12,0],"p":[0,0,28,18,18,28,16,16],"q":[0,0,14,18,18,14,2,2],"r":[0,0,14,18,16,16,16,0],"s":[0,0,14,16,12,2,28,0],"t":[8,8,28,8,8,8,6,0],"u":[0,0,18,18,18,18,14,0],"v":[0,0,18,18,18,12,12,0],"w":[0,0,18,18,30,30,18,0],"x":[0,0,18,12,12,18,18,0],"y":[0,0,18,18,18,14,2,28],"z":[0,0,30,2,4,8,30,0],"{":[6,8,8,24,24,8,8,6],"|":[4,4,4,4,4,4,4,4],"}":[24,4,4,6,6,4,4,24],"~":[0,0,0,9,22,0,0,0]}},"f8":{"w":8,"h":16,"g":{" ":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"!":[0,0,24,24,24,24,24,24,24,0,24,24,0,0,0,0],"\\"":[0,102,102,102,102,0,0,0,0,0,0,0,0,0,0,0],"#":[0,0,108,108,254,108,108,108,108,254,108,108,0,0,0,0],"$":[0,16,126,208,208,208,124,22,22,22,22,252,16,0,0,0],"%":[0,0,6,102,108,12,24,24,48,54,102,96,0,0,0,0],"&":[0,0,56,108,108,108,56,112,218,204,204,122,0,0,0,0],"'":[0,24,24,24,24,0,0,0,0,0,0,0,0,0,0,0],"(":[0,14,24,48,48,96,96,96,96,48,48,24,14,0,0,0],")":[0,112,24,12,12,6,6,6,6,12,12,24,112,0,0,0],"*":[0,0,0,0,102,60,24,255,24,60,102,0,0,0,0,0],"+":[0,0,0,0,0,24,24,126,24,24,0,0,0,0,0,0],",":[0,0,0,0,0,0,0,0,0,0,24,24,48,0,0,0],"-":[0,0,0,0,0,0,0,126,0,0,0,0,0,0,0,0],".":[0,0,0,0,0,0,0,0,0,0,24,24,0,0,0,0],"/":[0,6,6,12,12,24,24,48,48,96,96,192,192,0,0,0],"0":[0,0,124,198,198,206,222,246,230,198,198,124,0,0,0,0],"1":[0,0,24,56,120,88,24,24,24,24,24,126,0,0,0,0],"2":[0,0,124,198,6,6,12,24,48,96,198,254,0,0,0,0],"3":[0,0,124,198,6,6,60,6,6,6,198,124,0,0,0,0],"4":[0,0,192,192,204,204,204,204,254,12,12,12,0,0,0,0],"5":[0,0,254,198,192,192,252,6,6,6,198,124,0,0,0,0],"6":[0,0,124,198,192,192,252,198,198,198,198,124,0,0,0,0],"7":[0,0,254,198,6,6,12,24,48,48,48,48,0,0,0,0],"8":[0,0,124,198,198,198,124,198,198,198,198,124,0,0,0,0],"9":[0,0,124,198,198,198,198,126,6,6,198,124,0,0,0,0],":":[0,0,0,0,0,24,24,0,0,0,24,24,0,0,0,0],";":[0,0,0,0,0,24,24,0,0,0,24,24,48,0,0,0],"<":[0,0,6,12,24,48,96,96,48,24,12,6,0,0,0,0],"=":[0,0,0,0,0,126,0,0,126,0,0,0,0,0,0,0],">":[0,0,96,48,24,12,6,6,12,24,48,96,0,0,0,0],"?":[0,0,124,198,6,12,24,48,48,0,48,48,0,0,0,0],"@":[0,0,0,124,194,218,218,218,218,222,192,124,0,0,0,0],"A":[0,0,124,198,198,198,254,198,198,198,198,198,0,0,0,0],"B":[0,0,252,198,198,198,252,198,198,198,198,252,0,0,0,0],"C":[0,0,126,192,192,192,192,192,192,192,192,126,0,0,0,0],"D":[0,0,252,198,198,198,198,198,198,198,198,252,0,0,0,0],"E":[0,0,126,192,192,192,248,192,192,192,192,126,0,0,0,0],"F":[0,0,126,192,192,192,248,192,192,192,192,192,0,0,0,0],"G":[0,0,126,192,192,192,222,198,198,198,198,126,0,0,0,0],"H":[0,0,198,198,198,198,254,198,198,198,198,198,0,0,0,0],"I":[0,0,126,24,24,24,24,24,24,24,24,126,0,0,0,0],"J":[0,0,126,24,24,24,24,24,24,24,24,240,0,0,0,0],"K":[0,0,198,198,198,204,248,204,198,198,198,198,0,0,0,0],"L":[0,0,192,192,192,192,192,192,192,192,192,126,0,0,0,0],"M":[0,0,198,238,254,214,198,198,198,198,198,198,0,0,0,0],"N":[0,0,198,198,230,230,214,214,206,206,198,198,0,0,0,0],"O":[0,0,124,198,198,198,198,198,198,198,198,124,0,0,0,0],"P":[0,0,252,198,198,198,252,192,192,192,192,192,0,0,0,0],"Q":[0,0,124,198,198,198,198,198,198,214,214,124,24,12,0,0],"R":[0,0,252,198,198,198,252,198,198,198,198,198,0,0,0,0],"S":[0,0,126,192,192,192,124,6,6,6,6,252,0,0,0,0],"T":[0,0,255,24,24,24,24,24,24,24,24,24,0,0,0,0],"U":[0,0,198,198,198,198,198,198,198,198,198,126,0,0,0,0],"V":[0,0,198,198,198,198,198,198,198,108,56,16,0,0,0,0],"W":[0,0,198,198,198,198,198,198,214,254,238,198,0,0,0,0],"X":[0,0,198,198,198,108,56,108,198,198,198,198,0,0,0,0],"Y":[0,0,198,198,198,198,126,6,6,6,6,252,0,0,0,0],"Z":[0,0,254,6,6,12,24,48,96,192,192,254,0,0,0,0],"[":[0,62,48,48,48,48,48,48,48,48,48,48,62,0,0,0],"\\\\":[0,192,192,96,96,48,48,24,24,12,12,6,6,0,0,0],"]":[0,124,12,12,12,12,12,12,12,12,12,12,124,0,0,0],"^":[0,16,56,108,198,0,0,0,0,0,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,254,0],"\`":[0,48,24,12,0,0,0,0,0,0,0,0,0,0,0,0],"a":[0,0,0,0,0,124,6,126,198,198,198,126,0,0,0,0],"b":[0,0,192,192,192,252,198,198,198,198,198,252,0,0,0,0],"c":[0,0,0,0,0,126,192,192,192,192,192,126,0,0,0,0],"d":[0,0,6,6,6,126,198,198,198,198,198,126,0,0,0,0],"e":[0,0,0,0,0,126,198,198,254,192,192,126,0,0,0,0],"f":[0,0,30,48,48,48,124,48,48,48,48,48,0,0,0,0],"g":[0,0,0,0,0,126,198,198,198,198,198,124,6,6,252,0],"h":[0,0,192,192,192,252,198,198,198,198,198,198,0,0,0,0],"i":[0,0,24,24,0,56,24,24,24,24,24,28,0,0,0,0],"j":[0,0,24,24,0,24,24,24,24,24,24,24,24,24,112,0],"k":[0,0,192,192,192,204,216,240,240,216,204,198,0,0,0,0],"l":[0,0,48,48,48,48,48,48,48,48,48,28,0,0,0,0],"m":[0,0,0,0,0,236,214,214,214,214,198,198,0,0,0,0],"n":[0,0,0,0,0,252,198,198,198,198,198,198,0,0,0,0],"o":[0,0,0,0,0,124,198,198,198,198,198,124,0,0,0,0],"p":[0,0,0,0,0,252,198,198,198,198,198,252,192,192,192,0],"q":[0,0,0,0,0,126,198,198,198,198,198,126,6,6,6,0],"r":[0,0,0,0,0,126,198,192,192,192,192,192,0,0,0,0],"s":[0,0,0,0,0,126,192,192,124,6,6,252,0,0,0,0],"t":[0,0,48,48,48,124,48,48,48,48,48,30,0,0,0,0],"u":[0,0,0,0,0,198,198,198,198,198,198,126,0,0,0,0],"v":[0,0,0,0,0,198,198,198,198,108,56,16,0,0,0,0],"w":[0,0,0,0,0,198,198,214,214,214,214,110,0,0,0,0],"x":[0,0,0,0,0,198,108,56,56,108,198,198,0,0,0,0],"y":[0,0,0,0,0,198,198,198,198,198,198,126,6,6,252,0],"z":[0,0,0,0,0,254,6,12,24,48,96,254,0,0,0,0],"{":[0,14,24,24,24,24,112,112,24,24,24,24,14,0,0,0],"|":[0,24,24,24,24,24,24,24,24,24,24,24,24,0,0,0],"}":[0,112,24,24,24,24,14,14,24,24,24,24,112,0,0,0],"~":[0,0,0,0,0,0,50,126,76,0,0,0,0,0,0,0],"á":[0,12,24,48,0,124,6,126,198,198,198,126,0,0,0,0],"é":[0,12,24,48,0,126,198,198,254,192,192,126,0,0,0,0],"í":[0,12,24,48,0,56,24,24,24,24,24,28,0,0,0,0],"ó":[0,12,24,48,0,124,198,198,198,198,198,124,0,0,0,0],"ú":[0,12,24,48,0,198,198,198,198,198,198,126,0,0,0,0],"ñ":[0,50,126,76,0,252,198,198,198,198,198,198,0,0,0,0],"Ñ":[50,76,0,198,230,230,214,214,206,206,198,198,0,0,0,0],"ü":[0,0,108,108,0,198,198,198,198,198,198,126,0,0,0,0],"Á":[24,48,0,124,198,198,198,254,198,198,198,198,0,0,0,0],"É":[24,48,0,126,192,192,192,248,192,192,192,126,0,0,0,0],"Í":[12,24,0,126,24,24,24,24,24,24,24,126,0,0,0,0],"Ó":[24,48,0,124,198,198,198,198,198,198,198,124,0,0,0,0],"Ú":[24,48,0,198,198,198,198,198,198,198,198,126,0,0,0,0],"¿":[0,0,24,24,0,24,24,48,96,192,198,124,0,0,0,0],"¡":[0,0,24,24,0,24,24,24,24,24,24,24,0,0,0,0],"°":[0,56,108,108,56,0,0,0,0,0,0,0,0,0,0,0],"·":[0,0,0,0,0,0,0,24,24,0,0,0,0,0,0,0],"±":[0,0,0,0,0,24,24,126,24,24,0,126,0,0,0,0],"×":[0,0,0,0,0,198,108,56,56,108,198,0,0,0,0,0],"÷":[0,0,0,0,24,24,0,126,0,24,24,0,0,0,0,0],"µ":[0,0,0,0,0,204,204,204,204,204,204,246,192,192,192,0],"▲":[0,0,0,0,0,16,56,56,124,124,254,254,0,0,0,0],"▼":[0,0,0,0,0,254,254,124,124,56,56,16,0,0,0,0],"‹":[0,0,0,0,0,0,12,24,48,24,12,0,0,0,0,0],"›":[0,0,0,0,0,0,48,24,12,24,48,0,0,0,0,0]}}}`)); }
-function puWanted() { return !!state.pixelUi && document.documentElement.dataset.screen === 'matrix' && !setv && (!!menu || !OWN_TITLE.includes(state.mode)) && !document.hidden; }   // a menu is always drawn in pixels, even over a game's mode (menus cannot open while playing)
+function puWanted() { return !!state.pixelUi && document.documentElement.dataset.screen === 'matrix' && !document.hidden; }   // everything is drawn in pixels: play screens, menus, settings, games and tuner
 function puPx(x, y, v) { const u = pxuiState(); x = Math.round(x); y = Math.round(y); if (x >= 0 && x < u.w && y >= 0 && y < u.h) u.fb[y * u.w + x] = v === 0 ? 0 : 1; }
 function puRect(x, y, w, h, v) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) puPx(x + i, y + j, v); }
 function puFrame(x, y, w, h, v) { puRect(x, y, w, 1, v); puRect(x, y + h - 1, w, 1, v); puRect(x, y, 1, h, v); puRect(x + w - 1, y, 1, h, v); }
@@ -4271,7 +4286,7 @@ function puIndicators(w, h, t) {   // bottom right: joystick compass always; rec
   return x0;
 }
 function puPlay(t, w, h) {
-  puRect(0, 0, w, 9, 1); puText(puT('sKey').toUpperCase(), 2, 0, { v: 0 }); puText(puT('sSound').toUpperCase(), w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+  puBar(puT('sKey'), puT('sSound'), w);
   const name = puT('chordName'), el = $('chordName'), idle = !el || el.classList.contains('idle') || !name || name === '—';
   if (idle) { if (Math.floor(t * 2) % 2 === 0) puRect(4, 13, 7, 16, 1); } else puBig(name, Math.floor(w / 2) - 0, 10, w - 6);
   const cy = Math.round(h * 0.77);
@@ -4281,23 +4296,131 @@ function puPlay(t, w, h) {
   puText(short.slice(0, Math.max(4, Math.floor((x0 - 3) / 6))), 2, h - 8);
 }
 function puMenu(t, w, h) {
-  const k = menu.kind; puRect(0, 0, w, 9, 1); puText(puT('menuTitle').toUpperCase(), 2, 0, { v: 0 }); puText(puT('menuPos').toUpperCase(), w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+  const k = menu.kind; puBar(puT('menuTitle'), puT('menuPos'), w);
   const fx = 8, fy = 11, fw = w - 16, fh = h - 22, mid = fy + Math.floor(fh / 2); puFrame(fx, fy, fw, fh);
-  puTri(fx + 5, mid, 5, 'r'); puTri(fx + fw - 6, mid, 5, 'l');
+  puTri(fx + 9, mid, 5, 'l'); puTri(fx + fw - 10, mid, 5, 'r');   // arrows point OUTWARD (◂ on the left, ▸ on the right)
   const val = puT('menuVal');
   if (k === 'sound') {
-    const n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 12, amp = 9; let prev = null;
+    const n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 11, amp = 8; let prev = null;
     for (let i = 0; i < n; i++) { const y = Math.round(gy - pts[i] * amp), y0 = prev == null ? y : prev; puRect(fx + 15 + i, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; }
-    puName(val, Math.floor(w / 2), fy + fh - 17, fw - 24);
-  } else if (k === 'mode') { puIcon(state.mode, Math.floor(w / 2) - 12, fy + 2, t); puName(val, Math.floor(w / 2), fy + fh - 17, fw - 24); }
+    puName(val, Math.floor(w / 2), fy + fh - 16, fw - 24);
+  } else if (k === 'mode') { puIcon(state.mode, Math.floor(w / 2) - 12, fy + 3, t); puText(val, Math.floor(w / 2), fy + fh - 11, { align: 'c' }); }   // mode name: small (5×8) so it never touches the icon
   else puBig(val, Math.floor(w / 2), mid - 8, fw - 24);
-  puText(puT('menuUp').toUpperCase(), 2, h - 8); puText(puT('menuDown').toUpperCase(), w - 2, h - 8, { align: 'r' });
+  let hl = puT('menuUp').toUpperCase(), hr = puT('menuDown').toUpperCase();   // bottom hints: never collide (drop the BPM number first, then trim the right one)
+  if (puWidth(hl) + puWidth(hr) + 6 > w) hl = hl.replace(/\s*\d+$/, '');
+  if (puWidth(hl) + puWidth(hr) + 6 > w) hr = hr.slice(0, Math.max(3, Math.floor((w - puWidth(hl) - 12) / 6)));
+  puText(hl, 2, h - 8); puText(hr, w - 2, h - 8, { align: 'r' });
+}
+// --- settings in pixels: rows are drawn exactly where the (invisible) DOM rows are, so every tap still lands on its row ---
+const PU_SHORT_L = { 'NOTES AND NUMBERS ON KEYS':'KEY LABELS', 'PIXEL DISPLAY':'PIXELS', 'OSCILLOSCOPE':'SCOPE', 'TEST VIBRATION':'TEST VIBRA', 'SWIPE ACROSS BUTTONS':'SWIPE',
+  'TEST MICROPHONE':'TEST MIC', 'KEEP MICROPHONE OPEN':'MIC OPEN', 'MIDI (INPUT AND OUTPUT)':'MIDI', 'PAIR DETUNE':'DETUNE', 'BRIGHTNESS':'BRIGHT', 'INSTRUMENT CODE':'CODE',
+  'BACK TO ORIGINAL VALUES':'RESET SOUND', 'REVERB AMOUNT':'REV AMT', 'DELAY AMOUNT':'DLY AMT', 'VOCODER: FORMANT SHIFT':'FORMANT', 'VOCODER: NOISE LEVEL':'VOC NOISE',
+  'STRUM SPEED':'STRUM', 'ARP PATTERN':'ARP PATT', 'ARP LAYERING':'LAYERS', 'REPEAT RATE':'REPEAT', 'GAME LATENCY':'LATENCY', 'DRUM LOOP VARIATION':'LOOP VAR', 'DRUM VOLUME':'DRUM VOL',
+  'V.LEAD (VOICE LEADING)':'V.LEAD', 'CLEAR LOCKS, OCTAVES AND INVERSIONS':'RESET KEYS', 'RANDOM: SOUND':'RND SOUND', 'RANDOM: PATTERN':'RND PATTERN', 'RANDOM: ALL':'RND ALL',
+  'EXPORT SETTINGS':'EXPORT', 'IMPORT BACKUP':'IMPORT', 'IMPORT BACKUP OR PRESETS':'IMPORT', 'DIAGNOSTICS':'DIAGNOSE', 'RESET THE APP':'RESET APP', 'IMPORTED PRESETS':'IMPORTED',
+  'OPEN THE MANUAL':'MANUAL', 'TAP TEMPO':'TAP', 'FM: RATIO':'FM RATIO', 'FM: AMOUNT':'FM AMOUNT', 'FM: DECAY':'FM DECAY', 'INSTRUMENT EDITOR':'EDITOR' };
+function puShortL(s) { s = String(s).toUpperCase().replace(/ · /g, ' ').trim(); return PU_SHORT_L[s] || s; }
+const PU_SHORT_V = { 'AUTOMATIC':'AUTO', 'ARP ONLY':'ARP', 'CHORD+ARP':'CHD+ARP', 'RHYTHM+ARP':'RHY+ARP', 'UP/DOWN':'UP/DN', 'DOWN/UP':'DN/UP', 'FINGERPICK':'FINGER', 'SWING 8TH':'SWING8', 'SWING 16TH':'SWING16' };
+function puShortV(s) { s = String(s).toUpperCase().replace(/\s*\(.*\)\s*/g, '').replace('›', '>').replace(' CENTS', 'C').trim(); return PU_SHORT_V[s] || s; }
+function puWrap(text, cols) {
+  const out = [];
+  String(text).toUpperCase().split('\n').forEach(par => { let line = ''; par.split(/\s+/).forEach(word => { while (word.length > cols) { if (line) { out.push(line); line = ''; } out.push(word.slice(0, cols)); word = word.slice(cols); } if (!word) return; if ((line ? line.length + 1 : 0) + word.length > cols) { out.push(line); line = word; } else line = line ? line + ' ' + word : word; }); out.push(line); });
+  return out;
+}
+function puSettings(t, w, h) {
+  const scr = $('screen').getBoundingClientRect(), cw = scr.width / w, chh = scr.height / h;
+  const LX = r => Math.round((r.left - scr.left) / cw), LR = r => Math.round((r.right - scr.left) / cw), LY = r => Math.round((r.top - scr.top) / chh), LB = r => Math.round((r.bottom - scr.top) / chh);
+  const list = $('setvList');
+  if (setv.detail) {   // report / long text: wrapped to the font, scrolled by the (invisible) list
+    const cols = Math.floor((w - 4) / 6), lines = puWrap(setv.detail.text, cols), tdiv = list.querySelector('.setv-text');
+    if (tdiv && +tdiv.dataset.pl !== lines.length) { tdiv.dataset.pl = lines.length; tdiv.style.height = (lines.length * 27 + 12) + 'px'; tdiv.style.overflow = 'hidden'; }
+    const off = Math.max(0, Math.round(list.scrollTop / 27));
+    for (let i = 0; i < 6; i++) { const ln = lines[off + i]; if (ln) puText(ln, 2, 11 + i * 9); }
+    puRect(0, 0, w, 9, 1); puText('<', 2, 0, { v: 0 }); puText(puShortL(setv.detail.title), 10, 0, { v: 0 }); if (setv.detail.copy) puText('COPY', w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+    return;
+  }
+  list.querySelectorAll('.setv-row').forEach(row => {
+    const r = row.getBoundingClientRect(), y = LY(r), yb = LB(r); if (yb <= 9 || y >= h) return;
+    const cur = row.classList.contains('cur'), v0 = cur ? 0 : 1, ty = y + Math.max(0, Math.floor((yb - y - 8) / 2));
+    if (cur) puRect(0, y, w, yb - y, 1);
+    const vl = row.querySelector('.vl'), vv = vl && vl.querySelector('.v'); let vx0 = w - 2;
+    if (vv) {   // adjustable: < value > across the value area
+      const vr = vl.getBoundingClientRect(), xl = LX(vr), xr = Math.min(w - 1, LR(vr));
+      puText('<', xl + 1, ty, { v: v0 }); puText('>', xr - 6, ty, { v: v0 });
+      puText(puShortV(vv.textContent).slice(0, Math.max(2, Math.floor((xr - xl - 16) / 6))), Math.round((xl + xr) / 2), ty, { v: v0, align: 'c' }); vx0 = xl;
+    } else if (vl) { const val = puShortV(vl.textContent).slice(0, 9); puText(val, w - 2, ty, { v: v0, align: 'r' }); vx0 = w - 2 - puWidth(val); }
+    const lb = row.querySelector('.lb'); puText(puShortL(lb ? lb.textContent : '').slice(0, Math.max(3, Math.floor((vx0 - 6) / 6))), 2, ty, { v: v0 });
+  });
+  // header drawn last (covers rows scrolled under it)
+  puRect(0, 0, w, 9, 1);
+  const head = $('setvHead'), headCur = head.classList.contains('cur'), nx = LX($('setvNext').getBoundingClientRect()), name = puShortL($('setvSec').textContent).slice(0, Math.max(3, Math.floor((nx - 12) / 6)));
+  puText('<', 2, 0, { v: 0 });
+  if (headCur) { puRect(9, 0, puWidth(name) + 2, 9, 0); puText(name, 10, 0); } else puText(name, 10, 0, { v: 0 });
+  puText('>', nx + 1, 0, { v: 0 }); puText($('setvPos').textContent, w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
+}
+function puArrow(x, y, dir) { const d = DIR_VEC[dir]; if (!d) return; puLine(x - d[0] * 3, y - d[1] * 3, x + d[0] * 3, y + d[1] * 3); puRect(Math.round(x + d[0] * 3) - 1, Math.round(y + d[1] * 3) - 1, 3, 3); }
+function puBar(left, right, w) { puRect(0, 0, w, 9, 1); right = puMap(String(right || '').toUpperCase()); const rw = right ? puWidth(right) + 6 : 0; left = puMap(String(left || '').toUpperCase().replace(/ · /g, ' ')); puText(left.slice(0, Math.max(3, Math.floor((w - 15 - rw) / 6))), 2, 0, { v: 0 }); if (right) puText(right, w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1); }   // title bar: the left text is trimmed so it never runs into the right one
+function puGameBar(w) { puBar(puT('sKey'), puT('sSound').replace(/best streak/i, 'best'), w); }
+// --- Notes Hero in pixels: one lane, balls, degree circle (like the original Chord Hiro screen) ---
+function puHero(t, w, h) {
+  puGameBar(w);
+  if (hiro.phase === 'result') {
+    puText(hiro.big || '', Math.floor(w / 2), 11, { font: 'f8', align: 'c' });
+    const st = hiro.stats || {}; puText('P' + (st.perfect || 0) + ' G' + (st.great || 0) + ' OK' + (st.ok || 0) + ' M' + (st.miss || 0), Math.floor(w / 2), 28, { align: 'c' });
+    const n = hiro.events.length, sz = Math.max(3, Math.min(6, Math.floor((w - 8) / Math.max(1, n)) - 1)), x0 = Math.round((w - n * (sz + 1)) / 2);
+    hiro.events.forEach((ev, i) => { const x = x0 + i * (sz + 1); if (ev.result === 'miss') puFrame(x, 38, sz, sz); else puRect(x, 38, sz, sz); });
+    if (hiro.meanErr != null) { const m = Math.round(hiro.meanErr); puText('OFFSET ' + (m > 0 ? '+' : '') + m + 'MS', Math.floor(w / 2), 46, { align: 'c' }); }
+    puText(puT('sMode').toUpperCase(), 2, h - 8); return;
+  }
+  const live = hiro.phase === 'count' || hiro.phase === 'play', song = hiro.song || HIRO_SONGS[0], spb = live ? hiro.spb : 60 / song.bpm, adj = hiroAdj();
+  const tickX = Math.round(w * 0.64), laneY = 34, rB = 4, pps = (tickX + 8) / HIRO_TRAVEL, okPx = Math.round(WIN.ok * pps);
+  const target = hiro.events.find(e => !e.result), now = ctx ? ctx.currentTime : 0;
+  const dtOf = ev => live ? ev.time - now + adj : ev.beat * spb + 0.9;
+  for (let x = tickX - okPx; x <= tickX + okPx; x += 2) { puPx(x, laneY - 7); puPx(x, laneY + 7); }   // hit window, to scale
+  puRect(0, laneY, w, 1); puRect(tickX, laneY - 6, 1, 13);
+  for (const ev of hiro.events) {
+    const dt = dtOf(ev), x = Math.round(tickX - dt * pps); if (x < -8 || x > w + 8) continue; if (ev.result && dt < -0.8) continue;
+    if (ev.result && ev.result !== 'miss') puCircle(x, laneY, rB, 1, true);
+    else if (ev.result === 'miss') { puCircle(x, laneY, rB, 0, true); puCircle(x, laneY, rB, 1, false); puLine(x - 2, laneY - 2, x + 2, laneY + 2); puLine(x - 2, laneY + 2, x + 2, laneY - 2); }
+    else { puCircle(x, laneY, rB, 0, true); puCircle(x, laneY, rB, 1, false); }
+  }
+  puCircle(9, 18, 7, 1, false); if (target) { puText(String(target.btn + 1), 9, 14, { align: 'c' }); if (target.dir) puArrow(22, 18, target.dir); }
+  puText(NOTE_NAMES[song.key], w - 2, 11, { font: 'f8', align: 'r' });
+  if (hiro.phase === 'count') puText(hiro.big || '', Math.floor(w / 2), 11, { font: 'f8', align: 'c' });
+  else if (hiro.flash && ctx && now - hiro.flash.at < 0.7) puText((GRADE_TXT[hiro.flash.grade] || '').toUpperCase() + (hiro.flash.grade === 'miss' ? '' : '!'), Math.floor(w / 2) - 4, 14, { align: 'c' });
+  puText(target ? target.name : '-', 2, 44); puText(hiro.events.filter(e => e.result).length + '/' + hiro.events.length, w - 2, 44, { align: 'r' });
+  puText(puT('sMode').toUpperCase(), 2, h - 8);
+}
+// --- Ear Trainer in pixels: one circle per answer slot ---
+function puEar(t, w, h) {
+  puGameBar(w);
+  const big = puT('chordName'); if (big && big !== '—' && !(ear.phase === 'idle' || ear.phase === 'listen')) puText(big, 2, 11, { font: 'f8' });
+  const n = ear.q.length || EAR_LEVELS[state.earLevel].slots, gap = 14, x0 = Math.round(w / 2 - (n - 1) * gap / 2), y = 36;
+  for (let i = 0; i < n; i++) {
+    const x = x0 + i * gap, m = ear.marks[i];
+    if (m === 'ok') puCircle(x, y, 5, 1, true); else { puCircle(x, y, 5, 1, false); if (m === 'bad') { puLine(x - 3, y - 3, x + 3, y + 3); puLine(x - 3, y + 3, x + 3, y - 3); } }
+    if (i === ear.idx && ear.phase === 'answer') puCircle(x, y, 7, 1, false);
+  }
+  if (ear.hint) puArrow(w - 10, y, ear.hint);
+  puText(puT('sMode').toUpperCase(), 2, h - 8);
+}
+// --- tuner in pixels: ±50 cent scale, moving dot, mic level; the whole screen inverts when in tune ---
+function puTuner(t, w, h) {
+  puGameBar(w);
+  const tu = window.__tun || {}, big = puT('chordName'); if (big) puText(big, 2, 11, { font: 'f8' });
+  const mid = Math.floor(w / 2), span = Math.floor(w / 2) - 6, y = 38;
+  for (let k = -50; k <= 50; k += 10) { const x = Math.round(mid + k / 50 * span), hh = k === 0 ? 7 : (k % 50 === 0 ? 4 : 2); puRect(x, y - hh, 1, hh * 2 + 1); }
+  if (tu.cents != null) puCircle(Math.round(mid + Math.max(-50, Math.min(50, tu.cents)) / 50 * span), y, 3, 1, true);
+  if (tu.level > 0.01) puRect(Math.round(mid - tu.level * span), h - 12, Math.max(1, Math.round(tu.level * span * 2)), 1);
+  puText(puT('sMode').toUpperCase(), 2, h - 8);
+  if (tu.inTune) { const u = pxuiState(); for (let i = 0; i < u.fb.length; i++) u.fb[i] ^= 1; }
 }
 function puFrameDraw(now) {
   const c = $('pxui'); if (!c) return;
   const pxm = pxCanvas(c, 3); if (!pxm) return;
   const u = pxuiState(), { w, h } = pxm; if (u.w !== w || u.h !== h || !u.fb) { u.w = w; u.h = h; u.fb = new Uint8Array(w * h); } else u.fb.fill(0);
-  const t = now / 1000; if (menu) puMenu(t, w, h); else puPlay(t, w, h);
+  const t = now / 1000;
+  if (setv) puSettings(t, w, h); else if (menu) puMenu(t, w, h); else if (state.mode === 'hiro') puHero(t, w, h); else if (state.mode === 'ear') puEar(t, w, h); else if (state.mode === 'tuner') puTuner(t, w, h); else puPlay(t, w, h);
   const ts = $('toast'); if (ts && ts.classList.contains('show') && ts.textContent) { puRect(0, h - 9, w, 9, 1); puText(ts.textContent.toUpperCase().slice(0, Math.floor((w - 4) / 6)), 2, h - 9, { v: 0 }); }
   const g = c.getContext('2d'), im = g.createImageData(w, h), rgb = cssRgb(getComputedStyle(document.documentElement).getPropertyValue('--panel-ink'));
   for (let i = 0; i < u.fb.length; i++) if (u.fb[i]) { const j = i * 4; im.data[j] = rgb[0]; im.data[j + 1] = rgb[1]; im.data[j + 2] = rgb[2]; im.data[j + 3] = 255; }
