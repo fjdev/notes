@@ -19,70 +19,88 @@
 <style>
 /* ===== Paletas ===== */
 /* ===== CARCASAS (fase 26): un solo aparato, seis ediciones físicas. Lo que cambia es el color, el material y el acabado. ===== */
+/* Fase 29: base = el MOCKUP del usuario (colores medidos en su imagen) para CARBON, POCKET, LUNAR, AMBER y GHOST; VERTEX sigue la N64 (fase 28) */
 :root, [data-theme="lunar"] {   /* LUNAR */
-  --body: #ECE9E2; --tray: #1E1F21; --well: #17181A; --bezel: #111213;
-  --key: #232427; --key-ink: #EFECE5; --key2: #2B2C2F; --key2-ink: #F6F4EE;
-  --btn: #F6F4EE; --btn-ink: #1E1F21; --btn-muted: #6E6E6C; --btn-line: transparent;
-  --accent: #E2602B; --accent2: #2B2C2F; --press-ink: #F6F4EE; --accent3: #EFECE5; --state-ink: #1E1F21; --led: #E2602B; --on-accent: #1B1B19;
-  --ink: #1E1F21; --muted: #6A6761; --line: #C4C3BF;
-  --ctl: #232427; --ctl-ink: #EFECE5; --ctl-line: #C4C3BF;
-  --sel: #1E1F21; --sel-ink: #F3F1EB;
-  --sheet: #F3F1EB; --sheet-ink: #1E1F21; --sheet-muted: #67645E; --sheet-line: #C4C3BF; --field: #E6E3DC;
+  --body: #E0D9CF; --tray: #D6CFC5; --well: #34322F; --bezel: #121212;
+  --key: #D3CCC1; --key-ink: #2E2C2A; --key2: #2E2D2C; --key2-ink: #EFE4D3;
+  --btn: #EFE4D3; --btn-ink: #2E2C2A; --btn-muted: #69645E; --btn-line: transparent;
+  --knob: #E8E0D4; --knob-ink: #3A3632; --ring: #E2662B;
+  --accent: #E2662B; --accent2: #2E2D2C; --press-ink: #EFE4D3; --accent3: #2E2D2C; --state-ink: #EFE4D3; --led: #E2662B; --on-accent: #1B1B19;
+  --ink: #2E2C2A; --muted: #625E57; --line: #C5BFB8;
+  --ctl: #D3CCC1; --ctl-ink: #2E2C2A; --ctl-line: #C5BFB8;
+  --sel: #2E2D2C; --sel-ink: #EFE4D3;
+  --sheet: #EFE9E0; --sheet-ink: #2E2C2A; --sheet-muted: #63605C; --sheet-line: #C5BFB8; --field: #E4DDD2;
+  --tool: #373532; --tool-ink: #EFE9E0;
+  --wheel: #8A8680; --wheel-slot: #2E2D2C;
   --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 [data-theme="carbon"] {   /* CARBON */
-  --body: #141516; --tray: #09090A; --well: #070708; --bezel: #08090A;
-  --key: #2B2C2E; --key-ink: #E9E6DF; --key2: #E9E6DF; --key2-ink: #141516;
-  --btn: #3D3E42; --btn-ink: #ECE9E2; --btn-muted: #ACABA8; --btn-line: transparent;
-  --accent: #E4542C; --accent2: #E9E6DF; --press-ink: #141516; --accent3: #E9E6DF; --state-ink: #141516; --led: #E4542C; --on-accent: #1B1B19;
-  --ink: #E9E6DF; --muted: #8E8C86; --line: #484848;
-  --ctl: #2B2C2E; --ctl-ink: #E9E6DF; --ctl-line: #484848;
-  --sel: #E9E6DF; --sel-ink: #141516;
-  --sheet: #1B1C1E; --sheet-ink: #E9E6DF; --sheet-muted: #8E8C86; --sheet-line: #484848; --field: #232427;
+  --body: #29292A; --tray: #1F1F1F; --well: #252525; --bezel: #0F0F10;
+  --key: #3A3A3B; --key-ink: #E6E6E4; --key2: #D6D6D4; --key2-ink: #1F1F1F;
+  --btn: #424243; --btn-ink: #E6E6E4; --btn-muted: #B0B0AF; --btn-line: transparent;
+  --knob: #4A4A4B; --knob-ink: #D0D0CE; --ring: #ED4618;
+  --accent: #ED4618; --accent2: #D6D6D4; --press-ink: #1F1F1F; --accent3: #D6D6D4; --state-ink: #1F1F1F; --led: #A8A8A6; --on-accent: #1B1B19;
+  --ink: #E6E6E4; --muted: #9A9A98; --line: #484849;
+  --ctl: #3A3A3B; --ctl-ink: #E6E6E4; --ctl-line: #484849;
+  --sel: #E6E6E4; --sel-ink: #1F1F1F;
+  --sheet: #1C1C1D; --sheet-ink: #E6E6E4; --sheet-muted: #8E8E8D; --sheet-line: #484849; --field: #262627;
+  --tool: #3A3A3B; --tool-ink: #E6E6E4;
+  --wheel: #5A5A5A; --wheel-slot: #1A1A1A;
   --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 [data-theme="vertex"] {   /* VERTEX */
-  --body: #4B4E53; --tray: #2F3135; --well: #26282B; --bezel: #2A2C30;
-  --key: #63666B; --key-ink: #F2F2EE; --key2: #F2B705; --key2-ink: #2A2C2F;
-  --btn: #CFCCC5; --btn-ink: #2A2C2F; --btn-muted: #545555; --btn-line: transparent;
-  --accent: #D8262E; --accent2: #F2B705; --press-ink: #2A2C2F; --accent3: #1E9E4A; --state-ink: #0C2414; --led: #3A6FD8; --on-accent: #1B1B19;
-  --ink: #EEEEEA; --muted: #C0C2C4; --line: #636669;
-  --ctl: #63666B; --ctl-ink: #F2F2EE; --ctl-line: #636669;
-  --sel: #F2B705; --sel-ink: #2A2C2F;
-  --sheet: #3C3F44; --sheet-ink: #EEEEEA; --sheet-muted: #C0C2C4; --sheet-line: #636669; --field: #33363A;
+  --body: #BDBCBD; --tray: #3F3D3E; --well: #3A3839; --bezel: #3F3D3E;
+  --key: #4E4D52; --key-ink: #F0F0EE; --key2: #A3A2A4; --key2-ink: #18181A;
+  --btn: #D9D8D9; --btn-ink: #232326; --btn-muted: #5E5D60; --btn-line: transparent;
+  --knob: #A9A8AA; --knob-ink: #232326; --ring: #F5C722;
+  --accent: #E23B32; --accent2: #A3A2A4; --press-ink: #18181A; --accent3: #177A3A; --state-ink: #FFFFFF; --led: #E23B32; --on-accent: #1B1B19;
+  --ink: #232326; --muted: #46464A; --line: #B4B3B5;
+  --ctl: #4E4D52; --ctl-ink: #F0F0EE; --ctl-line: #B4B3B5;
+  --sel: #F5C722; --sel-ink: #232326;
+  --sheet: #DDDCDD; --sheet-ink: #232326; --sheet-muted: #58575A; --sheet-line: #B4B3B5; --field: #D0CFD0;
   --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 [data-theme="pocket"] {   /* POCKET */
-  --body: #C3C1BA; --tray: #9A9892; --well: #4A4B51; --bezel: #565965;
-  --key: #45464C; --key-ink: #ECEAE4; --key2: #45464C; --key2-ink: #ECEAE4;
-  --btn: #DEDCD6; --btn-ink: #2F3036; --btn-muted: #5F5F62; --btn-line: transparent;
-  --accent: #8A2C5C; --accent2: #45464C; --press-ink: #ECEAE4; --accent3: #E2E0DA; --state-ink: #2F3036; --led: #8A2C5C; --on-accent: #1B1B19;
-  --ink: #2B2C31; --muted: #4F4E4D; --line: #AEADA9;
-  --ctl: #45464C; --ctl-ink: #ECEAE4; --ctl-line: #AEADA9;
-  --sel: #45464C; --sel-ink: #ECEAE4;
-  --sheet: #D3D1CB; --sheet-ink: #2B2C31; --sheet-muted: #4F4E4D; --sheet-line: #AEADA9; --field: #C7C5BF;
+  --body: #CCC4B5; --tray: #AFA899; --well: #2F2F2E; --bezel: #2B2B29;
+  --key: #D8D2C7; --key-ink: #2E2C2A; --key2: #6B2440; --key2-ink: #F3EDE6;
+  --btn: #D3CEC5; --btn-ink: #2E2C2A; --btn-muted: #595653; --btn-line: transparent;
+  --knob: #DCD3C3; --knob-ink: #3A3632; --ring: #8E1F45;
+  --accent: #A22347; --accent2: #6B2440; --press-ink: #F3EDE6; --accent3: #4A4744; --state-ink: #F3EDE6; --led: #4C8FC4; --on-accent: #1B1B19;
+  --ink: #2E2C2A; --muted: #54504B; --line: #BEB8AF;
+  --ctl: #D8D2C7; --ctl-ink: #2E2C2A; --ctl-line: #BEB8AF;
+  --sel: #6B2440; --sel-ink: #F3EDE6;
+  --sheet: #E6E0D5; --sheet-ink: #2E2C2A; --sheet-muted: #5D5A56; --sheet-line: #BEB8AF; --field: #DAD3C7;
+  --tool: #4A4744; --tool-ink: #EDE8E0;
+  --wheel: #6A6967; --wheel-slot: #3A3936;
   --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 [data-theme="amber"] {   /* AMBER */
-  --body: #1D1C1A; --tray: #2A2825; --well: #121110; --bezel: #0E0D0C;
-  --key: #34322E; --key-ink: #EDE5D3; --key2: #CDA034; --key2-ink: #23211E;
-  --btn: #E8DECA; --btn-ink: #23211E; --btn-muted: #666158; --btn-line: transparent;
-  --accent: #D0562B; --accent2: #CDA034; --press-ink: #23211E; --accent3: #EDE5D3; --state-ink: #23211E; --led: #CDA034; --on-accent: #1B1B19;
-  --ink: #EDE5D3; --muted: #A39C8D; --line: #524E48;
-  --ctl: #34322E; --ctl-ink: #EDE5D3; --ctl-line: #524E48;
-  --sel: #EDE5D3; --sel-ink: #1D1C1A;
-  --sheet: #262421; --sheet-ink: #EDE5D3; --sheet-muted: #A39C8D; --sheet-line: #524E48; --field: #302D29;
+  --body: #312E29; --tray: #2B2824; --well: #2E281F; --bezel: #141310;
+  --key: #403E3B; --key-ink: #E2C27A; --key2: #D2A656; --key2-ink: #2A2620;
+  --btn: #E5D2B8; --btn-ink: #3A3226; --btn-muted: #64594A; --btn-line: transparent;
+  --knob: #E0CEB3; --knob-ink: #3A3226; --ring: #D2A656;
+  --accent: #E0662C; --accent2: #D2A656; --press-ink: #2A2620; --accent3: #D2A656; --state-ink: #2A2620; --led: #E09A3A; --on-accent: #1B1B19;
+  --ink: #E9DCC4; --muted: #A89A82; --line: #514C44;
+  --ctl: #403E3B; --ctl-ink: #E2C27A; --ctl-line: #514C44;
+  --sel: #D2A656; --sel-ink: #2A2620;
+  --sheet: #262420; --sheet-ink: #E9DCC4; --sheet-muted: #9D9584; --sheet-line: #514C44; --field: #302D28;
+  --tool: #3C3A37; --tool-ink: #E9DCC4;
+  --wheel: #A08A6A; --wheel-slot: #1D1B16;
+  --joy-dot: #D2A656;
   --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 [data-theme="ghost"] {   /* GHOST */
-  --body: #56635F; --tray: rgba(16,24,23,.55); --well: rgba(10,16,15,.62); --bezel: rgba(10,16,15,.78);
-  --key: #2D3534; --key-ink: #E3EAE8; --key2: #9CC3BB; --key2-ink: #1F2726;
-  --btn: #D3DAD8; --btn-ink: #1F2726; --btn-muted: #575F5D; --btn-line: transparent;
-  --accent: #E0663A; --accent2: #9CC3BB; --press-ink: #1F2726; --accent3: #CFE3DE; --state-ink: #1F2726; --led: #8FD6CB; --on-accent: #1B1B19;
-  --ink: #F0F4F2; --muted: #D6DFDC; --line: #59615F;
-  --ctl: #2D3534; --ctl-ink: #E3EAE8; --ctl-line: #59615F;
-  --sel: #D3DAD8; --sel-ink: #1F2726;
-  --sheet: #2E3836; --sheet-ink: #F0F4F2; --sheet-muted: #D6DFDC; --sheet-line: #59615F; --field: #263030;
+  --body: #2E3532; --tray: rgba(40,48,45,.55); --well: rgba(40,48,45,.62); --bezel: rgba(14,20,18,.86);
+  --key: rgba(77,80,78,.9); --key-ink: #E8EAE6; --key2: #A9D6B6; --key2-ink: #1E2A22;
+  --btn: #DAD4CB; --btn-ink: #2E2C2A; --btn-muted: #5D5A56; --btn-line: transparent;
+  --knob: #9A9A93; --knob-ink: #2E2C2A; --ring: #8FD3A0;
+  --accent: #E0662C; --accent2: #A9D6B6; --press-ink: #1E2A22; --accent3: #BFE3C9; --state-ink: #1E2A22; --led: #6FCB8E; --on-accent: #1B1B19;
+  --ink: #E8EAE6; --muted: #B9C0BB; --line: #545956;
+  --ctl: #4D504E; --ctl-ink: #E8EAE6; --ctl-line: #545956;
+  --sel: #DAD4CB; --sel-ink: #2E2C2A;
+  --sheet: #2A302D; --sheet-ink: #E8EAE6; --sheet-muted: #A1A4A1; --sheet-line: #545956; --field: #333A37;
+  --tool: rgba(50,52,51,.92); --tool-ink: #E8EAE6;
+  --wheel: #707470; --wheel-slot: rgba(20,26,24,.7);
   --panel: #0B0C0B; --panel-ink: #EDE4CF; --panel-dim: #8A8475; --scr-active: #E0702F; --scope: #EDE4CF;
 }
 
@@ -400,7 +418,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .lp-track.s-play { --k: var(--accent3); color: var(--state-ink); background-color: var(--accent3); }
 .lp-track.s-rec, .lp-track.s-finishing { --k: var(--accent); color: var(--on-accent); }
 .lp-track.s-armed { box-shadow: inset 0 0 0 1.5px var(--accent), 0 2px 0 rgba(0,0,0,.35) !important; }
-.lp-track.cur { box-shadow: 0 0 0 2px var(--body), 0 0 0 4px var(--accent2), 0 2px 0 rgba(0,0,0,.35); }
+.lp-track.cur { box-shadow: 0 0 0 2px var(--body), 0 0 0 4px var(--ring, var(--accent2)), 0 2px 0 rgba(0,0,0,.35); }
 .lp-transport, .lp-bars { --k: var(--key); color: var(--key-ink); height: 38px; }
 .looper .lp-bars { font: 700 10px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
 .looper button:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.4) !important; }
@@ -427,9 +445,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .joy .dot { background: var(--key-ink); opacity: .28; }
 .joy .dot.on { background: var(--accent3); opacity: 1; box-shadow: 0 0 8px var(--accent3); }
 .knob { width: 66px; height: 66px; margin: -33px 0 0 -33px; border: 0;
-  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--btn) 65%, #fff) 0%, var(--btn) 52%, color-mix(in srgb, var(--btn) 76%, #000) 100%);
+  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--knob, var(--btn)) 65%, #fff) 0%, var(--knob, var(--btn)) 52%, color-mix(in srgb, var(--knob, var(--btn)) 76%, #000) 100%);
   box-shadow: 0 5px 10px rgba(0,0,0,.5), inset 0 -3px 0 rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.4); }
-.knob::after { content: ""; position: absolute; left: 50%; top: 8px; width: 3px; height: 13px; margin-left: -1.5px; border-radius: 2px; background: color-mix(in srgb, var(--btn-ink) 70%, transparent); }
+.knob::after { content: ""; position: absolute; left: 50%; top: 8px; width: 3px; height: 13px; margin-left: -1.5px; border-radius: 2px; background: color-mix(in srgb, var(--knob-ink, var(--btn-ink)) 70%, transparent); }
 .joy.active .knob { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent3) 65%, transparent), 0 5px 10px rgba(0,0,0,.5), inset 0 -3px 0 rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.4); }
 
 /* Perilla: se hunde al apoyar el dedo y destella al confirmar el clic */
@@ -468,18 +486,18 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
    ========================================================================================== */
 /* ===== PANTALLAS (fase 26): cuatro tecnologías físicas; el mismo contenido, representado de otra manera ===== */
 :root[data-screen="ember"] {   /* EMBER: OLED cálida, negro absoluto que se funde con el marco; nítida, sin textura, brillo mínimo */
-  --panel:#0B0C0B; --panel-ink:#EDE4CF; --panel-dim:#8A8475; --scr-active:#E0702F; --scope:#EDE4CF; --bezel:#08090A;
+  --panel:#0B0C0B; --panel-ink:#EDE4CF; --panel-dim:#C9743E; --scr-active:#E8763A; --scope:#EDE4CF; --bezel:#08090A;
   --scr-glow: 0 0 6px rgba(237,228,207,.16); --chip-glow: 0 0 8px -3px rgba(237,228,207,.35); --chord-font: var(--mono);
   --scr-inset: inset 0 0 0 1px rgba(255,255,255,.02); --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.035) 0%, rgba(255,255,255,0) 30%);
 }
 :root[data-screen="matrix"] {   /* MATRIX: LCD monocroma industrial; gris carbón verdoso, menos contraste, sin brillo, matriz apagada apenas visible */
-  --panel:#1A1E1B; --panel-ink:#B4BEB2; --panel-dim:#7F897E; --scr-active:#D7E0D2; --scope:#B4BEB2;
+  --panel:#17181A; --panel-ink:#D2D4D0; --panel-dim:#8C8F8B; --scr-active:#F0F2EE; --scope:#D2D4D0;
   --scr-glow: none; --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
   --scr-inset: inset 0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
   --scr-overlay: radial-gradient(circle, rgba(200,214,196,.055) .7px, transparent .95px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 32%);
 }
 :root[data-screen="moss"] {   /* MOSS: LCD portátil verdosa de cuatro tonos; todo dibujado por la propia matriz, sin blanco ni brillo */
-  --panel:#A8B062; --panel-ink:#202817; --panel-dim:#384125; --scr-active:#202817; --scope:#202817;
+  --panel:#8C925B; --panel-ink:#1E2412; --panel-dim:#222815; --scr-active:#1E2412; --scope:#1E2412;
   --scr-glow: 1px 1px 0 rgba(32,40,23,.18); --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
   --scr-inset: inset 0 2px 5px rgba(32,40,23,.35), inset 0 0 0 1px rgba(32,40,23,.25);
   --scr-overlay: radial-gradient(circle, rgba(32,40,23,.10) .7px, transparent .95px) 0 0 / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 35%);
@@ -552,19 +570,60 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .sheet-head .sheet-nav { flex: 0 0 100%; order: 3; }
 
 
-/* GHOST: la carcasa es plástico ahumado (no vidrio): grosor en los bordes, tornillos y pistas de la placa insinuados detrás; teclas y controles opacos */
+
+
+
+/* Franja de modos, controles inferiores, rueda y puntos del joystick: cada edición puede darles color propio (fase 29, como el mockup) */
+:root[data-theme] .controls .tools button { --k: var(--tool, var(--key)); color: var(--tool-ink, var(--key-ink)); }
+:root[data-theme] .wheel { background: var(--wheel-slot, var(--tray)); }
+:root[data-theme] .wheel-rim { background: linear-gradient(90deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 24%, rgba(255,255,255,.12) 50%, rgba(0,0,0,0) 76%, rgba(0,0,0,.6) 100%),
+  repeating-linear-gradient(90deg, color-mix(in srgb, var(--wheel, var(--key)) 62%, #fff) 0 2px, var(--wheel, var(--key)) 2px 7px); background-position: 0 0, var(--rot, 0px) 0; }
+:root[data-theme] .joy .dot { background: var(--joy-dot, var(--key-ink)); }
+
+/* ===== RASGOS DE CADA EDICIÓN (fase 29): base del mockup + un rasgo de firma ===== */
+
+/* VERTEX · Nintendo 64 (se mantiene la de la fase 28): gris del mando, carbón de la consola, guía octogonal, stick estriado, A azul, B verde, C amarillos, Start rojo */
+[data-theme="vertex"] .app { background: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.9'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'/%3E%3CfeColorMatrix%20values%3D'0%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200%200%200%20.07%200'/%3E%3C/filter%3E%3Crect%20width%3D'160'%20height%3D'160'%20filter%3D'url(%23n)'/%3E%3C/svg%3E") 0 0 / 160px 160px, linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.05)), var(--body); }
+[data-theme="vertex"] .joy { border-radius: 0; clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+  background: radial-gradient(circle at 50% 42%, #4A4849 0%, #2E2C2D 72%); box-shadow: inset 0 6px 14px rgba(0,0,0,.7); }
+[data-theme="vertex"] .knob { background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.12) 0 1px, transparent 1px 4.5px), radial-gradient(circle at 50% 38%, #CFCFD1 0%, #A9A8AA 58%, #7F7E81 100%); }
+[data-theme="vertex"] .knob::after { display: none; }
+[data-theme="vertex"] .controls .tools.chord #tInv { --k: #2F55C9; color: #FFFFFF; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
+[data-theme="vertex"] .controls .tools.chord #tLock { --k: #1E9A4B; color: #FFFFFF; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
+[data-theme="vertex"] .controls .tools.chord #tOctDn, [data-theme="vertex"] .controls .tools.chord #tOctUp { --k: #F5C722; color: #232326; }
+[data-theme="vertex"] .controls .tools.chord button.locked { color: #FFFFFF; }
+[data-theme="vertex"] .lp-rec span { background: #E23B32; width: 18px; height: 18px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25), 0 0 0 2px rgba(0,0,0,.25); }
+
+/* POCKET · mockup (beige cálido, pantalla oliva, berenjena) + firma de la Game Boy: INV y FIJAR como los dos botones redondos A y B */
+[data-theme="pocket"] .controls .tools.chord #tInv, [data-theme="pocket"] .controls .tools.chord #tLock { --k: #6B2440; color: #F3EDE6; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
+[data-theme="pocket"] .controls .tools.chord button.locked { color: #F3EDE6; }
+
+/* AMBER · mockup (carbón cálido, teclas crema, mostaza) + firma del Orchid: la rueda tostada (ya en --wheel) e INV/FIJAR mostaza como sus perillas */
+[data-theme="amber"] .controls .tools.chord #tInv, [data-theme="amber"] .controls .tools.chord #tLock { --k: #D2A656; color: #2A2620; }
+[data-theme="amber"] .controls .tools.chord button.locked { color: #2A2620; }
+
+/* GHOST · mockup: carcasa ahumada oscura a través de la que se ve una placa base densa (chips, condensadores, resistencias, pistas); bordes más claros con grosor;
+   teclas claras opacas; perilla metálica moleteada */
 [data-theme="ghost"] .app {
   background:
-    radial-gradient(circle at 16px 16px, rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) 16px, rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px),
-    radial-gradient(circle at 16px calc(100% - 16px), rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) calc(100% - 16px), rgba(232,242,238,.42) 0 1.6px, rgba(16,26,24,.36) 2.2px 4px, transparent 4.6px),
-    linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 38%, rgba(0,0,0,.12) 100%),
-    linear-gradient(to bottom, rgba(86,99,95,0) 0%, rgba(86,99,95,.25) 55%, rgba(86,99,95,.7) 100%),
-    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27180%27%20height%3D%27180%27%20viewBox%3D%270%200%20180%20180%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27rgba%28214%2C236%2C228%2C0.15%29%27%20stroke-width%3D%271.2%27%3E%20%3Cpath%20d%3D%27M0%2046H64V96H180%27/%3E%3Cpath%20d%3D%27M22%200V30H118V180%27/%3E%3Cpath%20d%3D%27M140%200V58H180%27/%3E%3Cpath%20d%3D%27M0%20150H70V122H118%27/%3E%3Cpath%20d%3D%27M84%20180V140%27/%3E%3C/g%3E%20%3Cg%20fill%3D%27rgba%28214%2C236%2C228%2C0.20%29%27%3E%3Ccircle%20cx%3D%2764%27%20cy%3D%2746%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%27118%27%20cy%3D%2730%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%27140%27%20cy%3D%2758%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%2770%27%20cy%3D%27122%27%20r%3D%272.4%27/%3E%3Ccircle%20cx%3D%2784%27%20cy%3D%27140%27%20r%3D%272.4%27/%3E%3C/g%3E%20%3Crect%20x%3D%27126%27%20y%3D%27108%27%20width%3D%2734%27%20height%3D%2722%27%20rx%3D%272%27%20fill%3D%27rgba%2810%2C18%2C16%2C0.22%29%27%20stroke%3D%27rgba%28214%2C236%2C228%2C0.12%29%27/%3E%3C/svg%3E") 0 0 / 180px 180px,
+    radial-gradient(circle at 16px 16px, rgba(205,215,208,.55) 0 1.8px, rgba(20,26,24,.6) 2.4px 4.4px, transparent 5px), radial-gradient(circle at calc(100% - 16px) 16px, rgba(205,215,208,.55) 0 1.8px, rgba(20,26,24,.6) 2.4px 4.4px, transparent 5px),
+    radial-gradient(circle at 16px calc(100% - 16px), rgba(205,215,208,.55) 0 1.8px, rgba(20,26,24,.6) 2.4px 4.4px, transparent 5px), radial-gradient(circle at calc(100% - 16px) calc(100% - 16px), rgba(205,215,208,.55) 0 1.8px, rgba(20,26,24,.6) 2.4px 4.4px, transparent 5px),
+    linear-gradient(155deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 72%, rgba(255,255,255,.06) 100%),
+    linear-gradient(rgba(46,53,50,.38), rgba(46,53,50,.38)),
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27240%27%20height%3D%27240%27%20viewBox%3D%270%200%20240%20240%27%3E%3Crect%20width%3D%27240%27%20height%3D%27240%27%20fill%3D%27%2328312D%27%2F%3E%3Cg%20stroke%3D%27%23323C37%27%20stroke-width%3D%270.7%27%3E%3Cpath%20d%3D%27M0%206H240%27%2F%3E%3Cpath%20d%3D%27M0%2018H240%27%2F%3E%3Cpath%20d%3D%27M0%2030H240%27%2F%3E%3Cpath%20d%3D%27M0%2042H240%27%2F%3E%3Cpath%20d%3D%27M0%2054H240%27%2F%3E%3Cpath%20d%3D%27M0%2066H240%27%2F%3E%3Cpath%20d%3D%27M0%2078H240%27%2F%3E%3Cpath%20d%3D%27M0%2090H240%27%2F%3E%3Cpath%20d%3D%27M0%20102H240%27%2F%3E%3Cpath%20d%3D%27M0%20114H240%27%2F%3E%3Cpath%20d%3D%27M0%20126H240%27%2F%3E%3Cpath%20d%3D%27M0%20138H240%27%2F%3E%3Cpath%20d%3D%27M0%20150H240%27%2F%3E%3Cpath%20d%3D%27M0%20162H240%27%2F%3E%3Cpath%20d%3D%27M0%20174H240%27%2F%3E%3Cpath%20d%3D%27M0%20186H240%27%2F%3E%3Cpath%20d%3D%27M0%20198H240%27%2F%3E%3Cpath%20d%3D%27M0%20210H240%27%2F%3E%3Cpath%20d%3D%27M0%20222H240%27%2F%3E%3Cpath%20d%3D%27M0%20234H240%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%234E5C55%27%20stroke-width%3D%271.1%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M115%20221%20L115%20240%20L115%20209%20L115%20240%20L115%20214%27%2F%3E%3Cpath%20d%3D%27M114%2077%20L56%2077%20L56%20138%27%2F%3E%3Cpath%20d%3D%27M189%20157%20L116%20157%20L116%20135%20L58%20135%20L98%20135%27%2F%3E%3Cpath%20d%3D%27M112%20151%20L112%20202%20L63%20202%27%2F%3E%3Cpath%20d%3D%27M167%2071%20L167%206%20L115%206%20L59%206%27%2F%3E%3Cpath%20d%3D%27M196%2027%20L240%2027%20L166%2027%20L166%200%27%2F%3E%3Cpath%20d%3D%27M237%20233%20L240%20233%20L171%20233%27%2F%3E%3Cpath%20d%3D%27M172%2069%20L192%2069%20L192%2041%20L172%2041%27%2F%3E%3Cpath%20d%3D%27M15%20119%20L0%20119%20L0%2073%20L0%2028%27%2F%3E%3Cpath%20d%3D%27M107%2054%20L183%2054%20L138%2054%27%2F%3E%3Cpath%20d%3D%27M218%20154%20L218%20125%20L238%20125%20L238%20198%20L214%20198%27%2F%3E%3Cpath%20d%3D%27M23%2053%20L23%200%20L51%200%20L51%2073%20L51%20104%27%2F%3E%3Cpath%20d%3D%27M160%2039%20L160%200%20L97%200%20L97%2058%27%2F%3E%3Cpath%20d%3D%27M20%20107%20L0%20107%20L0%2040%27%2F%3E%3Cpath%20d%3D%27M180%20100%20L218%20100%20L218%2072%20L181%2072%27%2F%3E%3Cpath%20d%3D%27M54%20234%20L54%20197%20L31%20197%27%2F%3E%3Cpath%20d%3D%27M11%2045%20L0%2045%20L41%2045%20L41%200%27%2F%3E%3Cpath%20d%3D%27M8%20236%20L72%20236%20L51%20236%27%2F%3E%3Cpath%20d%3D%27M153%20162%20L193%20162%20L169%20162%27%2F%3E%3Cpath%20d%3D%27M115%20139%20L115%2069%20L115%20111%20L192%20111%27%2F%3E%3Cpath%20d%3D%27M19%20223%20L19%20148%20L0%20148%20L0%20205%27%2F%3E%3Cpath%20d%3D%27M3%20155%20L0%20155%20L0%20199%27%2F%3E%3Cpath%20d%3D%27M239%20188%20L239%20237%20L239%20184%20L239%20145%20L239%20166%27%2F%3E%3Cpath%20d%3D%27M58%20178%20L94%20178%20L94%20217%27%2F%3E%3Cpath%20d%3D%27M36%20173%20L0%20173%20L0%20224%20L0%20240%20L0%20180%27%2F%3E%3Cpath%20d%3D%27M110%20205%20L110%20239%20L110%20240%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%2736%27%20y%3D%27129%27%20width%3D%2726%27%20height%3D%2726%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2739.5%27%20cy%3D%27132.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M40.3%20126.5V129M40.3%20155V157.5%27%2F%3E%3Cpath%20d%3D%27M44.7%20126.5V129M44.7%20155V157.5%27%2F%3E%3Cpath%20d%3D%27M49.0%20126.5V129M49.0%20155V157.5%27%2F%3E%3Cpath%20d%3D%27M53.3%20126.5V129M53.3%20155V157.5%27%2F%3E%3Cpath%20d%3D%27M57.7%20126.5V129M57.7%20155V157.5%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%2712%27%20y%3D%27184%27%20width%3D%2744%27%20height%3D%2718%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2715.5%27%20cy%3D%27187.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M16.9%20181.5V184M16.9%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M21.8%20181.5V184M21.8%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M26.7%20181.5V184M26.7%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M31.6%20181.5V184M31.6%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M36.4%20181.5V184M36.4%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M41.3%20181.5V184M41.3%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M46.2%20181.5V184M46.2%20202V204.5%27%2F%3E%3Cpath%20d%3D%27M51.1%20181.5V184M51.1%20202V204.5%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%2772%27%20y%3D%27212%27%20width%3D%2734%27%20height%3D%2722%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2775.5%27%20cy%3D%27215.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M76.9%20209.5V212M76.9%20234V236.5%27%2F%3E%3Cpath%20d%3D%27M81.7%20209.5V212M81.7%20234V236.5%27%2F%3E%3Cpath%20d%3D%27M86.6%20209.5V212M86.6%20234V236.5%27%2F%3E%3Cpath%20d%3D%27M91.4%20209.5V212M91.4%20234V236.5%27%2F%3E%3Cpath%20d%3D%27M96.3%20209.5V212M96.3%20234V236.5%27%2F%3E%3Cpath%20d%3D%27M101.1%20209.5V212M101.1%20234V236.5%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%27122%27%20y%3D%2772%27%20width%3D%2726%27%20height%3D%2726%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27125.5%27%20cy%3D%2775.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M126.3%2069.5V72M126.3%2098V100.5%27%2F%3E%3Cpath%20d%3D%27M130.7%2069.5V72M130.7%2098V100.5%27%2F%3E%3Cpath%20d%3D%27M135.0%2069.5V72M135.0%2098V100.5%27%2F%3E%3Cpath%20d%3D%27M139.3%2069.5V72M139.3%2098V100.5%27%2F%3E%3Cpath%20d%3D%27M143.7%2069.5V72M143.7%2098V100.5%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%27162%27%20y%3D%27135%27%20width%3D%2726%27%20height%3D%2726%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27165.5%27%20cy%3D%27138.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M166.3%20132.5V135M166.3%20161V163.5%27%2F%3E%3Cpath%20d%3D%27M170.7%20132.5V135M170.7%20161V163.5%27%2F%3E%3Cpath%20d%3D%27M175.0%20132.5V135M175.0%20161V163.5%27%2F%3E%3Cpath%20d%3D%27M179.3%20132.5V135M179.3%20161V163.5%27%2F%3E%3Cpath%20d%3D%27M183.7%20132.5V135M183.7%20161V163.5%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%27174%27%20y%3D%2782%27%20width%3D%2722%27%20height%3D%2714%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27177.5%27%20cy%3D%2785.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M178.4%2079.5V82M178.4%2096V98.5%27%2F%3E%3Cpath%20d%3D%27M182.8%2079.5V82M182.8%2096V98.5%27%2F%3E%3Cpath%20d%3D%27M187.2%2079.5V82M187.2%2096V98.5%27%2F%3E%3Cpath%20d%3D%27M191.6%2079.5V82M191.6%2096V98.5%27%2F%3E%3C%2Fg%3E%3Crect%20x%3D%2721%27%20y%3D%2710%27%20width%3D%2730%27%20height%3D%2730%27%20rx%3D%271.5%27%20fill%3D%27%231A201D%27%20stroke%3D%27%2356625B%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2724.5%27%20cy%3D%2713.5%27%20r%3D%271%27%20fill%3D%27%2356625B%27%2F%3E%3Cg%20stroke%3D%27%237B8781%27%20stroke-width%3D%270.9%27%3E%3Cpath%20d%3D%27M25.3%207.5V10M25.3%2040V42.5%27%2F%3E%3Cpath%20d%3D%27M29.6%207.5V10M29.6%2040V42.5%27%2F%3E%3Cpath%20d%3D%27M33.9%207.5V10M33.9%2040V42.5%27%2F%3E%3Cpath%20d%3D%27M38.1%207.5V10M38.1%2040V42.5%27%2F%3E%3Cpath%20d%3D%27M42.4%207.5V10M42.4%2040V42.5%27%2F%3E%3Cpath%20d%3D%27M46.7%207.5V10M46.7%2040V42.5%27%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%27230%27%20cy%3D%27162%27%20r%3D%275%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M227%20162H233%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27179%27%20cy%3D%27187%27%20r%3D%274%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M177%20187H181%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2786%27%20cy%3D%27173%27%20r%3D%275%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M83%20173H89%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%27172%27%20r%3D%276%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M8%20172H16%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27109%27%20cy%3D%27122%27%20r%3D%274%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M107%20122H111%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27218%27%20cy%3D%2774%27%20r%3D%274%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M216%2074H220%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27205%27%20cy%3D%2742%27%20r%3D%274%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M203%2042H207%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%27167%27%20cy%3D%2735%27%20r%3D%274%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M165%2035H169%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Ccircle%20cx%3D%2734%27%20cy%3D%27168%27%20r%3D%275%27%20fill%3D%27%232F3834%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.9%27%2F%3E%3Cpath%20d%3D%27M31%20168H37%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.7%27%2F%3E%3Crect%20x%3D%2752%27%20y%3D%2753%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2767%27%20y%3D%2747%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27195%27%20y%3D%27122%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2771%27%20y%3D%27201%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27140%27%20y%3D%27180%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27204%27%20y%3D%27181%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2724%27%20y%3D%27107%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2735%27%20y%3D%27117%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2752%27%20y%3D%27162%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2798%27%20y%3D%27142%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27168%27%20y%3D%2754%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27186%27%20y%3D%27223%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2756%27%20y%3D%2764%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2724%27%20y%3D%2781%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%276%27%20y%3D%2791%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2711%27%20y%3D%27114%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27142%27%20y%3D%27109%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27126%27%20y%3D%279%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27209%27%20y%3D%27224%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27111%27%20y%3D%27206%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27122%27%20y%3D%2740%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27227%27%20y%3D%27128%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%2758%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27136%27%20y%3D%27145%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27214%27%20y%3D%27188%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27135%27%20y%3D%27133%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27224%27%20y%3D%27232%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27148%27%20y%3D%27129%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%273%27%20y%3D%27156%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%279%27%20y%3D%27139%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27141%27%20y%3D%27207%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27127%27%20y%3D%2725%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2718%27%20y%3D%27139%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27105%27%20y%3D%2770%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27123%27%20y%3D%27128%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2788%27%20y%3D%27113%27%20width%3D%273%27%20height%3D%276%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2729%27%20y%3D%2751%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27160%27%20y%3D%279%27%20width%3D%274%27%20height%3D%278%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%27201%27%20y%3D%277%27%20width%3D%278%27%20height%3D%274%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Crect%20x%3D%2760%27%20y%3D%275%27%20width%3D%276%27%20height%3D%273%27%20fill%3D%27%233A4540%27%20stroke%3D%27%236E7A74%27%20stroke-width%3D%270.5%27%2F%3E%3Cg%20fill%3D%27%236E7A74%27%3E%3Ccircle%20cx%3D%27178%27%20cy%3D%2775%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2785%27%20cy%3D%27188%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2793%27%20cy%3D%2765%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27161%27%20cy%3D%27130%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2729%27%20cy%3D%27130%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27190%27%20cy%3D%27152%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2734%27%20cy%3D%27221%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27133%27%20cy%3D%27162%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2767%27%20cy%3D%27186%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2753%27%20cy%3D%27182%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27138%27%20cy%3D%27227%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27114%27%20cy%3D%278%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2799%27%20cy%3D%27165%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27108%27%20cy%3D%27214%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27138%27%20cy%3D%27160%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2743%27%20cy%3D%27140%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2755%27%20cy%3D%27224%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27164%27%20cy%3D%27139%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27166%27%20cy%3D%2758%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27138%27%20cy%3D%2758%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27220%27%20cy%3D%27141%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27159%27%20cy%3D%27153%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27222%27%20cy%3D%2737%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2762%27%20cy%3D%27237%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27192%27%20cy%3D%27163%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27210%27%20cy%3D%2791%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%27234%27%20cy%3D%2749%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2783%27%20cy%3D%27157%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2783%27%20cy%3D%27231%27%20r%3D%271.2%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2758%27%20r%3D%271.2%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") 0 0 / 240px 240px,
     var(--body);
-  box-shadow: inset 0 0 0 1px rgba(232,244,240,.24), inset 0 2px 0 rgba(255,255,255,.22), inset 0 -4px 12px rgba(0,0,0,.28);
-}
+  box-shadow: inset 0 0 0 2px rgba(150,165,155,.38), inset 0 3px 0 rgba(255,255,255,.10), inset 0 -6px 16px rgba(0,0,0,.35); }
 [data-theme="ghost"] body { background: var(--body); }
-[data-theme="ghost"] .pads, [data-theme="ghost"] .joy, [data-theme="ghost"] .wheel { backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px); }
+[data-theme="ghost"] .knob { background: repeating-conic-gradient(from 0deg, rgba(0,0,0,.16) 0 4deg, rgba(255,255,255,.10) 4deg 8deg), radial-gradient(circle at 40% 32%, #C8C8C2 0%, #9A9A93 55%, #6E6E68 100%); }
+[data-theme="ghost"] .wheel-lbl, [data-theme="ghost"] .controls .tools button span, [data-theme="ghost"] .oct-cap, [data-theme="ghost"] .foot .brand { text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+
+
+/* La franja de modos es PARTE DE LA PANTALLA (fase 30): mismo fondo, mismo vidrio y misma tecnología que el resto del display */
+.display .modes { background: var(--panel); }
+:root[data-screen="moss"] .display .chip, :root[data-screen="matrix"] .display .chip { font-family: var(--chord-font); font-weight: 500; font-size: 13px; letter-spacing: .05em; padding: 8px 10px; }
+:root[data-screen="phosphor"] .display .chip { font-family: var(--mono); font-weight: 500; letter-spacing: .1em; }
+:root[data-screen="ember"] .display .chip { letter-spacing: .09em; }
+:root[data-screen="ember"] .display .chip:not(.on) { color: color-mix(in srgb, var(--panel-ink) 58%, var(--panel)); }   /* crema apagado: el naranja queda para el título y el estado */
 
 /* Rueda del canto superior (fase 24): se ve el borde estriado de una rueda a través de una ranura; al girarla, las estrías se desplazan */
 .topbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 24px; margin: -6px 2px -4px; }
@@ -729,7 +788,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
       <h3 class="grp">Ajustes y mantenimiento</h3>
       <h4>Aspecto</h4>
-      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro contemporáneo), LUNAR (blanco limpio), VERTEX (gris de consola de los 90), POCKET (portátil monocroma), AMBER (cálida, de sintetizador boutique) y GHOST (plástico translúcido ahumado). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (LCD industrial), MOSS (LCD verdosa de cuatro tonos) y PHOSPHOR (tubo de osciloscopio). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
+      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (LCD industrial), MOSS (LCD verdosa de cuatro tonos) y PHOSPHOR (tubo de osciloscopio). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Copia de seguridad</h4>
@@ -3494,11 +3553,11 @@ const opts = list => () => list;
 const DIV_OPTS = [['off','Off'],['1/4','1/4'],['1/8','1/8'],['1/16','1/16'],['1/16T','1/16T'],['1/32','1/32']];
 
 const SCREENS = [['auto','Según la carcasa'],['ember','EMBER'],['matrix','MATRIX'],['moss','MOSS'],['phosphor','PHOSPHOR']];
-const SCREEN_OF = { vertex:'ember', pocket:'moss', carbon:'matrix', lunar:'ember', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
+const SCREEN_OF = { vertex:'ember', pocket:'moss', carbon:'matrix', lunar:'ember', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa (AMBER: la OLED negra del Orchid)   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
 const THEMES = [['auto','Automático'],['carbon','CARBON'],['lunar','LUNAR'],['vertex','VERTEX'],['pocket','POCKET'],['amber','AMBER'],['ghost','GHOST']];
 const OLD_THEME = { dark:'carbon', light:'lunar', olive:'pocket', blue:'ghost', burgundy:'amber', alt:'ghost' };   // pieles de la fase 17 → carcasas
 const OLD_SCREEN = { oled:'ember', lcdg:'moss', lcdb:'matrix' };
-const THEME_COLOR = { lunar:'#ECE9E2', carbon:'#141516', vertex:'#4B4E53', pocket:'#C3C1BA', amber:'#1D1C1A', ghost:'#56635F' };
+const THEME_COLOR = { lunar:'#E0D9CF', carbon:'#29292A', vertex:'#BDBCBD', pocket:'#CCC4B5', amber:'#312E29', ghost:'#2E3532' };
 function applyTheme() {
   let t = state.theme;
   if (t === 'auto') t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'carbon' : 'lunar';
