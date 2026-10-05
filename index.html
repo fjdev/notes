@@ -487,27 +487,53 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   --scr-inset: inset 0 0 0 1px rgba(255,255,255,.02); --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.035) 0%, rgba(255,255,255,0) 30%);
   --panel-mid:#3A362F;
 }
-:root[data-screen="matrix"] {   /* MATRIX: LCD monocroma industrial; gris carbón verdoso, menos contraste, sin brillo, matriz apagada apenas visible */
-  --panel:#17181A; --panel-ink:#D2D4D0; --panel-dim:#8C8F8B; --scr-active:#F0F2EE; --scope:#D2D4D0;
-  --scr-glow: none; --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
-  --scr-inset: inset 0 2px 6px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
-  --panel-mid:#3C403D;
-  --scr-overlay: linear-gradient(90deg, rgba(23,24,26,.3) 1px, transparent 1px) 0 0 / 3px 3px, linear-gradient(rgba(23,24,26,.3) 1px, transparent 1px) 0 0 / 3px 3px, radial-gradient(circle, rgba(210,212,208,.045) .8px, transparent 1px) 1.5px 1.5px / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 32%);
+/* MATRIX (fase 36): la OLED de 1 bit del HiChord y del Orchid. Negro absoluto; cada píxel es un punto blanco-azulado que ilumina un poco sus vecinos (retroiluminación), con huecos oscuros finos y NO una cuadrícula dibujada encima. */
+:root {
+  --px-gap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Cpath fill='black' fill-opacity='.34' fill-rule='evenodd' d='M0 0h3v3H0zM.34 .34h2.32v2.32H.34z'/%3E%3C/svg%3E");
 }
-:root[data-screen="moss"] {   /* MOSS: LCD portátil verdosa de cuatro tonos; todo dibujado por la propia matriz, sin blanco ni brillo */
-  --panel:#8C925B; --panel-ink:#1E2412; --panel-dim:#222815; --scr-active:#1E2412; --scope:#1E2412;
-  --scr-glow: 1px 1px 0 rgba(32,40,23,.18); --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
-  --scr-inset: inset 0 2px 5px rgba(32,40,23,.35), inset 0 0 0 1px rgba(32,40,23,.25);
-  --panel-mid:#5E6538;
-  --scr-overlay: linear-gradient(90deg, rgba(140,146,91,.3) 1px, transparent 1px) 0 0 / 3px 3px, linear-gradient(rgba(140,146,91,.3) 1px, transparent 1px) 0 0 / 3px 3px, radial-gradient(circle, rgba(30,36,18,.07) .8px, transparent 1px) 1.5px 1.5px / 3px 3px, linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 35%);
+:root[data-screen="matrix"] {
+  --panel:#000; --panel-ink:#E4F1FB; --panel-dim:#6F8DA3; --scr-active:#FFFFFF; --scope:#E4F1FB; --bezel:#030507;
+  --scr-glow: 0 0 4px rgba(150,205,255,.55), 0 0 12px rgba(100,170,255,.2); --chip-glow: 0 0 6px rgba(150,205,255,.4); --chord-font: "Pixelify Sans", var(--mono);
+  --scr-inset: inset 0 0 0 1px rgba(110,160,200,.09), inset 0 0 22px rgba(70,120,170,.07);
+  --panel-mid:#2E4152;
+  --scr-overlay: radial-gradient(ellipse at 50% 38%, rgba(110,165,225,.075), rgba(110,165,225,0) 70%), linear-gradient(155deg, rgba(190,225,255,.045) 0%, rgba(190,225,255,0) 30%);
+  --px: 3; --px-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect x='.6' y='.6' width='8.8' height='8.8' rx='1.1' fill='white'/%3E%3C/svg%3E");
 }
-:root[data-screen="phosphor"] {   /* PHOSPHOR: tubo de osciloscopio de laboratorio; verde fósforo contenido, rejilla y líneas mínimas, brillo muy suave */
-  --panel:#07100B; --panel-ink:#7CD39B; --panel-dim:#4E8F66; --scr-active:#B5EDC6; --scope:#7CD39B;
-  --scr-glow: 0 0 7px rgba(124,211,155,.22); --chip-glow: 0 0 9px -3px rgba(124,211,155,.4); --chord-font: var(--mono);
-  --scr-inset: inset 0 3px 10px rgba(0,0,0,.7), inset 0 0 30px rgba(0,0,0,.45);
-  --panel-mid:#1F4A31;
-  --scr-overlay: linear-gradient(155deg, rgba(255,255,255,.055) 0%, rgba(255,255,255,0) 34%);   /* limpia: solo el reflejo del cristal (sin retícula, ejes ni marcas) */
+/* MOSS (fase 36b): LCD STN reflectante de la Game Boy original. Medido en las fotos del usuario y en la investigación de BGB «reality»:
+   · los píxeles son cuadrados con un borde del color del fondo (el color de «LCD apagado»): sobre el fondo claro NO se ve ninguna rejilla y solo aparece como finas líneas claras dentro de lo oscuro (por eso las líneas de la rejilla llevan el color del panel);
+   · el píxel oscuro es algo más azulado que el promedio y proyecta una sombra tenue hacia abajo a la derecha sobre el fondo;
+   · la sombra del marco cae sobre el borde superior e izquierdo del cristal; el borde inferior derecho asoma más claro y amarillento;
+   · verdes de la recreación IPS: más vivos que el oliva de la pantalla original. */
+:root[data-screen="moss"] {
+  --panel:#9CCB3E; --panel-ink:#1E4A33; --panel-dim:#295B3D; --scr-active:#1E4A33; --scope:#1E4A33;
+  --scr-glow: 1px 1px 0 rgba(26,66,44,.2); --chip-glow: none; --chord-font: "Pixelify Sans", var(--mono);
+  --scr-inset: inset 7px 8px 8px -6px rgba(22,58,34,.55), inset 0 0 0 1px rgba(22,58,34,.2), inset -2px -3px 0 rgba(208,232,72,.3);
+  --panel-mid:#6FA03F;
+  --gb: 156,203,62;
+  --scr-overlay: radial-gradient(ellipse at 62% 22%, rgba(230,250,150,.10), rgba(230,250,150,0) 62%);
+  --px: 2; --px-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Crect x='.45' y='.45' width='9.1' height='9.1' rx='.9' fill='white'/%3E%3C/svg%3E");
 }
+/* PHOSPHOR (fase 36b): tubo de un osciloscopio analógico. La pantalla es NEGRA: el verde lo pone el haz (fósforo P31, ~525 nm, núcleo casi blanco y halo verde);
+   todo lo que se ve —trazas, texto, iconos— está dibujado por el haz y brilla. La retícula está grabada en el cristal y solo se ve cuando se ilumina por el borde
+   (potenciómetro «scale illum»): luz ámbar, más fuerte hacia los bordes. */
+:root[data-screen="phosphor"] {
+  --panel:#020503; --panel-ink:#6FDC9C; --panel-dim:#2C9758; --scr-active:#C8FFDC; --scope:#A8FFC8; --bezel:#040706;
+  --scr-glow: 0 0 3px rgba(130,255,180,.75), 0 0 10px rgba(40,230,110,.38); --chip-glow: 0 0 8px rgba(120,255,170,.4); --chord-font: var(--mono);
+  --scr-inset: inset 0 0 50px rgba(0,0,0,.9), inset 0 0 100px rgba(0,0,0,.5);
+  --panel-mid:#16502F;
+  --gr: rgba(255,146,46,.42); --gr2: rgba(255,146,46,.17); --cell: calc(var(--screen-h) / 6);
+  --scr-overlay:
+    linear-gradient(90deg, transparent calc(50% - .5px), var(--gr) calc(50% - .5px), var(--gr) calc(50% + .5px), transparent calc(50% + .5px)) 0 0 / 100% 100% no-repeat,
+    linear-gradient(transparent calc(50% - .5px), var(--gr) calc(50% - .5px), var(--gr) calc(50% + .5px), transparent calc(50% + .5px)) 0 0 / 100% 100% no-repeat,
+    linear-gradient(90deg, var(--gr2) 1px, transparent 1px) calc(50% + var(--cell) / 2) 0 / var(--cell) 100%,
+    linear-gradient(var(--gr2) 1px, transparent 1px) 0 calc(50% + var(--cell) / 2) / 100% var(--cell),
+    linear-gradient(90deg, var(--gr) 1px, transparent 1px) calc(50% + var(--cell) / 10) 50% / calc(var(--cell) / 5) 7px repeat-x,
+    linear-gradient(var(--gr) 1px, transparent 1px) 50% calc(50% + var(--cell) / 10) / 7px calc(var(--cell) / 5) repeat-y,
+    linear-gradient(150deg, rgba(210,255,225,.05) 0%, rgba(210,255,225,0) 26%);
+}
+:root[data-screen="phosphor"] .display::after { -webkit-mask-image: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.42) 0%, rgba(0,0,0,.6) 55%, #000 100%); mask-image: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.42) 0%, rgba(0,0,0,.6) 55%, #000 100%); }   /* iluminada por el borde: la retícula brilla más hacia fuera */
+:root[data-screen="phosphor"] .display .screen { background-image: radial-gradient(ellipse at 50% 50%, #040D08 0%, #020604 70%, #010302 100%); text-shadow: 0 0 5px rgba(120,255,170,.45); }
+:root[data-screen="phosphor"] .display #scope { filter: drop-shadow(0 0 2px rgba(150,255,190,.85)) drop-shadow(0 0 8px rgba(50,230,120,.5)); }
 :root[data-screen] .display::after { background: var(--scr-overlay); }
 .display .screen { box-shadow: var(--scr-inset); }
 .display .chord:not(.idle) { text-shadow: var(--scr-glow); }
@@ -591,19 +617,19 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
   background: radial-gradient(circle at 50% 42%, #4A4849 0%, #2E2C2D 72%); box-shadow: inset 0 6px 14px rgba(0,0,0,.7); }
 [data-theme="vertex"] .knob { background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.12) 0 1px, transparent 1px 4.5px), radial-gradient(circle at 50% 38%, #CFCFD1 0%, #A9A8AA 58%, #7F7E81 100%); }
 [data-theme="vertex"] .knob::after { display: none; }
-[data-theme="vertex"] .controls .tools.chord #tInv { --k: #2F55C9; color: #FFFFFF; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
-[data-theme="vertex"] .controls .tools.chord #tLock { --k: #1E9A4B; color: #FFFFFF; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
-[data-theme="vertex"] .controls .tools.chord #tOctDn, [data-theme="vertex"] .controls .tools.chord #tOctUp { --k: #F5C722; color: #232326; }
-[data-theme="vertex"] .controls .tools.chord button.locked { color: #FFFFFF; }
+[data-theme="vertex"] .controls .tools.std #tInv { --k: #2F55C9; color: #FFFFFF; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
+[data-theme="vertex"] .controls .tools.std #tLock { --k: #1E9A4B; color: #FFFFFF; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
+[data-theme="vertex"] .controls .tools.std #tOctDn, [data-theme="vertex"] .controls .tools.std #tOctUp { --k: #F5C722; color: #232326; }
+[data-theme="vertex"] .controls .tools.std button.locked { color: #FFFFFF; }
 [data-theme="vertex"] .lp-rec span { background: #E23B32; width: 18px; height: 18px; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25), 0 0 0 2px rgba(0,0,0,.25); }
 
 /* POCKET · mockup (beige cálido, pantalla oliva, berenjena) + firma de la Game Boy: INV y FIJAR como los dos botones redondos A y B */
-[data-theme="pocket"] .controls .tools.chord #tInv, [data-theme="pocket"] .controls .tools.chord #tLock { --k: #6B2440; color: #F3EDE6; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
-[data-theme="pocket"] .controls .tools.chord button.locked { color: #F3EDE6; }
+[data-theme="pocket"] .controls .tools.std #tInv, [data-theme="pocket"] .controls .tools.std #tLock { --k: #6B2440; color: #F3EDE6; border-radius: 50%; width: 46px; justify-self: center; margin: 0; }
+[data-theme="pocket"] .controls .tools.std button.locked { color: #F3EDE6; }
 
 /* AMBER · mockup (carbón cálido, teclas crema, mostaza) + firma del Orchid: la rueda tostada (ya en --wheel) e INV/FIJAR mostaza como sus perillas */
-[data-theme="amber"] .controls .tools.chord #tInv, [data-theme="amber"] .controls .tools.chord #tLock { --k: #D2A656; color: #2A2620; }
-[data-theme="amber"] .controls .tools.chord button.locked { color: #2A2620; }
+[data-theme="amber"] .controls .tools.std #tInv, [data-theme="amber"] .controls .tools.std #tLock { --k: #D2A656; color: #2A2620; }
+[data-theme="amber"] .controls .tools.std button.locked { color: #2A2620; }
 
 /* GHOST · mockup: carcasa ahumada oscura a través de la que se ve una placa base densa (chips, condensadores, resistencias, pistas); bordes más claros con grosor;
    teclas claras opacas; perilla metálica moleteada */
@@ -708,17 +734,17 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .controls .tools.idle button { visibility: hidden; }   /* modos sin función (Drums, Ritmos, Mic, Afinador): las teclas se ocultan */
 .oct-cap { display: none; }
 
-/* (Sustituido en la fase 34c: las teclas son las mismas en todos los modos; esta regla ya no se aplica porque #tools siempre lleva «chord») */
-.controls .tools:not(.chord) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 24px 14px; justify-content: center; align-content: center; }
+/* (Sustituido en la fase 34c: las teclas son las mismas en todos los modos; esta regla ya no se aplica porque #tools siempre lleva «std») */
+.controls .tools:not(.std) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 24px 14px; justify-content: center; align-content: center; }
 
 /* Con acordes: INV y FIJAR sueltos y las dos octavas como un balancín de dos mitades */
-.controls .tools.chord { grid-template-columns: repeat(2, 58px); grid-template-rows: 46px 46px; gap: 22px 0; justify-content: center; align-content: center; }
-.controls .tools.chord #tInv { margin-right: 5px; } .controls .tools.chord #tLock { margin-left: 5px; }
-.controls .tools.chord #tOctDn { border-radius: 10px 3px 3px 10px; }
-.controls .tools.chord #tOctUp { border-radius: 3px 10px 10px 3px; box-shadow: inset 1px 0 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.16), 0 2px 0 rgba(0,0,0,.45); }
-.controls .tools.chord #tOctDn span, .controls .tools.chord #tOctUp span { display: none; }
-.controls .tools.chord #tOctDn::before { right: auto; left: 6px; }
-.controls .tools.chord .oct-cap { display: block; position: absolute; left: 0; right: 0; bottom: -15px; text-align: center; font: 500 9px/1 var(--sans); letter-spacing: .04em; text-transform: lowercase; color: var(--muted); pointer-events: none; }
+.controls .tools.std { grid-template-columns: repeat(2, 58px); grid-template-rows: 46px 46px; gap: 22px 0; justify-content: center; align-content: center; }
+.controls .tools.std #tInv { margin-right: 5px; } .controls .tools.std #tLock { margin-left: 5px; }
+.controls .tools.std #tOctDn { border-radius: 10px 3px 3px 10px; }
+.controls .tools.std #tOctUp { border-radius: 3px 10px 10px 3px; box-shadow: inset 1px 0 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.16), 0 2px 0 rgba(0,0,0,.45); }
+.controls .tools.std #tOctDn span, .controls .tools.std #tOctUp span { display: none; }
+.controls .tools.std #tOctDn::before { right: auto; left: 6px; }
+.controls .tools.std .oct-cap { display: block; position: absolute; left: 0; right: 0; bottom: -15px; text-align: center; font: 500 9px/1 var(--sans); letter-spacing: .04em; text-transform: lowercase; color: var(--muted); pointer-events: none; }
 
 
 /* ===== FASE 34 ===== */
@@ -737,18 +763,61 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 @media (min-height: 741px) { :root { --joy-size: 146px; --knob-size: 64px; } }
 @media (min-height: 800px) { :root { --joy-size: 152px; --knob-size: 66px; } }
 @media (max-height: 640px) { :root { --joy-size: 120px; --knob-size: 54px; } }
-.controls .tools.chord { grid-template-columns: repeat(2, 60px); grid-template-rows: 46px 46px; justify-content: end; }
-.controls .tools:not(.chord) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 22px 12px; justify-content: end; }
+.controls .tools.std { grid-template-columns: repeat(2, 60px); grid-template-rows: 46px 46px; justify-content: end; }
+.controls .tools:not(.std) { grid-template-columns: repeat(2, 54px); grid-auto-rows: 54px; gap: 22px 12px; justify-content: end; }
 /* Teclas redondas (INV y FIJAR en VERTEX y POCKET): círculo exacto y la luz de estado centrada arriba, dentro del círculo */
-[data-theme="vertex"] .controls .tools.chord #tInv, [data-theme="vertex"] .controls .tools.chord #tLock,
-[data-theme="pocket"] .controls .tools.chord #tInv, [data-theme="pocket"] .controls .tools.chord #tLock { width: 46px; height: 46px; }
-[data-theme="vertex"] .controls .tools.chord #tInv::before, [data-theme="vertex"] .controls .tools.chord #tLock::before,
-[data-theme="pocket"] .controls .tools.chord #tInv::before, [data-theme="pocket"] .controls .tools.chord #tLock::before { top: 6px; right: auto; left: 50%; transform: translateX(-50%); }
+[data-theme="vertex"] .controls .tools.std #tInv, [data-theme="vertex"] .controls .tools.std #tLock,
+[data-theme="pocket"] .controls .tools.std #tInv, [data-theme="pocket"] .controls .tools.std #tLock { width: 46px; height: 46px; }
+[data-theme="vertex"] .controls .tools.std #tInv::before, [data-theme="vertex"] .controls .tools.std #tLock::before,
+[data-theme="pocket"] .controls .tools.std #tInv::before, [data-theme="pocket"] .controls .tools.std #tLock::before { top: 6px; right: auto; left: 50%; transform: translateX(-50%); }
 /* Los botones de abajo son LOS MISMOS en todos los modos (fase 34c): en Seq, Mixer, Notes Hero y Oído conservan forma, color y posición; solo cambian icono y texto.
    Las dos mitades del balancín llevan cada una su texto debajo (en los acordes comparten «octava») */
-.controls .tools.chord { width: 120px; }   /* ancho fijo: los textos de abajo no deben mover los botones */
+.controls .tools.std { width: 120px; }   /* ancho fijo: los textos de abajo no deben mover los botones */
 .controls .tools.alt #tOctDn span, .controls .tools.alt #tOctUp span { display: block; }
 .controls .tools.alt .oct-cap { display: none; }
+/* Oído en reposo: la línea grande no se usa (sin raya ni cursor parpadeante suelto junto al título) */
+.display .screen.ear .chord.idle { visibility: hidden; }
+/* Modos sin función (Drums, Beats, Mic, Afinador): ningún elemento del grupo se ve, tampoco el rótulo «octava» */
+.controls .tools.idle { visibility: hidden; }
+.controls .tools.idle .oct-cap { display: none; }
+/* Juegos: durante la partida el nombre del modo no se puede tocar (solo se muestra el estado); en reposo, pausa o resultado abre el menú de modos */
+.display #sMode.live { pointer-events: none; cursor: default; }
+
+
+/* ===== FASE 36 · MATRIX = OLED del HiChord / Orchid: barra de título invertida, selectores con marco y triángulos ◂ ▸, forma de onda del sonido ===== */
+:root[data-screen="matrix"] .display .screen-top { background: #D9E8F4; color: #000; margin: -6px -8px 4px; padding: 7px 44px 6px 10px; box-shadow: var(--scr-glow); }
+:root[data-screen="matrix"] .display .screen-top, :root[data-screen="matrix"] .display .screen-top span { color: #000 !important; opacity: 1 !important; font-weight: 700; }
+:root[data-screen="matrix"] .display .gear { color: #000; }
+:root[data-screen="matrix"] .display .gear svg { stroke: #000; }
+:root[data-screen="matrix"] .display .screen-bottom { color: var(--panel-ink); }
+:root[data-screen="matrix"] .display .menu { padding: 0 0 10px; }
+:root[data-screen="matrix"] .display .menu-top { background: #D9E8F4; padding: 8px 44px 6px 12px; box-shadow: var(--scr-glow); color: #000; }
+:root[data-screen="matrix"] .display .menu-top #menuTitle, :root[data-screen="matrix"] .display .menu-top span { color: #000 !important; font-weight: 700; }
+:root[data-screen="matrix"] .display .menu-row { position: relative; margin: 8px 14px 4px; border: 3px solid var(--panel-ink); box-shadow: var(--scr-glow), inset 0 0 8px rgba(140,200,255,.1); grid-template-columns: 30px 1fr 30px; gap: 0; }
+:root[data-screen="matrix"] .display .menu-side { font-size: 0; position: relative; height: 100%; padding: 0; }
+:root[data-screen="matrix"] .display .menu-side::before { content: ""; position: absolute; top: 50%; left: 50%; margin-top: -9px; width: 0; height: 0; border: 9px solid transparent; filter: drop-shadow(0 0 3px rgba(150,205,255,.55)); }
+:root[data-screen="matrix"] .display #menuPrev::before { margin-left: -12px; border-right: 12px solid var(--panel-ink); border-left: 0; }
+:root[data-screen="matrix"] .display #menuNext::before { margin-left: 0; border-left: 12px solid var(--panel-ink); border-right: 0; }
+:root[data-screen="matrix"] .display .menu-val { font-size: 34px; max-width: none; }
+:root[data-screen="matrix"] .display .menu-bottom { padding: 0 14px; }
+:root[data-screen="matrix"] .display .setv-head { background: #D9E8F4; color: #000; margin: -4px -6px 4px; padding: 7px 44px 6px 4px; box-shadow: var(--scr-glow); }
+:root[data-screen="matrix"] .display .setv-head button, :root[data-screen="matrix"] .display .setv-head #setvSec, :root[data-screen="matrix"] .display .setv-head #setvPos { color: #000; }
+:root[data-screen="matrix"] .display .setv-head.cur #setvSec { background: #000; color: var(--panel-ink); }
+:root[data-screen="matrix"] .display .chip.on { background: var(--panel-ink); color: #000; }
+/* forma de onda del sonido dentro del marco (el aparato dibuja una representación de todo lo representable); solo en MATRIX */
+.display .menu-glyph { display: none; image-rendering: pixelated; }
+:root[data-screen="matrix"] .display .menu.has-glyph .menu-glyph { display: block; position: absolute; left: 30px; top: 6px; width: calc(100% - 60px); height: calc(100% - 12px - var(--glyph-name, 30px)); pointer-events: none; filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
+:root[data-screen="matrix"] .display .menu.has-glyph .menu-val { align-self: end; justify-self: center; font-size: 22px; line-height: 1; padding-bottom: 5px; position: relative; z-index: 1; }
+@media (max-height: 700px) { :root[data-screen="matrix"] .display .menu.has-glyph { --glyph-name: 22px; } :root[data-screen="matrix"] .display .menu.has-glyph .menu-val { font-size: 16px; padding-bottom: 3px; } :root[data-screen="matrix"] .display .menu-val { font-size: 26px; } }
+
+/* ===== FASE 37 · píxeles de verdad y traza de borde a borde ===== */
+/* Un lienzo «de píxel» se dibuja a resolución lógica (MATRIX 3 px CSS por píxel, MOSS 2) y se amplía sin suavizar; la máscara pone el hueco entre píxeles DENTRO de cada píxel
+   (alineada con el propio lienzo), así nunca hay píxeles cortados a la mitad como con una rejilla superpuesta a toda la pantalla. */
+:root { --px: 1; }
+canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-mask: var(--px-mask) 0 0 / var(--cw, 3px) var(--ch, 3px); mask: var(--px-mask) 0 0 / var(--cw, 3px) var(--ch, 3px); }
+:root[data-screen="matrix"] canvas.px { filter: drop-shadow(0 0 3px rgba(150,205,255,.5)); }
+/* la línea del osciloscopio ocupa todo el ancho de la pantalla: entra por un borde y sale por el otro */
+.display .screen:not(.hiro):not(.ear):not(.tuner) .scope { margin-left: -14px; margin-right: -14px; width: calc(100% + 28px); }
 </style>
 </head>
 <body>
@@ -770,7 +839,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
     </div>
     <div class="menu" id="menu" hidden aria-live="polite">
       <div class="menu-top"><span id="menuTitle"></span><span id="menuPos"></span></div>
-      <div class="menu-row"><button class="menu-side" id="menuPrev" aria-label="Anterior"></button><span class="menu-val" id="menuVal"></span><button class="menu-side" id="menuNext" aria-label="Siguiente"></button></div>
+      <div class="menu-row"><canvas class="menu-glyph" id="menuGlyph" aria-hidden="true"></canvas><button class="menu-side" id="menuPrev" aria-label="Anterior"></button><span class="menu-val" id="menuVal"></span><button class="menu-side" id="menuNext" aria-label="Siguiente"></button></div>
       <div class="menu-bottom"><button class="menu-hint" id="menuUp"></button><button class="menu-hint" id="menuDown"></button></div>
     </div>
     <div class="setv" id="setv" hidden role="dialog" aria-label="Ajustes">
@@ -873,14 +942,15 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
       <p>Si el aviso dice que está bloqueado, en Safari toca "aA" en la barra de direcciones, entra en Ajustes del sitio web y permite el micrófono. Si dice que iOS no pudo iniciar el audio, cierra Safari del todo y vuelve a abrir la página; si sigue igual, reinicia el iPhone. "Probar el micrófono", en Ajustes → Sonido, muestra el estado completo.</p>
       <h3 class="grp">Practicar</h3>
       <h4>Notes Hero (juego de acordes)</h4>
-      <p>Un juego de ritmo que enseña progresiones reales. Elige nivel en el menú del modo, hacia abajo (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión); el nivel, el tipo y el título de la canción salen arriba en la pantalla. Pulsa "jugar". Tras una cuenta atrás de cuatro tiempos, los acordes avanzan hacia la línea de golpeo: pulsa su botón justo cuando lleguen y, si el bloque lleva una flecha, mantén también esa dirección del joystick. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
-      <p>"Práctica" juega más despacio: empieza al 75 % y con "vel −" y "vel +" va del 50 al 100 %. Tras los resultados, "siguiente" pasa al nivel siguiente y "repetir" vuelve a jugar el actual. Cada nivel estrena una idea: el acorde 6 (nivel 2), el sus4 con el joystick abajo (3), cambios cada dos tiempos y anticipos (4), el iv prestado con el joystick arriba (5), la mezcla con 2 y 3 (6), séptimas (7), novenas (8), dominantes secundarias (9) y una cadena por quintas (10).</p>
+      <p>Un juego de ritmo que enseña progresiones reales. Elige nivel en el menú del modo, hacia abajo (10 niveles en cinco tipos: Folk, Rock, Moderno, Jazz y Fusión); el nivel, el tipo y el título de la canción salen arriba en la pantalla. Pulsa "jugar". La pantalla muestra una sola pista: arriba a la izquierda, un círculo con el botón que toca (y a su lado una flecha si hay que mover el joystick), arriba a la derecha la tonalidad, abajo a la izquierda el nombre del acorde y abajo a la derecha cuántos llevas. Tras una cuenta atrás de cuatro tiempos, una bola por acorde avanza de izquierda a derecha hacia la raya de golpeo (con la zona de acierto sombreada): pulsa su botón justo cuando la bola llegue a la raya y, si lleva una flecha encima, mantén también esa dirección del joystick. El trazo fino entre dos bolas es lo que dura ese acorde. La bola se rellena cuando acertaste y se tacha cuando fallaste. Cuanto más cerca del tiempo, mejor nota: Perfecto, Bien, OK o Fallo. Se cuentan la racha y la mejor racha. Cada canción fija su tonalidad, su sonido y su ritmo; tus ajustes vuelven al terminar.</p>
+      <p>"Práctica" juega más despacio: empieza al 75 % y con "vel −" y "vel +" va del 50 al 100 %. Tras los resultados, "siguiente" pasa al nivel siguiente y "repetir" vuelve a jugar el actual. En los resultados, «desfase medio» dice si sueles pulsar tarde (+) o pronto (−): si es siempre parecido, súmalo en Ajustes → Modos → «Latencia del juego» (el sonido tarda un poco en llegar a tus oídos y eso se nota); acerca la bola a la raya cuando oyes el golpe. Cada nivel estrena una idea: el acorde 6 (nivel 2), el sus4 con el joystick abajo (3), cambios cada dos tiempos y anticipos (4), el iv prestado con el joystick arriba (5), la mezcla con 2 y 3 (6), séptimas (7), novenas (8), dominantes secundarias (9) y una cadena por quintas (10).</p>
+      <p>Para salir de Notes Hero (o de Ear Trainer), con la partida parada o terminada, toca el nombre del modo, abajo a la izquierda de la pantalla: abre el menú de modos y con izquierda y derecha pasas a otro. Durante la partida ese nombre desaparece (solo se ve el estado) y no responde al toque, para no salirte sin querer: para cortar, usa «parar».</p>
       <h4>Ear Trainer (entrenador de oído)</h4>
       <p>La app toca algo y tú lo repites. Elige nivel en el menú del modo, hacia abajo, y pulsa "jugar": primero suena la nota base (la tónica) y después la pregunta. Nivel 1: oyes la tónica y una nota más aguda; pulsa el botón de esa nota. Nivel 2: la nota puede estar por encima o por debajo. Nivel 3: un acorde de la tonalidad. Nivel 4: una progresión de cuatro acordes. Nivel 5: un acorde con modificación (séptimas, sus, aug…): responde también con el joystick. Nivel 6: una progresión de cuatro acordes con modificaciones.</p>
       <p>Si te atascas, "tónica" vuelve a sonar la nota base y "repetir" repite la pregunta. Se cuentan la racha y la mejor racha. En los niveles con modificaciones, un fallo muestra una flecha con la dirección correcta del joystick. Mientras juegas, tus ajustes se sustituyen por los del entrenador y vuelven al terminar.</p>
       <h3 class="grp">Ajustes y mantenimiento</h3>
       <h4>Aspecto</h4>
-      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (LCD industrial), MOSS (LCD verdosa de cuatro tonos) y PHOSPHOR (tubo de osciloscopio). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. La línea que cruza la pantalla es la traza: en reposo es plana; con «Osciloscopio» activado muestra la onda que suena. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
+      <p>notes es un solo aparato fabricado en seis ediciones, que eliges en Ajustes → Aspecto → Carcasa: CARBON (negro), LUNAR (marfil con controles negros y toques naranja), VERTEX (gris de mando de consola de los 90, con botones de colores), POCKET (beige con pantalla oliva y botones berenjena, como una portátil de los 80), AMBER (carbón cálido con teclas crema y mostaza, de sintetizador boutique) y GHOST (plástico ahumado que deja ver la placa base). La pantalla es independiente y representa otra tecnología: EMBER (OLED cálida), MATRIX (la OLED de 1 bit del HiChord y del Orchid: blanco frío sobre negro, píxeles visibles, barra de título invertida, selectores con marco y triángulos a los lados, y en el selector de sonido, la forma de onda del sonido, animada: aparece, se sostiene y se apaga como lo hace ese sonido), MOSS (LCD reflectante verde, como la de la primera Game Boy: la rejilla solo se insinúa dentro de lo oscuro y el marco proyecta su sombra arriba y a la izquierda) y PHOSPHOR (osciloscopio analógico: pantalla negra donde todo, trazas y texto, lo dibuja el haz en verde, con la retícula ámbar iluminada por el borde). «Según la carcasa» usa la de cada edición, y puedes combinarlas como quieras. «Automático» elige CARBON o LUNAR según el modo oscuro o claro del dispositivo. La línea que cruza la pantalla es la traza: va de un borde al otro; en reposo es plana; con «Osciloscopio» activado muestra la onda que suena. Las teclas de acorde van limpias, sin notas ni números; actívalos con «Notas y números en las teclas». «Probar la vibración» comprueba si tu dispositivo puede vibrar desde la app y, si no, por qué: en el iPhone hace falta iOS 18 o posterior y tener activados los hápticos del sistema (Ajustes del iPhone → Sonidos y vibraciones).</p>
       <h4>MIDI</h4>
       <p>Solo en PC (Chrome o Edge) y Android; Safari en iPhone no lo admite, y por eso el ajuste no aparece allí. Actívalo en Ajustes → Sonido. Las teclas blancas de cualquier octava tocan los botones 1 a 7 (Do es el 1). El acorde que suena sale como notas MIDI por todas las salidas conectadas (si una salida devuelve las notas a la entrada, la app ignora ese eco). En Arp y Repeat se envía el acorde sostenido, no cada golpe.</p>
       <h4>Copia de seguridad</h4>
@@ -1256,7 +1326,7 @@ const DEFAULT_STATE = {
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
   library:[],
-  hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, earLevel:0, earBest:0,
+  hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
   micGain:1, micHold:false, midi:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
@@ -1420,7 +1490,7 @@ function loadSample(id) {
     const shift = i / buf.sampleRate - m.onset;
     buf._start = i / buf.sampleRate;
     if (m.loopStart != null) { buf._loopStart = m.loopStart + shift; buf._loopEnd = m.loopEnd + shift; }
-    buf._root = m.root; sampleBuf[id] = buf; sampleLoading[id] = false;
+    buf._root = m.root; sampleBuf[id] = buf; sampleLoading[id] = false; /* el bucle de animación ya la redibuja */
   };
   try {
     const p = ctx.decodeAudioData(bytes.buffer, done, () => { sampleLoading[id] = false; });
@@ -2868,6 +2938,7 @@ function tunerStop() {
 // Escala de ±50 cents con un punto que marca la desviación, y una línea fina con el nivel que oye el micrófono
 function drawTunerMeter(cents, inTune, level) {
   const c = $('scope'), g = c.getContext && c.getContext('2d'); if (!g) return;
+  c.classList.remove('px');
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
@@ -3168,7 +3239,7 @@ function setTool(id, icon, label, opts = {}) {
 function renderTools() {
   const m = state.mode;
   // Los mismos botones en todos los modos (misma forma, color y posición): solo cambian el icono y el texto. `alt` = las funciones no son las de los acordes (cada mitad del balancín lleva su propio texto)
-  $('tools').classList.add('chord');
+  $('tools').classList.add('std');
   $('tools').classList.toggle('alt', ['seq', 'mixer', 'hiro', 'ear'].includes(m));
   $('tools').classList.toggle('idle', ['drum', 'beat', 'mic', 'tuner'].includes(m));   // sin función: las teclas se ocultan
   if (m === 'seq') {
@@ -3228,6 +3299,7 @@ function renderScreen(active) {
   const p = modeParam();
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
   const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map(s => seqChord(s).name).join(' ') : state.mode === 'mic' ? (micTake ? ' grabando' : '') : '';
+  $('sMode').classList.remove('live');
   $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
     + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '') + (wavRec ? ' · audio ' + wavClock() : '');
   const cn = $('chordName');
@@ -3421,7 +3493,7 @@ window.addEventListener('keydown', e => {
   if (e.repeat) { if ('1234567wasdqezc '.includes(k)) e.preventDefault(); return; }
   if (k >= '1' && k <= '7') { e.preventDefault(); press(+k - 1); }
   else if ('wasdqezc'.includes(k) && k.length === 1) { dirKeys.add(k); setJoyDir('key', keyboardDir()); }
-  else if (k === 'm') setMode(MODES[(MODES.findIndex(m => m.id === state.mode) + 1) % MODES.length].id);
+  else if (k === 'm' && !gameLocked()) setMode(MODES[(MODES.findIndex(m => m.id === state.mode) + 1) % MODES.length].id);
   else if (k === 'j' || k === 'k' || k === 'l') quickArm(k === 'j' ? 'sound' : k === 'k' ? 'key' : 'mode');
   else if (setv && MENU_ARROWS[k]) { e.preventDefault(); setvNav(MENU_ARROWS[k]); }
   else if (setv && k === 'enter') { e.preventDefault(); setvActivate(); }
@@ -3654,11 +3726,13 @@ const FX_NAMES = { reverb:'Reverb', delay:'Delay', chorus:'Chorus', flanger:'Fla
 const MENU_TITLES = { key:'Key', sound:'Sound', fx:'FX', mode:'Mode', bpm:'BPM', param:'Mode' };
 let menuTimer = null, menuRep = null;
 function menuToggle(group) {
+  if (gameLocked()) return;   // en partida no hay menús: se sale con «parar»
   if (group !== 'mode' && (state.mode === 'hiro' || state.mode === 'ear')) return;   // en los juegos solo el modo
   const same = menu && (menu.kind === group || (group === 'sound' && menu.kind === 'fx') || (group === 'mode' && (menu.kind === 'bpm' || menu.kind === 'param')));
   if (same) menuClose(); else menuOpen(group);
 }
-function menuOpen(kind) { if (setv) setvClose(); menu = { kind, fx: menu ? menu.fx : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+let menuOpenedAt = 0;
+function menuOpen(kind) { menuOpenedAt = performance.now(); if (setv) setvClose(); menu = { kind, fx: menu ? menu.fx : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
 function menuClose() { if (!menu) return; menu = null; clearTimeout(menuTimer); clearTimeout(menuRep); renderMenu(); renderWheel(); renderScreen(held.length > 0); }
 function menuPoke() { clearTimeout(menuTimer); menuTimer = setTimeout(menuClose, MENU_TIMEOUT); }
 function menuJoy(dir) {   // del joystick: un paso al empujar; mantener izquierda/derecha repite
@@ -3714,6 +3788,73 @@ function menuNav(dir) {
   }
   if (menu) { haptic(false); menuPoke(); renderMenu(); renderWheel(); }
 }
+// ----- forma de onda del sonido (MATRIX): una representación real de cada sonido, como hace el aparato -----
+const GLYPH_WAVE = { sawtooth: p => 2 * (p % 1) - 1, sine: p => Math.sin(2 * Math.PI * p), square: p => (p % 1) < 0.5 ? 1 : -1, triangle: p => 1 - 4 * Math.abs((p % 1) - 0.5) };
+function glyphNoise(i) { const x = Math.sin(i * 12.9898 + 4.1414) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; }   // ruido fijo (no parpadea)
+function glyphLayers(snd) {   // lista de capas {wave, fm, ratio, sample, noise, det}
+  if (snd.layers) return snd.layers.slice(0, 3).map(l => {
+    if (l[0] === 'w') return { wave: SRC.w[l[1]] || 'sine', det: l[3] || 0 };
+    if (l[0] === 'f') return { wave: 'sine', fm: (SRC.f[l[1]] || [])[0] || { ratio: 2, i0: 1.5 }, det: l[3] || 0 };
+    if (l[0] === 's') return { sample: (SRC.s[l[1]] || [])[0] || null, wave: 'sine', det: l[3] || 0 };
+    return { noise: true, wave: 'sine', det: 0 };
+  });
+  if (snd.sample) return [{ sample: snd.sample, wave: 'sine', det: 0 }];
+  const out = [{ wave: (snd.waves || ['sine'])[0], fm: snd.fm && snd.fm[0], det: 0 }];
+  if (snd.waves && snd.waves[1] && snd.waves[1] !== snd.waves[0]) out.push({ wave: snd.waves[1], det: 6 });
+  if (snd.subOctave) out.push({ wave: 'sine', sub: true, det: 0 });
+  if (snd.noise) out.push({ noise: true, wave: 'sine', det: 0 });
+  return out;
+}
+function glyphEnv(snd) {   // {a, d, s, r} del sonido: su ADSR, o el de la biblioteca, o uno por defecto según su tipo
+  if (snd.env) return snd.env;
+  const e = ADSR[snd.adsr || (snd.sample || snd.layers ? 'TOUCH' : 'SHORT')] || ADSR.TOUCH; return { a: e.a, d: e.d, s: e.s, r: e.r };
+}
+function envAt(e, t, hold) {   // 0..1 en el instante t de una nota que se suelta en `hold`
+  const lvl = (u) => u < e.a ? u / Math.max(0.001, e.a) : u < e.a + e.d ? 1 - (1 - e.s) * ((u - e.a) / Math.max(0.001, e.d)) : e.s;
+  if (t < hold) return lvl(t);
+  const l0 = lvl(hold), u = (t - hold) / Math.max(0.05, e.r); return u >= 1 ? 0 : l0 * (1 - u);
+}
+function glyphPoints(snd, n, t) {   // n valores entre −1 y 1: unos 2,5 ciclos del sonido, en el instante t (s) de una nota que suena y se suelta
+  const layers = glyphLayers(snd), cycles = 2.5, pts = new Array(n).fill(0), env = glyphEnv(snd);
+  const sustained = env.s > 0.25, hold = sustained ? 1.5 : Math.min(0.9, env.a + env.d + 0.25), T = hold + Math.min(1.2, env.r) + 0.5, tt = t % T;
+  const amp = Math.max(0.06, envAt(env, tt, hold)), drift = tt * 0.9;   // la onda corre (fase) y crece / decae como el sonido
+  layers.forEach((l, li) => {
+    let buf = null; if (l.sample) { loadSample(l.sample); buf = sampleBuf[l.sample]; }
+    for (let i = 0; i < n; i++) {
+      const ph = ((i / n) * cycles + drift * (l.sub ? 0.5 : 1)) * (l.sub ? 0.5 : 1) * Math.pow(2, (l.det || 0) / 1200 * 60);
+      let v;
+      if (l.noise) v = glyphNoise(i + li * 7 + Math.floor(t * 14) * 31) * 0.55;   // el ruido se renueva
+      else if (buf) { const root = buf._root || 60, per = buf.sampleRate / mtof(root), d = buf.getChannelData(0), at = Math.floor(buf.sampleRate * (0.02 + Math.min(1.2, tt * 0.7))) + Math.floor((i / n) * cycles * per); v = d[Math.min(d.length - 1, at)] || 0; }
+      else if (l.fm) { const idx = (l.fm.i1 || 0) + ((l.fm.i0 || 1.5) - (l.fm.i1 || 0)) * Math.exp(-tt / Math.max(0.2, l.fm.decay || 1)); v = Math.sin(2 * Math.PI * ph + Math.min(2.4, idx) * Math.sin(2 * Math.PI * ph * Math.min(2, l.fm.ratio || 1))); }
+      else v = (GLYPH_WAVE[l.wave] || GLYPH_WAVE.sine)(ph);
+      pts[i] += l.sub ? v * 0.5 : v;
+    }
+  });
+  const mx = Math.max(0.001, ...pts.map(Math.abs)); return pts.map(v => v / mx * (l_amp(snd, amp)));
+}
+function l_amp(snd, amp) { return Math.min(1, amp); }
+let glyphRaf = null, glyphT0 = 0, glyphLast = 0;
+function drawMenuGlyph(now) {
+  const c = $('menuGlyph'); if (!c || !c.clientWidth || document.documentElement.dataset.screen !== 'matrix') return;
+  const PX = pxScale(), pxm = pxCanvas(c, PX); if (!pxm) return;
+  const { w, h } = pxm, g = c.getContext('2d'), t = ((now || performance.now()) - glyphT0) / 1000;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
+  const snd = curSound(), pts = glyphPoints(snd, w - 12, t), css = getComputedStyle(document.documentElement);
+  g.fillStyle = css.getPropertyValue('--panel-ink').trim() || '#fff';
+  const mid = Math.round(h / 2), amp = Math.floor(h / 2) - 2;
+  g.globalAlpha = 0.28; g.fillRect(4, mid, w - 8, 1); g.globalAlpha = 1;   // el eje, tenue
+  let prev = null;
+  for (let x = 0; x < pts.length; x++) {   // línea de 1 píxel: cada columna une con la anterior
+    const y = Math.round(mid - pts[x] * amp);
+    const y0 = prev == null ? y : prev; g.fillRect(x + 6, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y;
+  }
+}
+function glyphLoop(now) {   // 20 fotogramas por segundo, como una pantalla pequeña
+  glyphRaf = null; if (!menu || menu.kind !== 'sound') return;
+  if (now - glyphLast > 48) { glyphLast = now; drawMenuGlyph(now); }
+  glyphRaf = requestAnimationFrame(glyphLoop);
+}
+function glyphStart() { glyphT0 = performance.now(); if (!glyphRaf && document.documentElement.dataset.screen === 'matrix') glyphRaf = requestAnimationFrame(glyphLoop); }
 function renderMenu() {
   const el = $('menu'); if (!el) return;
   $('screen').classList.toggle('menu-open', !!menu);
@@ -3746,10 +3887,12 @@ function renderMenu() {
   $('menuTitle').textContent = title; $('menuPos').textContent = pos; $('menuVal').textContent = val;
   $('menuPrev').textContent = prev; $('menuNext').textContent = next; $('menuUp').textContent = up; $('menuDown').textContent = down;
   $('menuUp').disabled = !up; $('menuDown').disabled = !down;
+  el.classList.toggle('has-glyph', k === 'sound'); if (k === 'sound') { glyphStart(); drawMenuGlyph(); }
 }
 // Toques en la propia pantalla (para quien no use el joystick): vecinos = izquierda/derecha; pistas de abajo = arriba/abajo
-onChipTap($('menuPrev'), () => menuNav('l')); onChipTap($('menuNext'), () => menuNav('r'));
-onChipTap($('menuUp'), () => menuNav('u')); onChipTap($('menuDown'), () => menuNav('d'));
+const menuTap = dir => () => { if (performance.now() - menuOpenedAt < 450) return; menuNav(dir); };   // ignora el toque que acaba de abrir el menú
+onChipTap($('menuPrev'), menuTap('l')); onChipTap($('menuNext'), menuTap('r'));
+onChipTap($('menuUp'), menuTap('u')); onChipTap($('menuDown'), menuTap('d'));
 
 // ===== SELECCIÓN RÁPIDA =====
 // Mantener el sonido, la tonalidad o el modo de la pantalla: los botones de acorde pasan a elegir y el joystick cambia de página.
@@ -3811,7 +3954,7 @@ function quickFlip(dir) {
 // MANTENER (desde 0,2 s) es la selección rápida (+ toque en la perilla = azar). El retraso evita que las teclas parpadeen en cada toque.
 const QUICK_DELAY = 200;
 let quickPending = null;   // etiqueta pulsada que aún no es «mantener»: { group, timer }
-function quickArm(group) { quickCancel(); quickPending = { group, timer: setTimeout(() => { const g = quickPending.group; quickPending = null; quickOpen(g); }, QUICK_DELAY) }; }
+function quickArm(group) { if (gameLocked()) return; quickCancel(); quickPending = { group, timer: setTimeout(() => { const g = quickPending.group; quickPending = null; quickOpen(g); }, QUICK_DELAY) }; }
 function quickCancel() { if (!quickPending) return false; clearTimeout(quickPending.timer); quickPending = null; return true; }
 // Si mientras mantienes la etiqueta haces otra cosa (rueda, perilla, un botón, el joystick), la selección rápida se activa al momento
 function quickPromote() { if (!quickPending) return; const g = quickPending.group; quickCancel(); quickOpen(g); if (quick) quick.used = true; }
@@ -3944,7 +4087,7 @@ const SCREENS = [['auto','Según la carcasa'],['ember','EMBER'],['matrix','MATRI
 const SCREEN_OF = { vertex:'ember', pocket:'moss', carbon:'matrix', lunar:'ember', amber:'phosphor', ghost:'phosphor' };   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa (AMBER: la OLED negra del Orchid)   // pantalla por defecto de cada carcasa   // pantalla por defecto de cada carcasa
 const THEMES = [['auto','Automático'],['carbon','CARBON'],['lunar','LUNAR'],['vertex','VERTEX'],['pocket','POCKET'],['amber','AMBER'],['ghost','GHOST']];
 const OLD_THEME = { dark:'carbon', light:'lunar', olive:'pocket', blue:'ghost', burgundy:'amber', alt:'ghost' };   // pieles de la fase 17 → carcasas
-const OLD_SCREEN = { oled:'ember', lcdg:'moss', lcdb:'matrix' };
+const OLD_SCREEN = { oled:'ember', lcdg:'moss', lcdb:'matrix', hichord:'matrix' };
 const THEME_COLOR = { lunar:'#E0D9CF', carbon:'#29292A', vertex:'#BDBCBD', pocket:'#CCC4B5', amber:'#312E29', ghost:'#2E3532' };
 function applyTheme() {
   let t = state.theme;
@@ -3959,31 +4102,77 @@ function applyTheme() {
 
 // ===== OSCILOSCOPIO =====
 let scopeRaf = null;
+// Resolución de píxel de la pantalla: 1 píxel lógico = --px píxeles CSS (MATRIX 3, MOSS 2, el resto 1 = nativo). El lienzo se dibuja a esa resolución y se amplía SIN suavizar,
+// y el hueco entre píxeles (máscara CSS) forma parte del propio lienzo: queda alineado con cada píxel, nunca hay «medios píxeles».
+function pxScale() { const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')); return v >= 1 ? v : 1; }
+function pxCanvas(c, PX) {   // PX = 1: nativo; si no, dimensiona el lienzo a resolución de píxel y devuelve {w, h}
+  const W = c.clientWidth || 300, H = c.clientHeight || 64;
+  if (PX <= 1) { c.classList.remove('px'); return null; }
+  const w = Math.max(8, Math.round(W / PX)), h = Math.max(6, Math.round(H / PX));
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  c.classList.add('px'); c.style.setProperty('--cw', (W / w) + 'px'); c.style.setProperty('--ch', (H / h) + 'px');
+  return { w, h, W, H };
+}
+function pxThreshold(g, w, h, rgb, thr) {   // 1 bit: cada píxel o está encendido o apagado, del color de la tinta
+  const im = g.getImageData(0, 0, w, h), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { if (d[i + 3] > (thr || 90)) { d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; d[i + 3] = 255; } else d[i + 3] = 0; }
+  g.putImageData(im, 0, 0);
+}
+function cssRgb(str) { str = (str || '').trim(); const m = /^#([0-9a-f]{6})$/i.exec(str); if (m) { const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; } const r = /rgba?\((\d+)[ ,]+(\d+)[ ,]+(\d+)/.exec(str); return r ? [+r[1], +r[2], +r[3]] : [255, 255, 255]; }
 function drawScope() {
   scopeRaf = null;
   if (!state.osc || document.hidden) return;
   if (OWN_TITLE.includes(state.mode)) { scopeRaf = requestAnimationFrame(drawScope); return; }   // el afinador usa el mismo lienzo
   const c = $('scope'), g = c.getContext && c.getContext('2d');
   if (!g) return;
+  const css = getComputedStyle(document.documentElement), screenSkin = document.documentElement.dataset.screen, PX = pxScale();
+  const live = analyser && ctx && ctx.state === 'running';
+  const pxm = pxCanvas(c, PX);
+  if (pxm) {   // MATRIX / MOSS: línea de 1 píxel, a resolución de píxel y de borde a borde
+    const { w, h } = pxm; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
+    g.fillStyle = '#fff'; let prev = null;
+    if (live) analyser.getByteTimeDomainData(scopeData);
+    for (let x = 0; x < w; x++) {
+      const si = Math.min(699, Math.floor(x / w * 700)), v = live ? (scopeData[si] - 128) / 128 : 0, y = Math.round(h / 2 - v * h * 0.46);
+      const y0 = prev == null ? y : prev; g.fillRect(x, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y;
+    }
+    pxThreshold(g, w, h, cssRgb(css.getPropertyValue('--scope')), 60);
+    scopeRaf = requestAnimationFrame(drawScope); return;
+  }
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
-  const css = getComputedStyle(document.documentElement);
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   // Persistencia según la tecnología de la pantalla: fósforo = el trazo se desvanece despacio; LCD = un fantasma mínimo; OLED = ninguna.
   // El desvanecimiento deja el lienzo TRANSPARENTE (antes lo rellenaba con el color de fondo y tapaba la sombra interior de la pantalla: se veía un rectángulo).
-  const fade = { phosphor: 1, moss: 0.65, matrix: 0.6, ember: 1 }[document.documentElement.dataset.screen] || 0.5;
+  const fade = { phosphor: 1, moss: 0.65, matrix: 0.6, ember: 1 }[screenSkin] || 0.5;
   g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + fade + ')'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'source-over';
   g.strokeStyle = css.getPropertyValue('--scope').trim() || '#888';
-  g.lineWidth = 1.6; g.lineJoin = 'round'; g.beginPath();
-  if (analyser && ctx && ctx.state === 'running') {
-    analyser.getByteTimeDomainData(scopeData);
-    const N = 700;   // ~15 ms: la onda corre y se ve el batido de los pares desafinados
-    for (let i = 0; i < N; i++) {
-      const x = i / (N - 1) * W, y = H / 2 - ((scopeData[i] - 128) / 128) * H * 0.46;
-      if (i) g.lineTo(x, y); else g.moveTo(x, y);
-    }
-  } else { g.moveTo(0, H / 2); g.lineTo(W, H / 2); }
-  g.stroke();
+  g.lineWidth = 1.6; g.lineJoin = 'round';
+  if (screenSkin === 'phosphor') {
+    // Haz de electrones: la luz de cada tramo es inversamente proporcional a la velocidad del haz (las crestas, donde casi se detiene, brillan más
+    // y los flancos rápidos se ven tenues); núcleo casi blanco y halo verde del fósforo P31. Entra y sale por los bordes de la pantalla.
+    const N = 700, ys = new Array(N);
+    if (live) { analyser.getByteTimeDomainData(scopeData); for (let i = 0; i < N; i++) ys[i] = H / 2 - ((scopeData[i] - 128) / 128) * H * 0.46; }
+    else for (let i = 0; i < N; i++) ys[i] = H / 2;
+    const bins = [[], [], []];   // lento, medio, rápido
+    for (let i = 1; i < N; i++) { const sp = Math.abs(ys[i] - ys[i - 1]); bins[sp < 0.35 ? 0 : sp < 1.6 ? 1 : 2].push(i); }
+    const pass = (w, col, alphas) => { g.lineWidth = w; g.strokeStyle = col; bins.forEach((b, k) => { g.globalAlpha = alphas[k]; g.beginPath(); for (const i of b) { g.moveTo((i - 1) / (N - 1) * W, ys[i - 1]); g.lineTo(i / (N - 1) * W, ys[i]); } g.stroke(); }); };
+    pass(5, 'rgb(40,230,110)', [0.16, 0.09, 0.04]);
+    pass(2.6, 'rgb(90,255,150)', [0.5, 0.3, 0.14]);
+    pass(1.3, 'rgb(225,255,235)', [1, 0.7, 0.4]);
+    g.globalAlpha = 1;
+  } else {
+    g.beginPath();
+    if (live) {
+      analyser.getByteTimeDomainData(scopeData);
+      const N = 700;   // ~15 ms: la onda corre y se ve el batido de los pares desafinados
+      for (let i = 0; i < N; i++) {
+        const x = i / (N - 1) * W, y = H / 2 - ((scopeData[i] - 128) / 128) * H * 0.46;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+    } else { g.moveTo(0, H / 2); g.lineTo(W, H / 2); }
+    g.stroke();
+  }
   scopeRaf = requestAnimationFrame(drawScope);
 }
 function setOsc(on) {
@@ -3993,13 +4182,25 @@ function setOsc(on) {
 }
 // La traza en reposo (fase 33): sin osciloscopio en vivo, una línea plana en el tono medio de la pantalla (como la línea del mockup)
 function drawBaseline() {
-  if (state.osc || ['hiro', 'ear', 'tuner'].includes(state.mode)) return;
+  if (['hiro', 'ear', 'tuner'].includes(state.mode)) { const c0 = $('scope'); if (c0) c0.classList.remove('px'); return; }
+  if (state.osc) return;
   const c = $('scope'), g = c && c.getContext && c.getContext('2d'); if (!g) return;
+  const PX = pxScale(), css = getComputedStyle(document.documentElement), pxm = pxCanvas(c, PX);
+  if (pxm) {   // MATRIX / MOSS: una fila de píxeles de borde a borde
+    const { w, h } = pxm; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
+    const rgb = cssRgb(css.getPropertyValue(document.documentElement.dataset.screen === 'matrix' ? '--panel-dim' : '--scope'));
+    g.fillStyle = 'rgb(' + rgb.join(',') + ')'; g.fillRect(0, Math.round(h / 2), w, 1); return;
+  }
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 0, H = c.clientHeight || 0; if (!W || !H) return;
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-  g.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--panel-mid').trim() || '#555';
-  g.lineWidth = 1.4; g.beginPath(); g.moveTo(0, Math.round(H / 2) + .5); g.lineTo(W, Math.round(H / 2) + .5); g.stroke();
+  if (document.documentElement.dataset.screen === 'phosphor') {   // sin señal el haz barre una línea recta: núcleo casi blanco y halo verde
+    const y = Math.round(H / 2) + .5; g.lineCap = 'round';
+    [[5, 'rgba(40,230,110,.14)'], [2.6, 'rgba(90,255,150,.45)'], [1.3, 'rgba(225,255,235,.95)']].forEach(([w, c2]) => { g.lineWidth = w; g.strokeStyle = c2; g.beginPath(); g.moveTo(-4, y); g.lineTo(W + 4, y); g.stroke(); });
+    return;
+  }
+  g.strokeStyle = css.getPropertyValue('--panel-mid').trim() || '#555';
+  g.lineWidth = 1.4; g.beginPath(); g.moveTo(-4, Math.round(H / 2) + .5); g.lineTo(W + 4, Math.round(H / 2) + .5); g.stroke();
 }
 window.addEventListener('resize', () => drawBaseline());
 { const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); }; }   // la traza en reposo sigue a la pantalla, la carcasa y el modo
@@ -4071,6 +4272,7 @@ const SETTINGS = [
   { id:'arpRate', label:'Arp Rate', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
   { id:'arpLayer', label:'Arp Layering', type:'select', options:opts(ARP_LAYERS) },
   { id:'repeatRate', label:'Repeat Rate', type:'select', options:() => RATES.map(r => [r[0], RATE_NAMES[r[0]]]) },
+  { id:'hiroLatency', label:'Latencia del juego', type:'range', min:-100, max:400, to:v => v, from:v => Math.round(v), fmt:v => (v > 0 ? '+' : '') + Math.round(v) + ' ms' },
   { section:'Batería' },
   { id:'kit', label:'Kit', type:'select', options:opts(KITS) },
   { id:'beatVar', label:'Drum Loop Variation', type:'select', options:opts(BEAT_VARS) },
@@ -4189,6 +4391,7 @@ function sanitizeState() {
   if (!Number.isFinite(state.attack)) state.attack = a.a;
   if (!Number.isFinite(state.release)) state.release = a.r;
   state.bpm = Math.max(40, Math.min(300, Math.round(state.bpm) || 120));
+  state.hiroLatency = Math.max(-100, Math.min(400, Math.round(Number(state.hiroLatency)) || 0));
   state.globalOct = Math.max(-3, Math.min(3, Math.round(state.globalOct) || 0));
   if (!state.tweaks || typeof state.tweaks !== 'object' || Array.isArray(state.tweaks)) state.tweaks = {};
   for (const k of Object.keys(state.tweaks)) if (!state.tweaks[k] || typeof state.tweaks[k] !== 'object') delete state.tweaks[k];
@@ -4542,6 +4745,7 @@ function applySong(song, f) {
 // ----- dibujo -----
 function gameCanvas() {
   const c = $('scope'), g = c.getContext && c.getContext('2d'); if (!g) return null;
+  c.classList.remove('px');
   const dpr = window.devicePixelRatio || 1, W = c.clientWidth || 300, H = c.clientHeight || 64;
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const css = getComputedStyle(document.documentElement);
@@ -4584,10 +4788,11 @@ function hiroStart() {
   for (let k = 0; k < 4; k++) hiroBeep(t1 + k * hiro.spb, k === 0);
   for (const ev of hiro.events) ev.time = hiro.t0 + ev.beat * hiro.spb;
   beatStop(); beatStart(song.beat[0], hiro.t0);
-  hiro.stats = { perfect:0, great:0, ok:0, miss:0 }; hiro.idx = 0; hiro.streak = 0; hiro.best = 0; hiro.last = ''; hiro.flash = null;
+  hiro.stats = { perfect:0, great:0, ok:0, miss:0 }; hiro.idx = 0; hiro.streak = 0; hiro.best = 0; hiro.last = ''; hiro.flash = null; hiro.meanErr = null;
   hiro.phase = 'count'; renderTools(); renderModes(); hiroTick();
 }
 function hiroEnd(finished) {
+  { const es = (hiro.events || []).filter(e => typeof e.err === 'number' && e.result && e.result !== 'miss').map(e => e.err * 1000); hiro.meanErr = es.length ? es.reduce((a, b) => a + b, 0) / es.length : null; }
   if (hiro.raf) cancelAnimationFrame(hiro.raf); hiro.raf = null;
   if (pendingDir) { clearTimeout(pendingDir.timer); pendingDir = null; }
   const was = hiro.phase;
@@ -4604,12 +4809,15 @@ function hiroJudge(ev, grade) {
   if (grade === 'miss') hiro.streak = 0; else { hiro.streak++; if (hiro.streak > hiro.best) hiro.best = hiro.streak; }
   hiro.flash = { grade, at:ctx.currentTime };
 }
+function hiroAdj() { return (state.hiroLatency || 0) / 1000; }   // latencia del sistema (salida de audio + pantalla + toque): se resta al reloj del juego
 function hiroHit(btn, tp) {
   if (hiro.phase !== 'play') return;
+  tp -= hiroAdj();
   let ev = null, best = Infinity;
   for (const e of hiro.events) { if (e.result) continue; const d = Math.abs(tp - e.time); if (d <= WIN.ok && d < best) { best = d; ev = e; } }
   if (!ev) return;
   if (ev.btn !== btn) { hiroJudge(ev, 'miss'); return; }
+  ev.err = tp - ev.time;   // error con signo (+ = tarde): para el «desfase medio» del resultado
   const grade = best <= WIN.perfect ? 'perfect' : best <= WIN.great ? 'great' : 'ok';
   withDir(btn, ev.dir, () => { if (!ev.result) hiroJudge(ev, grade); }, () => { if (!ev.result) hiroJudge(ev, 'miss'); });
 }
@@ -4620,7 +4828,7 @@ function hiroTick() {
   if (hiro.phase === 'count' && now >= hiro.t0 - WIN.ok - 0.02) hiro.phase = 'play';
   if (hiro.phase === 'play') {
     while (hiro.idx < hiro.events.length && hiro.events[hiro.idx].result) hiro.idx++;
-    while (hiro.idx < hiro.events.length && !hiro.events[hiro.idx].result && now > hiro.events[hiro.idx].time + WIN.ok) {
+    while (hiro.idx < hiro.events.length && !hiro.events[hiro.idx].result && now - hiroAdj() > hiro.events[hiro.idx].time + WIN.ok) {
       hiroJudge(hiro.events[hiro.idx], 'miss'); hiro.idx++;
     }
     if (now > hiro.t0 + hiro.events.total * hiro.spb + 0.8) { hiroEnd(true); return; }
@@ -4634,54 +4842,90 @@ function hiroTexts() {
   $('sSound').textContent = hiro.streak ? 'racha ' + hiro.streak : (state.hiroBest ? 'mejor ' + state.hiroBest : '');
   let big = song.name, status = state.hiroPractice ? 'práctica ' + Math.round(state.hiroSpeed * 100) + '%' : '';
   if (hiro.phase === 'count') { big = String(Math.max(1, Math.min(4, Math.ceil((hiro.t0 - ctx.currentTime) / hiro.spb)))); status = ''; }
-  else if (hiro.phase === 'play') { const t = hiro.events[hiro.idx]; big = t ? t.name : '—'; status = GRADE_TXT[hiro.last] || ''; }
+  else if (hiro.phase === 'play') { const t = hiro.events[hiro.idx]; big = t ? t.name : '—'; }   // el último resultado se dibuja dentro del juego
   else if (hiro.phase === 'result') {
     const s = hiro.stats; big = Math.round(hiro.acc * 100) + '%';
-    status = GRADE_TXT.perfect + ' ' + s.perfect + ' · ' + GRADE_TXT.great + ' ' + s.great + ' · OK ' + s.ok + ' · ' + GRADE_TXT.miss + ' ' + s.miss;
+    status = ''; hiro.detail = GRADE_TXT.perfect + ' ' + s.perfect + ' · ' + GRADE_TXT.great + ' ' + s.great + ' · OK ' + s.ok + ' · ' + GRADE_TXT.miss + ' ' + s.miss;   // el desglose se dibuja dentro del juego
     $('sSound').textContent = 'mejor racha ' + hiro.best;
   }
   cn.textContent = big; cn.classList.toggle('idle', hiro.phase === 'idle'); hiro.big = big;   // la cuenta atrás y el porcentaje se dibujan dentro del juego
-  $('sMode').textContent = status;
+  const live = hiro.phase === 'count' || hiro.phase === 'play';
+  $('sMode').classList.toggle('live', live);   // en partida: solo el estado y sin toque (se sale con «parar»); fuera de ella: el nombre del modo, que abre el menú de modos
+  $('sMode').textContent = live ? status : MODES.find(m => m.id === 'hiro').name;
 }
+const HIRO_TRAVEL = 2.4;   // segundos que tarda una bola en cruzar la pista: la velocidad visual NO depende del BPM
 function hiroRender() {
+  // Una sola pista, como el Chord Hiro original: círculo con el grado que toca (arriba a la izquierda), tonalidad (arriba a la derecha),
+  // nombre del acorde (abajo a la izquierda) y una bola por acorde que avanza hacia la línea de golpeo. Lo que dura cada acorde es un trazo fino.
   const k = gameCanvas(); if (!k) return;
-  const { g, W, H, v } = k, ink = v('--panel-ink'), faint = v('--panel-dim'), acc = v('--scr-active'), acc2 = v('--panel-ink'), bg = v('--panel');
-  const mono = v('--mono') || 'monospace';
-  if (hiro.phase === 'result') {   // porcentaje arriba y una casilla por acorde debajo: llena = acertado, hueca = fallado
-    g.fillStyle = ink; g.font = '600 ' + Math.round(Math.min(34, H * 0.4)) + 'px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(hiro.big || '', W / 2, H * 0.3); g.textAlign = 'left';
+  const { g, W, H, v } = k, ink = v('--panel-ink'), faint = v('--panel-dim'), acc = v('--scr-active'), bg = v('--panel');
+  const mono = v('--mono') || 'monospace', fam = v('--chord-font') || mono;
+  const u = Math.max(0.62, Math.min(1.3, H / 120));
+  if (hiro.phase === 'result') {   // porcentaje, desglose, una casilla por acorde (llena = acertado, hueca = fallado) y el desfase medio
+    g.fillStyle = ink; g.font = '600 ' + Math.round(Math.min(34, H * 0.32)) + 'px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(hiro.big || '', W / 2, H * 0.22);
+    g.fillStyle = faint; g.font = '500 ' + Math.round(11 * u) + 'px ' + mono; g.fillText(hiro.detail || '', W / 2, H * 0.42);
     const n = hiro.events.length, sz = Math.max(6, Math.min(18, (W - 24) / n - 3)), x0 = (W - n * (sz + 3)) / 2;
     hiro.events.forEach((ev, i) => {
-      g.lineWidth = 1.5; g.strokeStyle = ev.result === 'miss' ? faint : acc2; g.fillStyle = acc2;
-      g.globalAlpha = ev.result === 'ok' ? 0.5 : 1; rrect(g, x0 + i * (sz + 3), H * 0.72 - sz / 2, sz, sz, 3);
+      g.lineWidth = 1.5; g.strokeStyle = ev.result === 'miss' ? faint : ink; g.fillStyle = ink;
+      g.globalAlpha = ev.result === 'ok' ? 0.5 : 1; rrect(g, x0 + i * (sz + 3), H * 0.64 - sz / 2, sz, sz, 3);
       if (ev.result === 'miss') g.stroke(); else g.fill(); g.globalAlpha = 1;
     });
-    return;
+    if (hiro.meanErr != null) { const m = Math.round(hiro.meanErr); g.fillStyle = faint; g.font = '500 ' + Math.round(11 * u) + 'px ' + mono; g.fillText('desfase medio ' + (m > 0 ? '+' : '') + m + ' ms', W / 2, H * 0.88); }
+    g.textAlign = 'left'; return;
   }
-  const hitX = W * 0.2, ppb = (W - hitX - 6) / 6, live = hiro.phase === 'count' || hiro.phase === 'play';
-  const beatNow = live ? (ctx.currentTime - hiro.t0) / hiro.spb : 0, target = hiro.events[hiro.idx];
-  g.strokeStyle = faint; g.lineWidth = 1.5; g.beginPath(); g.moveTo(hitX, 4); g.lineTo(hitX, H - 4); g.stroke();
-  g.textBaseline = 'middle'; g.textAlign = 'left';
-  for (const ev of hiro.events) {
-    const x0 = hitX + (ev.beat - beatNow) * ppb, w = Math.max(18, ev.len * ppb - 4), y = 4, h = H - 8, res = ev.result, isT = live && ev === target && !res;
-    if (x0 + w < 0 || x0 > W) continue;
-    rrect(g, x0, y, w, h, 8);
-    if (res && res !== 'miss') { g.fillStyle = acc2; g.globalAlpha = res === 'ok' ? 0.55 : 0.9; g.fill(); g.globalAlpha = 1; }
-    else if (isT) { g.fillStyle = acc; g.globalAlpha = 0.25; g.fill(); g.globalAlpha = 1; }
-    g.strokeStyle = isT ? acc : (res === 'miss' ? faint : ink); g.globalAlpha = res === 'miss' ? 0.45 : 1; g.lineWidth = 1.5; g.stroke(); g.globalAlpha = 1;
-    g.fillStyle = res && res !== 'miss' ? bg : ink;
-    g.font = '600 ' + Math.round(Math.min(26, h * 0.34)) + 'px ' + mono; g.fillText(String(ev.btn + 1), x0 + 9, y + h * 0.36);
-    g.font = '600 12px ' + mono; g.fillText(ev.name, x0 + 9, y + h * 0.76);
-    if (ev.dir && w > 46) { g.strokeStyle = g.fillStyle; g.lineWidth = 1.6; drawArrow(g, x0 + w - 16, y + 17, ev.dir, 7); }
-  }
-  if (hiro.phase === 'count') {   // cuenta atrás grande en el centro
-    g.fillStyle = acc; g.font = '600 ' + Math.round(Math.min(56, H * 0.7)) + 'px ' + mono; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(hiro.big || '', W / 2, H / 2); g.textAlign = 'left';
-  }
-  if (hiro.flash) {   // destello en la línea de golpeo con el último resultado
+  const live = hiro.phase === 'count' || hiro.phase === 'play', song = hiro.song || HIRO_SONGS[0];
+  const spb = live ? hiro.spb : 60 / song.bpm, adj = hiroAdj(), pad = 6;
+  const cr = Math.round(15 * u), cx = pad + cr, cy = pad + cr;
+  const rB = Math.round(9 * u), laneY = Math.round(H * 0.5 + 4 * u), tickX = Math.round(W * 0.64), spawnX = -rB * 1.5;
+  const pps = (tickX - spawnX) / HIRO_TRAVEL, okPx = WIN.ok * pps, perfPx = WIN.perfect * pps;
+  const target = hiro.events.find(e => !e.result);
+  const dtOf = ev => live ? ev.time - ctx.currentTime + adj : ev.beat * spb + 0.9;   // segundos que faltan para golpear (en reposo, una vista previa fija)
+  // zona de golpeo (las ventanas OK y Perfecto, a escala) y línea de golpeo
+  g.fillStyle = acc; g.globalAlpha = 0.08; g.fillRect(tickX - okPx, laneY - rB * 1.7, okPx * 2, rB * 3.4);
+  g.globalAlpha = 0.14; g.fillRect(tickX - perfPx, laneY - rB * 1.7, perfPx * 2, rB * 3.4); g.globalAlpha = 1;
+  g.strokeStyle = faint; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, laneY); g.lineTo(W, laneY); g.stroke();
+  g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.moveTo(tickX, laneY - rB * 1.9); g.lineTo(tickX, laneY + rB * 1.9); g.stroke();
+  if (hiro.flash) {   // destello en la línea con el último resultado
     const age = ctx.currentTime - hiro.flash.at;
-    if (age < 0.4) { g.globalAlpha = 1 - age / 0.4; g.strokeStyle = hiro.flash.grade === 'miss' ? faint : acc; g.lineWidth = 4; g.beginPath(); g.moveTo(hitX, 4); g.lineTo(hitX, H - 4); g.stroke(); g.globalAlpha = 1; }
+    if (age < 0.35) { g.globalAlpha = 1 - age / 0.35; g.strokeStyle = hiro.flash.grade === 'miss' ? faint : acc; g.lineWidth = 4; g.beginPath(); g.moveTo(tickX, laneY - rB * 1.9); g.lineTo(tickX, laneY + rB * 1.9); g.stroke(); g.globalAlpha = 1; }
   }
+  // lo que dura cada acorde (un trazo entre su bola y la siguiente) y las bolas
+  g.lineCap = 'round'; g.textBaseline = 'middle'; g.textAlign = 'center';
+  for (const ev of hiro.events) {
+    const dt = dtOf(ev), x = tickX - dt * pps, len = ev.len * spb * pps;
+    const fade = ev.result ? Math.max(0, Math.min(1, 1 - (-dt - 0.35) / 0.9)) : 1;
+    if (fade <= 0 || x < -rB * 2 || x - len > W + rB) continue;
+    const a = x - rB - 3, b = x - len + rB + 3;
+    if (a > b) { g.strokeStyle = faint; g.globalAlpha = 0.3 * fade; g.lineWidth = Math.max(2, 2.4 * u); g.beginPath(); g.moveTo(a, laneY); g.lineTo(b, laneY); g.stroke(); }
+    if (x < -rB || x > W + rB) { g.globalAlpha = 1; continue; }
+    const isT = ev === (live ? target : hiro.events[0]), inZone = live && !ev.result && Math.abs(dt) <= WIN.ok;
+    g.globalAlpha = fade; g.lineWidth = isT ? 2.2 : 1.6;
+    g.beginPath(); g.arc(x, laneY, rB, 0, Math.PI * 2);
+    if (ev.result && ev.result !== 'miss') { g.fillStyle = acc; g.fill(); g.fillStyle = bg; }
+    else if (ev.result === 'miss') { g.strokeStyle = faint; g.stroke(); g.lineWidth = 2; const q = rB * 0.55; g.beginPath(); g.moveTo(x - q, laneY - q); g.lineTo(x + q, laneY + q); g.moveTo(x + q, laneY - q); g.lineTo(x - q, laneY + q); g.stroke(); g.fillStyle = faint; }
+    else { if (inZone) { g.save(); g.globalAlpha = fade * 0.3; g.fillStyle = acc; g.fill(); g.restore(); } g.strokeStyle = isT ? acc : ink; g.stroke(); g.fillStyle = ink; }
+    if (ev.result !== 'miss') { g.font = '700 ' + Math.round(rB * 1.15) + 'px ' + fam; g.fillText(String(ev.btn + 1), x, laneY + 1); }
+    if (ev.dir && !ev.result) { g.strokeStyle = isT ? acc : ink; g.lineWidth = 1.5; drawArrow(g, x, laneY - rB - 8 * u, ev.dir, 4.5 * u); }
+    g.globalAlpha = 1;
+  }
+  // círculo con el grado que toca, y su flecha de joystick si la lleva
+  g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, cr, 0, Math.PI * 2); g.stroke();
+  if (target) {
+    g.fillStyle = ink; g.font = '700 ' + Math.round(cr * 1.2) + 'px ' + fam; g.fillText(String(target.btn + 1), cx, cy + 1);
+    if (target.dir) { g.strokeStyle = acc; g.lineWidth = 1.8; drawArrow(g, cx + cr + 12 * u, cy, target.dir, 6 * u); }
+  }
+  g.fillStyle = ink; g.textAlign = 'right'; g.font = '700 ' + Math.round(14 * u) + 'px ' + fam; g.fillText(NOTE_NAMES[song.key], W - pad, cy);
+  g.textAlign = 'left'; g.font = '700 ' + Math.round(17 * u) + 'px ' + fam; g.fillText(target ? target.name : '—', pad, H - pad - 7 * u);
+  g.textAlign = 'right'; g.fillStyle = faint; g.font = '600 ' + Math.round(12 * u) + 'px ' + fam; g.fillText(hiro.events.filter(e => e.result).length + '/' + hiro.events.length, W - pad, H - pad - 7 * u);
+  // arriba, en el centro: la cuenta atrás o el último resultado
+  g.textAlign = 'center';
+  if (hiro.phase === 'count') { g.fillStyle = acc; g.font = '700 ' + Math.round(26 * u) + 'px ' + fam; g.fillText(hiro.big || '', W / 2, cy); }
+  else if (hiro.flash) {
+    const age = ctx.currentTime - hiro.flash.at;
+    if (age < 0.7) { g.globalAlpha = Math.min(1, (0.7 - age) / 0.3); g.fillStyle = hiro.flash.grade === 'miss' ? faint : acc; g.font = '700 ' + Math.round(13 * u) + 'px ' + fam; g.fillText(GRADE_TXT[hiro.flash.grade] + (hiro.flash.grade === 'miss' ? '' : '!'), W / 2, cy); g.globalAlpha = 1; }
+  }
+  g.textAlign = 'left'; g.lineCap = 'butt';
 }
 function hiroTool(i) {
   const playing = hiro.phase === 'count' || hiro.phase === 'play', res = hiro.phase === 'result';
@@ -4796,7 +5040,9 @@ function earTexts() {
   else if (ear.phase === 'feedback') { big = ear.shown; status = ear.marks.includes('bad') ? 'Incorrecto' : 'Correcto'; }
   else if (ear.phase === 'result') { big = ear.correct + '/' + EAR_LEVELS[state.earLevel].rounds; status = 'Aciertos'; }
   cn.textContent = big; cn.classList.toggle('idle', ear.phase === 'idle' || ear.phase === 'listen');
-  $('sMode').textContent = status;
+  const live = ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback';
+  $('sMode').classList.toggle('live', live);
+  $('sMode').textContent = live ? status : MODES.find(m => m.id === 'ear').name + (status ? ' · ' + status : '');
 }
 function earRender() {
   const k = gameCanvas(); if (!k) return;
