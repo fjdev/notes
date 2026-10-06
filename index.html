@@ -864,7 +864,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 </head>
 <body>
 <main class="app">
-  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span><span class="wheel-lbl" id="wheelLbl" aria-hidden="true">filter</span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Wheel"><div class="wheel-rim" id="wheelRim"></div></div></div>
+  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span><span class="wheel-lbl dim" id="wheelLbl" aria-hidden="true"></span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Wheel"><div class="wheel-rim" id="wheelRim"></div></div></div>
   <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Screen">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
@@ -931,8 +931,8 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>They act on the last button you played, which you can recognise by its green light. INV changes the inversion. LOCK keeps that button on the last variation you played; press it again to release it. The two keys below, joined like a rocker, raise or lower only that button by an octave.</p>
       <p>The light on each key shows its state: inversion on, chord locked, or octave shifted down or up. In Sequencer, Mixer, Notes Hero and Ear Trainer they are the same four keys, in the same place and with the same colours: only the icon and the text underneath change, and that text says what each one does; in Drum, Drum Loop, Mic Sample and Tuner they are not used and disappear.</p>
       <h4>Wheel</h4>
-      <p>The wheel at the top right turns when you slide a finger left or right (on a computer, also with the mouse wheel or with the arrow keys when it is selected). On its own it sweeps the filter: to the right is brighter, to the left is darker. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets its volume, and turning it keeps that track from being muted. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls at any moment, and the screen shows the value while you turn it.</p>
-      <p>The overall volume is controlled by your device's volume buttons: a web page cannot read them, which is why the wheel is used for the filter and the rest.</p>
+      <p>The wheel at the top right turns when you slide a finger left or right (on a computer, also with the mouse wheel or with the arrow keys when it is selected). On the real HiChord, the wheel by itself controls master volume. A web page cannot control the iPhone/PC hardware volume, so in notes the wheel by itself intentionally does nothing. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets its volume, and turning it keeps that track from being muted. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls when a contextual function is active, and the screen shows the value while you turn it.</p>
+      <p>Use the device's own volume buttons for overall volume. The unused bare-wheel gesture is deliberately kept free rather than reassigned; it may receive an optional app-specific function later.</p>
       <h4>Dimmed controls</h4>
       <p>A dimmed button or tool has no function in the current mode (for example, empty tracks in the Mixer) and does not respond to touch.</p>
       <h3 class="grp">Screen and shortcuts</h3>
@@ -1039,7 +1039,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 44d · 6 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 45b · 6 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -3621,26 +3621,31 @@ window.addEventListener('blur', () => {
   quickClose(); held.length = 0; pointers.clear(); refresh();
 });
 
-// ===== RUEDA (como la rueda de volumen del HiChord) =====
-// El volumen general lo llevan los botones de volumen del dispositivo (una web no puede leerlos), así que la rueda sola barre el FILTRO,
-// como el «Filter Wheel» del aparato. Con la tonalidad mantenida regula el ataque; con el sonido, el release; con el modo, el filtro (como el aparato).
-// En Mixer, con una pista mantenida, su volumen (y no la silencia); en Mic Sample, la ganancia del micro.
+// ===== WHEEL (mirrors the HiChord's volume wheel) =====
+// On the hardware, the wheel by itself is master volume. A web app cannot control the iPhone/PC hardware volume,
+// so the bare wheel intentionally changes NOTHING. Contextual wheel functions remain faithful: Key = attack,
+// Sound = release, Mode = filter; Mixer track = track volume; Mic Sample = mic gain; supported FX/settings keep their own wheel action.
 const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGain:'mic gain', reverbAmt:'reverb', delayAmt:'delay', setvText:'scroll' };
 let wheelRot = 0; const wheelMuteFixed = new Set();
 function wheelTarget() {
-  if (setv) { if (setv.detail) return 'setvText'; const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }   // en los ajustes de la pantalla: el deslizador de la fila
-  if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }   // en el menú de efectos: intensidad
+  if (setv) { if (setv.detail) return 'setvText'; const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }
+  if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }
   if (quick) return quick.group === 'key' ? 'attack' : quick.group === 'sound' ? 'release' : 'cutoff';
   if (state.mode === 'mixer') { const b = held.find(x => x < 6 && tracks[x] && tracks[x].buffer); if (b != null) return 'track:' + b; }
   if (state.mode === 'mic') return 'micGain';
-  return 'cutoff';
+  return null;
 }
-function renderWheel() { const tg = wheelTarget(), l = $('wheelLbl'); if (l) l.textContent = tg === 'setv' ? setvRow().s.label.toLowerCase() : tg.startsWith('track:') ? 'track ' + (+tg.slice(6) + 1) : WHEEL_NAMES[tg]; }
-function wheelTurn(px) {   // px > 0 (a la derecha) = más
+function renderWheel() {
+  const tg = wheelTarget(), l = $('wheelLbl'); if (!l) return;
+  l.textContent = !tg ? '' : tg === 'setv' ? setvRow().s.label.toLowerCase() : tg.startsWith('track:') ? 'track ' + (+tg.slice(6) + 1) : WHEEL_NAMES[tg];
+  l.classList.toggle('dim', !tg);
+}
+function wheelTurn(px) {   // px > 0 (to the right) = more
   quickPromote();
   if (quick) quick.used = true; if (menu) menuPoke();
-  wheelRot += px; $('wheelRim').style.setProperty('--rot', Math.round(wheelRot) + 'px');   // enteros: las estrías se ven nítidas
+  wheelRot += px; $('wheelRim').style.setProperty('--rot', Math.round(wheelRot) + 'px');
   const tg = wheelTarget(); let txt;
+  if (!tg) return;   // bare wheel = hardware master volume; intentionally no-op on the web app
   if (tg === 'setvText') { $('setvList').scrollTop += px * 2; return; }
   if (tg === 'setv') { const r = setvRow(), el = r.s.el; el.value = Math.max(+el.min, Math.min(+el.max, +el.value + px * (+el.max - +el.min) / 260)); el.dispatchEvent(new Event('input', { bubbles: true })); setvRender(); return; }
   if (tg.startsWith('track:')) {
@@ -4373,8 +4378,48 @@ function puText(str, x, y, o) {
   return w;
 }
 function puWidth(str, font, sc) { const f = pxFont()[font || 'f5']; return puMap(str).length * (f.w + 1) * (sc || 1) - (sc || 1); }
-function puBig(str, cx, y, maxW) { const sc = puWidth(str, 'f8', 2) <= maxW ? 2 : 1; if (puWidth(str, 'f8', sc) > maxW) { puText(str, cx, y + 4, { align: 'c' }); return; } puText(str, cx, y + (sc === 1 ? 8 : 0), { font: 'f8', scale: sc, align: 'c' }); }
-function puName(str, cx, y, maxW) { const sc = puWidth(str, 'f5', 2) <= maxW ? 2 : 1; puText(str, cx, y + (sc === 1 ? 4 : 0), { scale: sc, align: 'c' }); }   // selector names: 5×8 font, doubled when it fits
+// PIXEL has firmware-style display vocabulary: common names are shortened deliberately first; truncation is only a final fallback for imported/user text.
+function puCompact(str) {
+  return puMap(String(str || '').toUpperCase())
+    .replace('HARMONIC MINOR', 'HARM MIN').replace('MELODIC MINOR', 'MEL MIN')
+    .replace('MAJOR PENTATONIC', 'MAJ PENT').replace('MINOR PENTATONIC', 'MIN PENT')
+    .replace('MIXOLYDIAN', 'MIXO').replace('DORIAN', 'DOR').replace('LYDIAN', 'LYD')
+    .replace('FM EPIANO', 'FM EP').replace('HX7 PIANO', 'HX7').replace('GRANDPNO', 'GRAND')
+    .replace('E GUITAR', 'E GTR').replace('ACOUSTIC', 'ACOUST').replace('CLARINET', 'CLAR')
+    .replace('VIBRAPH', 'VIBRA').replace('MIC SAMPLE', 'MIC').replace('DRUM LOOP', 'LOOP')
+    .replace('NOTES HERO', 'HERO').replace('EAR TRAINER', 'EAR').replace('SEQUENCER', 'SEQ');
+}
+function puFit(str, room) {
+  let s = puCompact(str); if (room <= 0) return '';
+  if (puWidth(s) <= room) return s;
+  const dot = room >= 17 ? '.' : '';
+  while (s.length > 1 && puWidth(s + dot) > room) s = s.slice(0, -1);
+  return s + (s && dot && puWidth(s + dot) <= room ? dot : '');
+}
+// Firmware-style left/right fields. Each side owns a pixel budget; they can never overlap.
+function puPair(left, right, y, leftX, rightX, gap, o) {
+  o = o || {}; leftX = leftX == null ? 2 : leftX; rightX = rightX == null ? pxuiState().w - 2 : rightX; gap = gap == null ? 5 : gap;
+  left = puCompact(left); right = puCompact(right);
+  const total = Math.max(0, rightX - leftX + 1), rb = right ? Math.max(17, Math.floor((total - gap) * (o.rightShare || 0.48))) : 0;
+  right = right ? puFit(right, rb) : ''; const rw = right ? puWidth(right) : 0;
+  left = puFit(left, Math.max(0, total - rw - (right ? gap : 0)));
+  if (left) puText(left, leftX, y, o.left || {});
+  if (right) puText(right, rightX, y, Object.assign({ align:'r' }, o.right || {}));
+  return { left, right };
+}
+const PU_HINT = {
+  'BPM':'BPM', 'EFFECTS':'FX', 'SOUND':'SOUND', 'MODE':'MODE', 'KEY':'KEY', 'OCTAVE':'OCT',
+  'STRUM SPEED':'SPEED', 'ARP PATTERN':'PATTERN', 'ARP RATE':'RATE', 'ARP LAYERING':'LAYER',
+  'REPEAT RATE':'RATE', 'DRUM KIT':'KIT', 'DRUM LOOP VARIATION':'VAR', 'LEVEL':'LEVEL'
+};
+function puHint(str) {
+  let s = puMap(String(str || '').toUpperCase()).replace(/\s+/g, ' ').trim();
+  s = s.replace('TIGHT KIT','TIGHT').replace('LYNN KIT','LYNN').replace('TRAP BOX','TRAP').replace('X0X BOX','X0X').replace('X9X BOX','X9X');
+  for (const [a,b] of Object.entries(PU_HINT)) s = s.replace(a,b);
+  return puCompact(s);
+}
+function puBig(str, cx, y, maxW) { str = puCompact(str); const sc = puWidth(str, 'f8', 2) <= maxW ? 2 : 1; if (puWidth(str, 'f8', sc) > maxW) { puText(puFit(str, maxW), cx, y + 4, { align: 'c' }); return; } puText(str, cx, y + (sc === 1 ? 8 : 0), { font: 'f8', scale: sc, align: 'c' }); }
+function puName(str, cx, y, maxW) { str = puFit(str, maxW); const sc = puWidth(str, 'f5', 2) <= maxW ? 2 : 1; puText(str, cx, y + (sc === 1 ? 4 : 0), { scale: sc, align: 'c' }); }   // selector names: 5×8 font, doubled when it fits
 function puGear(x, y) { puCircle(x + 3, y + 3, 2, 0); [[3, 0], [3, 6], [0, 3], [6, 3], [1, 1], [5, 1], [1, 5], [5, 5]].forEach(q => puPx(x + q[0], y + q[1], 0)); }
 function puIcon(name, x, y, t) {
   const R = (a, b, c, d, v) => puRect(x + a, y + b, c, d, v), L = (a, b, c, d) => puLine(x + a, y + b, x + c, y + d), C = (cx, cy, r, f) => puCircle(x + cx, y + cy, r, 1, f);
@@ -4414,22 +4459,22 @@ function puPlay(t, w, h) {
   const cy = Math.round(h * 0.77);
   if (state.osc && analyser && ctx && ctx.state === 'running') { analyser.getByteTimeDomainData(scopeData); let prev = null; for (let x = 0; x < w; x++) { const v = (scopeData[Math.min(699, Math.floor(x / w * 700))] - 128) / 128, y = Math.round(cy - v * 6), y0 = prev == null ? y : prev; puRect(x, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; } }
   else for (let x = 0; x < w; x += 2) puPx(x, cy);   // dotted line = the dim rest line
-  const x0 = puIndicators(w, h, t), short = puT('sMode').toUpperCase().replace('SEQUENCER', 'SEQ').replace('DRUM LOOP', 'LOOP').replace('MIC SAMPLE', 'MIC').replace('NOTES HERO', 'HERO').replace('EAR TRAINER', 'EAR').replace('TIGHT KIT', 'TIGHT').replace(' · ', ' ');
-  puText(short.slice(0, Math.max(4, Math.floor((x0 - 3) / 6))), 2, h - 8);
+  const x0 = puIndicators(w, h, t), short = puHint(puT('sMode').replace(/ · /g, ' '));
+  const modeTxt = puFit(short, Math.max(0, x0 - 5));
+  if (modeTxt) puText(modeTxt, 2, h - 8);
 }
 function puMenu(t, w, h) {
   const k = menu.kind; puBar(puT('menuTitle'), puT('menuPos'), w);
   const fx = 8, fy = 10, fw = w - 16, fh = h - 20, mid = fy + Math.floor(fh / 2), ny = fy + fh - 10; puFrame(fx, fy, fw, fh);
-  const fitName = (s, room) => { while (s.length > 3 && puWidth(s) > room) s = s.slice(0, -1); return s; };   // names: always the 5×8 font, one size for all
   puTri(fx + 9, mid, 5, 'l'); puTri(fx + fw - 10, mid, 5, 'r');   // arrows point OUTWARD (◂ on the left, ▸ on the right)
   const val = puT('menuVal');
   if (k === 'sound') {
     const band = ny - 4 - (fy + 2), n = fw - 30, pts = glyphPoints(curSound(), n, (performance.now() - glyphT0) / 1000), gy = fy + 2 + Math.floor(band / 2), amp = Math.max(4, Math.floor(band / 2) - 1); let prev = null;
     for (let i = 0; i < n; i++) { const y = Math.round(gy - pts[i] * amp), y0 = prev == null ? y : prev; puRect(fx + 15 + i, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; }
-    puText(fitName(val, fw - 6), Math.floor(w / 2), ny, { align: 'c' });   // the arrows sit at mid height, so the name can use the full width
+    puText(puFit(val, fw - 6), Math.floor(w / 2), ny, { align: 'c' });   // the arrows sit at mid height, so the name can use the full width
   } else if (k === 'mode') {   // the mode ALWAYS shows its icon (24×24). Tall frame: icon on top, name on the bottom row. Short frame (Safari with its bars, small phones): icon and name side by side
     const cx = Math.floor(w / 2);
-    if (fh >= 38) { puIcon(state.mode, cx - 12, fy + 2, t); puText(fitName(val, fw - 6), cx, ny, { align: 'c' }); }   // 2+ rows of air between icon and name (7 on a full-height iPhone 13)
+    if (fh >= 38) { puIcon(state.mode, cx - 12, fy + 2, t); puText(puFit(val, fw - 6), cx, ny, { align: 'c' }); }   // 2+ rows of air between icon and name (7 on a full-height iPhone 13)
     else {
       let ffy = fy, ffh = fh; if (ffh < 26) ffh = 26;   // the icon needs 24 inner rows: on the shortest screens the frame grows by a row or two toward the hints
       puRect(fx - 4, fy - 1, fw + 8, ffh + 2, 0); puFrame(fx, ffy, fw, ffh); const m = ffy + Math.floor(ffh / 2);
@@ -4438,16 +4483,15 @@ function puMenu(t, w, h) {
       if (!fits(name, a1 - a0, 4)) name = PAD_SHORT[name] || name;   // Sequencer → Seq, Ear Trainer → Ear…
       if (fits(name, a1 - a0, 4)) { puTri(fx + 9, m, 5, 'l'); puTri(fx + fw - 10, m, 5, 'r'); }
       else { a0 = fx + 7; a1 = fx + fw - 8; puTri(fx + 5, m, 4, 'l'); puTri(fx + fw - 6, m, 4, 'r'); }   // very narrow: smaller arrows against the frame
-      const gap = fits(name, a1 - a0, 4) ? 4 : 3; name = fitName(name, a1 - a0 - 24 - gap);
+      const gap = fits(name, a1 - a0, 4) ? 4 : 3; name = puFit(name, a1 - a0 - 24 - gap);
       const gw = 24 + gap + puWidth(name), gx = a0 + Math.floor((a1 - a0 - gw) / 2);
       puIcon(state.mode, gx, m - 12, t); puText(name, gx + 24 + gap, m - 4);
     }
   }
   else puBig(val, Math.floor(w / 2), mid - 8, fw - 24);
-  let hl = puT('menuUp').toUpperCase(), hr = puT('menuDown').toUpperCase();   // bottom hints: never collide (drop the BPM number first, then trim the right one)
+  let hl = puHint(puT('menuUp')), hr = puHint(puT('menuDown'));   // deterministic firmware hints: fixed left/right budgets, never overlap
   if (puWidth(hl) + puWidth(hr) + 12 > w) hl = hl.replace(/\s*\d+$/, '');
-  if (puWidth(hl) + puWidth(hr) + 12 > w) hr = hr.slice(0, Math.max(3, Math.floor((w - puWidth(hl) - 12) / 6)));
-  puText(hl, 2, h - 8); puText(hr, w - 2, h - 8, { align: 'r' });
+  puPair(hl, hr, h - 8, 2, w - 2, 6, { rightShare:0.50 });
 }
 // --- settings in pixels: rows are drawn exactly where the (invisible) DOM rows are, so every tap still lands on its row ---
 const PU_SHORT_L = { 'NOTES AND NUMBERS ON KEYS':'KEY LABELS', 'PIXEL DISPLAY':'PIXELS', 'OSCILLOSCOPE':'SCOPE', 'TEST VIBRATION':'TEST VIBRA', 'SWIPE ACROSS BUTTONS':'SWIPE',
@@ -4475,8 +4519,8 @@ function puSettings(t, w, h) {
     const off = Math.max(0, Math.round(list.scrollTop / 27));
     for (let i = 0; i < 6; i++) { const ln = lines[off + i]; if (ln) puText(ln, 2, 11 + i * 9); }
     puRect(0, 0, w, 9, 1);
-    if (setv.msg) puText(puShortL(setv.msg).slice(0, Math.floor((w - 16) / 6)), 2, 0, { v: 0 });
-    else { puText('<', 2, 0, { v: 0 }); puText(puShortL(setv.detail.title), 10, 0, { v: 0 }); if (setv.detail.copy) puText('COPY', w - 13, 0, { v: 0, align: 'r' }); }
+    if (setv.msg) puText(puFit(puShortL(setv.msg), w - 18), 2, 0, { v: 0 });
+    else { puText('<', 2, 0, { v: 0 }); const copyRoom = setv.detail.copy ? puWidth('COPY') + 8 : 0; puText(puFit(puShortL(setv.detail.title), Math.max(0, w - 23 - copyRoom)), 10, 0, { v: 0 }); if (setv.detail.copy) puText('COPY', w - 13, 0, { v: 0, align: 'r' }); }
     puGear(w - 10, 1);
     return;
   }
@@ -4488,20 +4532,25 @@ function puSettings(t, w, h) {
     if (vv) {   // adjustable: < value > across the value area
       const vr = vl.getBoundingClientRect(), xl = LX(vr), xr = Math.min(w - 1, LR(vr));
       puText('<', xl + 1, ty, { v: v0 }); puText('>', xr - 6, ty, { v: v0 });
-      puText(puShortV(vv.textContent).slice(0, Math.max(2, Math.floor((xr - xl - 16) / 6))), Math.round((xl + xr) / 2), ty, { v: v0, align: 'c' }); vx0 = xl;
-    } else if (vl) { const val = puShortV(vl.textContent).slice(0, 9); puText(val, w - 2, ty, { v: v0, align: 'r' }); vx0 = w - 2 - puWidth(val); }
-    const lb = row.querySelector('.lb'); puText(puShortL(lb ? lb.textContent : '').slice(0, Math.max(3, Math.floor((vx0 - 6) / 6))), 2, ty, { v: v0 });
+      puText(puFit(puShortV(vv.textContent), Math.max(0, xr - xl - 16)), Math.round((xl + xr) / 2), ty, { v: v0, align: 'c' }); vx0 = xl;
+    } else if (vl) { const val = puFit(puShortV(vl.textContent), 53); puText(val, w - 2, ty, { v: v0, align: 'r' }); vx0 = w - 2 - puWidth(val); }
+    const lb = row.querySelector('.lb'); puText(puFit(puShortL(lb ? lb.textContent : ''), Math.max(0, vx0 - 8)), 2, ty, { v: v0 });
   });
   // header drawn last (covers rows scrolled under it)
   puRect(0, 0, w, 9, 1);
-  const head = $('setvHead'), headCur = head.classList.contains('cur'), nx = LX($('setvNext').getBoundingClientRect()), name = puShortL($('setvSec').textContent).slice(0, Math.max(3, Math.floor((nx - 12) / 6)));
-  if (head.classList.contains('msg')) { puText(puShortL($('setvSec').textContent).slice(0, Math.floor((w - 16) / 6)), 2, 0, { v: 0 }); puGear(w - 10, 1); return; }
+  const head = $('setvHead'), headCur = head.classList.contains('cur'), nx = LX($('setvNext').getBoundingClientRect()), name = puFit(puShortL($('setvSec').textContent), Math.max(0, nx - 12));
+  if (head.classList.contains('msg')) { puText(puFit(puShortL($('setvSec').textContent), w - 18), 2, 0, { v: 0 }); puGear(w - 10, 1); return; }
   puText('<', 2, 0, { v: 0 });
   if (headCur) { puRect(9, 0, puWidth(name) + 2, 9, 0); puText(name, 10, 0); } else puText(name, 10, 0, { v: 0 });
   puText('>', nx + 1, 0, { v: 0 }); puText($('setvPos').textContent, w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1);
 }
 function puArrow(x, y, dir) { const d = DIR_VEC[dir]; if (!d) return; puLine(x - d[0] * 3, y - d[1] * 3, x + d[0] * 3, y + d[1] * 3); puRect(Math.round(x + d[0] * 3) - 1, Math.round(y + d[1] * 3) - 1, 3, 3); }
-function puBar(left, right, w) { puRect(0, 0, w, 9, 1); right = puMap(String(right || '').toUpperCase()); const rw = right ? puWidth(right) + 6 : 0; left = puMap(String(left || '').toUpperCase().replace(/ · /g, ' ')); puText(left.slice(0, Math.max(3, Math.floor((w - 15 - rw) / 6))), 2, 0, { v: 0 }); if (right) puText(right, w - 13, 0, { v: 0, align: 'r' }); puGear(w - 10, 1); }   // title bar: the left text is trimmed so it never runs into the right one
+function puBar(left, right, w) {
+  puRect(0, 0, w, 9, 1);
+  // Reserve the rightmost 11 px for the gear, then split the remaining bar into non-overlapping firmware fields.
+  puPair(String(left || '').replace(/ · /g, ' '), right, 0, 2, w - 13, 5, { rightShare:0.50, left:{v:0}, right:{v:0} });
+  puGear(w - 10, 1);
+}
 function puGameBar(w) { puBar(puT('sKey'), puT('sSound').replace(/best streak/i, 'best'), w); }
 // --- Notes Hero in pixels: one lane, balls, degree circle (like the original Chord Hiro screen) ---
 function puHero(t, w, h) {
@@ -4563,7 +4612,7 @@ function puFrameDraw(now) {
   const u = pxuiState(), { w, h } = pxm; if (u.w !== w || u.h !== h || !u.fb) { u.w = w; u.h = h; u.fb = new Uint8Array(w * h); } else u.fb.fill(0);
   const t = now / 1000;
   if (setv) puSettings(t, w, h); else if (menu) puMenu(t, w, h); else if (state.mode === 'hiro') puHero(t, w, h); else if (state.mode === 'ear') puEar(t, w, h); else if (state.mode === 'tuner') puTuner(t, w, h); else puPlay(t, w, h);
-  const ts = $('toast'); if (ts && ts.classList.contains('show') && ts.textContent) { puRect(0, h - 9, w, 9, 1); puText(ts.textContent.toUpperCase().slice(0, Math.floor((w - 4) / 6)), 2, h - 9, { v: 0 }); }
+  const ts = $('toast'); if (ts && ts.classList.contains('show') && ts.textContent) { puRect(0, h - 9, w, 9, 1); puText(puFit(ts.textContent, w - 4), 2, h - 9, { v: 0 }); }
   const g = c.getContext('2d'), im = g.createImageData(w, h), rgb = cssRgb(getComputedStyle(document.documentElement).getPropertyValue('--panel-ink'));
   for (let i = 0; i < u.fb.length; i++) if (u.fb[i]) { const j = i * 4; im.data[j] = rgb[0]; im.data[j + 1] = rgb[1]; im.data[j + 2] = rgb[2]; im.data[j + 3] = 255; }
   g.putImageData(im, 0, 0);
