@@ -838,6 +838,32 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 :root[data-screen="phosphor"] .display .menu.has-glyph .menu-glyph { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; filter: drop-shadow(0 0 2px rgba(150,255,190,.8)) drop-shadow(0 0 7px rgba(50,230,120,.4)); }
 :root[data-screen="phosphor"] .display .menu.has-glyph .menu-val, :root[data-screen="phosphor"] .display .menu.has-glyph .menu-side { position: relative; z-index: 1; }
 
+/* ===== PHASE 46 · hardware fidelity: real three-button control group ===== */
+.controls .legacy-tools { display: none !important; }
+.controls .menu-keys {
+  flex: 0 0 auto; width: 144px; display: grid; grid-template-columns: repeat(3, 44px); gap: 6px;
+  align-items: center; justify-content: end;
+}
+.controls .menu-key {
+  position: relative; width: 44px; height: 44px; border: 1px solid rgba(0,0,0,.55); border-radius: 8px;
+  padding: 0; display: grid; place-items: center; color: #171717;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 2px 0 rgba(0,0,0,.42);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.controls .menu-key.key { background: #A7AAA7; }
+.controls .menu-key.sound { background: #E2BF2F; }
+.controls .menu-key.mode { background: #C84635; color: #fff; }
+.controls .menu-key .mk-icon { font: 700 13px/1 var(--mono); letter-spacing: -.04em; transform: translateY(-3px); }
+.controls .menu-key .mk-icon.wave { font-size: 20px; font-weight: 500; }
+.controls .menu-key .mk-label { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); font: 600 7px/1 var(--sans); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; opacity: .82; }
+.controls .menu-key.pressed, .controls .menu-key:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.35); }
+.controls .menu-key.held { outline: 1px solid color-mix(in srgb, var(--led) 75%, transparent); outline-offset: 2px; }
+@media (max-width: 360px) {
+  .controls .menu-keys { width: 126px; grid-template-columns: repeat(3, 38px); gap: 5px; }
+  .controls .menu-key { width: 38px; height: 40px; }
+  .controls .menu-key .mk-label { font-size: 6px; }
+}
+
 /* ===== FASE 39 · PHOSPHOR: osciloscopio simulado ===== */
 .display .scope-read { display: none; }
 :root[data-screen="phosphor"] .display .screen:not(.hiro):not(.ear):not(.tuner):not(.menu-open):not(.setv-open) .scope-read { display: block; position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); font: 10px/1 var(--mono); letter-spacing: .04em; color: var(--panel-dim); opacity: .85; white-space: nowrap; pointer-events: none; z-index: 1; }
@@ -902,12 +928,17 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 
   <section class="controls">
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
-    <div class="tools" id="tools">
+    <div class="menu-keys" id="menuKeys" aria-label="HiChord menu buttons">
+      <button class="menu-key key" id="hwKey" aria-label="Key"><span class="mk-icon" aria-hidden="true">K</span><span class="mk-label">Key</span></button>
+      <button class="menu-key sound" id="hwSound" aria-label="Sound"><span class="mk-icon wave" aria-hidden="true">~</span><span class="mk-label">Sound</span></button>
+      <button class="menu-key mode" id="hwMode" aria-label="Mode"><span class="mk-icon" aria-hidden="true">M</span><span class="mk-label">Mode</span></button>
+    </div>
+    <div class="tools legacy-tools" id="tools" aria-hidden="true">
       <div class="target-lbl" id="targetLbl">Button 1</div>
-      <button id="tInv" aria-label="Inversion"></button>
-      <button id="tLock" aria-label="Lock chord"></button>
-      <button id="tOctDn" aria-label="Octave down"></button>
-      <button id="tOctUp" aria-label="Octave up"></button>
+      <button id="tInv" tabindex="-1" aria-hidden="true"></button>
+      <button id="tLock" tabindex="-1" aria-hidden="true"></button>
+      <button id="tOctDn" tabindex="-1" aria-hidden="true"></button>
+      <button id="tOctUp" tabindex="-1" aria-hidden="true"></button>
       <span class="oct-cap" aria-hidden="true">octave</span>
     </div>
   </section>
@@ -926,10 +957,9 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Chords</h4>
       <p>The seven buttons play the chords of the key: 1, 4 and 5 are major; 2, 3 and 6 are minor; 7 is diminished. They never sound bad together. Try 1 → 5 → 6 → 4.</p>
       <p>Hold a button and move the joystick: each direction changes the colour of the chord. Let go and you are back to the normal chord. In Settings → Chords you can choose between five joystick maps.</p>
-      <p>The screen shows the name of the chord that is sounding; if you also want to see it on the keys, turn on "Notes and numbers on keys" in Settings → Look. That option applies to every mode: with it off, the keys stay clean in Drums, Beats, Mixer, Seq and the rest (only quick select always shows the names). In Settings → Chords, "Bass" adds the root an octave down (Root) or lets you hold one button for the bass and press another for the chord (Slash), and "V.Lead" (Voice Leading) chooses the inversions for you (the INV key is then dimmed).</p>
-      <h4>Tools</h4>
-      <p>They act on the last button you played, which you can recognise by its green light. INV changes the inversion. LOCK keeps that button on the last variation you played; press it again to release it. The two keys below, joined like a rocker, raise or lower only that button by an octave.</p>
-      <p>The light on each key shows its state: inversion on, chord locked, or octave shifted down or up. In Sequencer, Mixer, Notes Hero and Ear Trainer they are the same four keys, in the same place and with the same colours: only the icon and the text underneath change, and that text says what each one does; in Drum, Drum Loop, Mic Sample and Tuner they are not used and disappear.</p>
+      <p>The screen shows the name of the chord that is sounding; if you also want to see it on the keys, turn on "Notes and numbers on keys" in Settings → Look. In Settings → Chords, "Bass" adds the root an octave down (Root) or lets you hold one button for the bass and press another for the chord (Slash), and "V.Lead" (Voice Leading) chooses smooth inversions automatically.</p>
+      <h4>Menu buttons</h4>
+      <p>The three physical buttons follow the REV 3.0 hardware: gray Key, yellow Sound and red Mode. Tap them to open their menus. Hold a chord and press Key for octave down, Sound for inversion (or Sound while holding a joystick modification to lock it), and Mode for octave up. Holding a menu button first turns the seven chord buttons into its quick-select choices.</p>
       <h4>Wheel</h4>
       <p>The wheel at the top right turns when you slide a finger left or right (on a computer, also with the mouse wheel or with the arrow keys when it is selected). On the real HiChord, the wheel by itself controls master volume. A web page cannot control the iPhone/PC hardware volume, so in notes the wheel by itself intentionally does nothing. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets its volume, and turning it keeps that track from being muted. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls when a contextual function is active, and the screen shows the value while you turn it.</p>
       <p>Use the device's own volume buttons for overall volume. The unused bare-wheel gesture is deliberately kept free rather than reassigned; it may receive an optional app-specific function later.</p>
@@ -950,7 +980,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>Hold the key, the sound or the mode on the screen and, with your other finger, tap the joystick knob with a short tap, without moving it (like pushing the joystick down on the device). Key: changes everything, that is, the sound, the effects, the key and the tempo. Sound: a new sound (waveform and effects); the key, the tempo and the inversions stay. Mode: a new pattern (arpeggio, rhythm or sequence, and the octave layout); the sound stays. This is what the device does in its 3.0 version. It does not count if a chord is held, nor in Notes Hero and Ear Trainer.</p>
       <p>On a computer, hold J (sound), K (key) or L (mode) and press the space bar. For more control, Settings → Presets has randomisation with more options (see "Presets and random").</p>
       <h4>Computer keyboard</h4>
-      <p><span class="k">1</span>–<span class="k">7</span> chords · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> and <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> next mode · <span class="k">I</span> inversion · <span class="k">F</span> lock · <span class="k">,</span> <span class="k">.</span> octave · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> tapped open the sound, key and mode menus; held, their quick select · <span class="k">←</span> <span class="k">→</span> <span class="k">↑</span> <span class="k">↓</span> move through the open menu · <span class="k">Esc</span> closes it · <span class="k">Space</span> with J, K or L held randomises · <span class="k">←</span> <span class="k">→</span> turn the wheel when it is selected</p>
+      <p><span class="k">1</span>–<span class="k">7</span> chords · <span class="k">W</span> <span class="k">A</span> <span class="k">S</span> <span class="k">D</span> and <span class="k">Q</span> <span class="k">E</span> <span class="k">Z</span> <span class="k">C</span> joystick · <span class="k">M</span> next mode · <span class="k">J</span> <span class="k">K</span> <span class="k">L</span> tapped open the sound, key and mode menus; held, their quick select · <span class="k">←</span> <span class="k">→</span> <span class="k">↑</span> <span class="k">↓</span> move through the open menu · <span class="k">Esc</span> closes it · <span class="k">Space</span> with J, K or L held randomises · <span class="k">←</span> <span class="k">→</span> turn the wheel when it is selected</p>
       <h3 class="grp">Modes and rhythms</h3>
       <h4>Modes</h4>
       <p><b>Play</b> full chord. <b>Strum</b> strummed chord. <b>Lead</b> one note, the root. <b>Drone</b> the chord keeps sounding when you let go. <b>Arp</b> arpeggio at the tempo. <b>Repeat</b> the chord pulses at the tempo. To change mode, tap the mode on the screen (bottom left) and move with the joystick, or hold it for quick select (see "Menus" and "Quick select"); each mode's setting (speed, kit, variation or level) is in that same menu, downwards.</p>
@@ -1039,7 +1069,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 45b · 6 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 46 · 6 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -3211,6 +3241,15 @@ function setJoyDir(source, dir) {
   if (setv && held.length === 0 && !quick) { setvJoy(dir); renderJoy(); return; }
   if (quick) { quickFlip(dir); renderJoy(); return; }
   if (menu && held.length === 0) { menuJoy(dir); renderJoy(); return; }
+  // REV 3.0 mode-native joystick actions. These replace the old four invented function buttons.
+  if (held.length === 0 && dir) {
+    if (state.mode === 'hiro') {
+      if (dir === 'd' && !(hiro.phase === 'count' || hiro.phase === 'play')) { state.hiroPractice = !state.hiroPractice; saveState(); renderScreen(false); renderJoy(); return; }
+      if ((hiro.phase === 'count' || hiro.phase === 'play') && (dir === 'u' || dir === 'd')) {
+        state.hiroSpeed = Math.max(0.5, Math.min(1, +(state.hiroSpeed + (dir === 'u' ? 0.05 : -0.05)).toFixed(2))); saveState(); renderScreen(false); renderJoy(); return;
+      }
+    }
+  }
   // En modo cromático, sin acorde pulsado, izquierda/derecha cambian la tonalidad
   if (state.joy === 'chromatic' && held.length === 0 && (dir === 'l' || dir === 'r')) {
     state.key = (state.key + (dir === 'r' ? 1 : 11)) % 12; saveState();
@@ -3222,7 +3261,7 @@ function setJoyDir(source, dir) {
   if (held.length) refresh(); else renderScreen(false);
 }
 
-// ===== HERRAMIENTAS POR BOTÓN =====
+// ===== LEGACY FUNCTION-BUTTON HELPERS (hidden since Phase 46; retained temporarily for migration/keyboard compatibility) =====
 const NO_TOOLS = ['drum', 'beat', 'mic', 'tuner', 'hiro', 'ear'];
 function toolInversion() {
   if (state.mode === 'hiro') { hiroTool(0); return; }
@@ -3560,17 +3599,21 @@ function buildJoy() {
 }
 // El clic de la perilla solo sirve para aleatorizar, con la tonalidad, el sonido o el modo mantenidos. El resto de funciones (looper, Seq, Mixer) ya tienen su botón visible,
 // así que en cualquier otro caso la perilla es solo un joystick.
-function joyClickAction() { return (!!setv && !quick) || (!!menu && !quick) || (!!quick && state.mode !== 'hiro' && state.mode !== 'ear'); }
+function joyClickAction() { return (!!setv && !quick) || (!!menu && !quick) || !!quick || state.mode === 'seq' || state.mode === 'mixer' || state.mode === 'hiro' || state.mode === 'ear' || loopHasAudio(); }
 function joyClick() {
   quickPromote();
   if (held.length || !joyClickAction()) return;             // con un acorde pulsado no cuenta
-  if (setv && !quick) { setvActivate(); return; }           // en los ajustes de la pantalla, el clic activa la fila
-  if (menu && !quick) { menuClose(); return; }              // con un menú abierto, el clic lo cierra (en el aparato, «select/close»)
+  if (setv && !quick) { setvActivate(); return; }
+  if (menu && !quick) { menuClose(); return; }
   const knob = $('knob'); knob.classList.add('click'); setTimeout(() => knob.classList.remove('click'), 130);
   haptic(true);
   try {
-    quick.used = true; randomize(quick.group === 'sound' ? 'sound' : quick.group === 'mode' ? 'pattern' : 'all');   // como en la Rev 3.0: SONIDO = onda y efectos; KEY = todo; MODO = patrón
-    renderPads();
+    if (quick) { quick.used = true; randomize(quick.group === 'sound' ? 'sound' : quick.group === 'mode' ? 'pattern' : 'all'); renderPads(); return; }
+    if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
+    if (state.mode === 'mixer') { togglePause(); return; }
+    if (state.mode === 'hiro') { if (hiro.phase === 'count' || hiro.phase === 'play') hiroEnd(false); else if (hiro.phase === 'result') { state.hiroLevel = (state.hiroLevel + 1) % HIRO_SONGS.length; saveState(); hiroPrepare(); } else hiroStart(); return; }
+    if (state.mode === 'ear') { if (ear.phase === 'idle') earStart(); else if (ear.phase === 'result') { state.earLevel = (state.earLevel + 1) % EAR_LEVELS.length; saveState(); earPrepare(); } return; }
+    if (loopHasAudio()) togglePause();
   } catch (e) { logErr('clic', e); errToast(e); }
 }
 function renderJoy() {
@@ -3630,7 +3673,7 @@ let wheelRot = 0; const wheelMuteFixed = new Set();
 function wheelTarget() {
   if (setv) { if (setv.detail) return 'setvText'; const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }
   if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }
-  if (quick) return quick.group === 'key' ? 'attack' : quick.group === 'sound' ? 'release' : 'cutoff';
+  const mg = hwHeldGroup || (quick && quick.group); if (mg) return mg === 'key' ? 'attack' : mg === 'sound' ? 'release' : 'cutoff';
   if (state.mode === 'mixer') { const b = held.find(x => x < 6 && tracks[x] && tracks[x].buffer); if (b != null) return 'track:' + b; }
   if (state.mode === 'mic') return 'micGain';
   return null;
@@ -4160,6 +4203,72 @@ function bindQuick(id, group) {
   el.addEventListener('contextmenu', e => e.preventDefault());
 }
 bindQuick('sSound', 'sound'); bindQuick('sKey', 'key'); bindQuick('sMode', 'mode');
+
+// ===== PHYSICAL MENU BUTTONS (Phase 46) =====
+// Canonical hardware interaction follows REV 3.0: gray=Key, yellow=Sound, red=Mode.
+// The screen labels remain tappable as a touchscreen convenience, but these three buttons are the primary controls.
+let hwHeldGroup = null;
+function comboBtn() { return held.length ? held[held.length - 1] : target; }
+function chordOctaveAt(btn, d) {
+  if (btn == null || btn < 0 || btn > 6) return;
+  const v = Math.max(-2, Math.min(2, state.btnOct[btn] + d));
+  state.btnOct[btn] = v; saveState();
+  toast('Button ' + (btn + 1) + ': octave ' + (v > 0 ? '+' + v : v));
+  refresh();
+}
+function chordInvertAt(btn) {
+  if (btn == null || state.vlead) return;
+  state.inv[btn] = (state.inv[btn] + 1) % 3; saveState();
+  const names = ['root position', '1st inversion', '2nd inversion'];
+  toast('Button ' + (btn + 1) + ': ' + names[state.inv[btn]]); refresh();
+}
+function chordLockAt(btn, dir) {
+  if (btn == null || !dir) return;
+  if (state.locks[btn]) {
+    state.locks[btn] = null; saveState(); toast('Button ' + (btn + 1) + ' released'); refresh(); return;
+  }
+  const ch = resolveChord(Object.assign({}, state, { locks:[] }), btn, dir);
+  state.locks[btn] = { rootBase:ch.rootBase, iv:ch.iv, suffix:ch.suffix }; saveState();
+  toast('Button ' + (btn + 1) + ' locked at ' + ch.name); refresh();
+}
+function arpGrayCombo(btn) {
+  if (btn >= 0 && btn < 6) { quickSet('arpPattern', ARP_PATTERNS[btn][0]); toast('Arp: ' + ARP_PATTERNS[btn][1]); return; }
+  if (btn === 6) {
+    const i = Math.max(0, ARP_LAYERS.findIndex(x => x[0] === state.arpLayer));
+    const nx = ARP_LAYERS[(i + 1) % ARP_LAYERS.length]; quickSet('arpLayer', nx[0]); toast('Arp: ' + nx[1]);
+  }
+}
+function hwChordCombo(group) {
+  const btn = comboBtn(); if (btn == null) return false;
+  if (group === 'key') {
+    if (state.mode === 'arp') arpGrayCombo(btn); else chordOctaveAt(btn, -1);
+    return true;
+  }
+  if (group === 'sound') {
+    const dir = dirFor(btn) || padDir || keyDir;
+    if (dir) chordLockAt(btn, dir); else chordInvertAt(btn);
+    return true;
+  }
+  if (group === 'mode') { chordOctaveAt(btn, 1); return true; }
+  return false;
+}
+function bindHardwareMenu(id, group) {
+  const el = $(id); let ptr = null, combo = false;
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); ptr = e.pointerId; combo = false; hwHeldGroup = group; el.classList.add('pressed','held');
+    try { el.setPointerCapture(ptr); } catch (err) {}
+    if (held.length) { combo = hwChordCombo(group); return; }
+    quickArm(group); // short press = menu; hold = quick-select/randomise context
+  });
+  const end = e => {
+    if (e.pointerId !== ptr) return; ptr = null; el.classList.remove('pressed','held'); hwHeldGroup = null;
+    if (combo) { combo = false; quickCancel(); return; }
+    if (quickCancel()) { if (e.type === 'pointerup') { if (group === 'mode') tapTempo(); menuToggle(group); } return; }
+    quickClose();
+  };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end); el.addEventListener('contextmenu', e => e.preventDefault());
+}
+bindHardwareMenu('hwKey','key'); bindHardwareMenu('hwSound','sound'); bindHardwareMenu('hwMode','mode');
 
 // ===== MIDI (Web MIDI: PC y Android; Safari en iOS no lo ofrece) =====
 // Entrada: las teclas blancas de cualquier octava tocan los botones 1–7 (Do = 1). Salida: el acorde que suena, como notas.
