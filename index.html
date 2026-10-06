@@ -984,7 +984,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>The microphone is closed as soon as you finish using it, so Safari may ask for permission every time. To stop it asking, tap "aA" in the address bar → Website Settings → Microphone → Allow; the app will still close the microphone when it finishes. In Settings → Sound, "Test microphone" shows the state: "granted" means Safari already remembers it and "prompt" that it will ask again.</p>
       <p>Alternative: turn on "Keep microphone open" in Settings → Sound. The microphone stays open but muted while the app is open (the iPhone's orange dot may stay on) and is released when you leave the app or after 15 minutes of not using it.</p>
       <h4>If the microphone does not work</h4>
-      <p>If the notice says it is blocked, in Safari tap "aA" in the address bar, go to Website Settings and allow the microphone. If it says iOS could not start the audio, close Safari completely and open the page again; if it is still the same, restart the iPhone. "Test microphone", in Settings → Sound, shows the full state. If the app ever stops responding while using the microphone, open Diagnostics afterwards: it lists the last microphone steps, which tells where it stopped.</p>
+      <p>If the notice says it is blocked, in Safari tap "aA" in the address bar, go to Website Settings and allow the microphone. If it says iOS could not start the audio, close Safari completely and open the page again; if it is still the same, restart the iPhone. "Test microphone", in Settings → Sound, shows the full state. If the app ever stops responding while using the microphone, open Diagnostics afterwards: it lists the last microphone steps, which tells where it stopped. The first line of Diagnostics is the version of the app: if it is not the latest one you uploaded, GitHub has not published it yet (or the phone still has the old copy: close the app completely and open it again).</p>
       <h3 class="grp">Practice</h3>
       <h4>Notes Hero (chord game)</h4>
       <p>A rhythm game that teaches real songwriting moves. Choose a level in the mode menu, downwards (10 levels in five tiers: Folk, Rock, Modern, Jazz and Fusion); the level, the tier and the song title appear at the top of the screen. Press "play". The screen shows a single lane: at the top left, a circle with the button you need (and next to it an arrow if you must move the joystick), at the top right the key, at the bottom left the name of the chord and at the bottom right how many you have done. After a four-beat count-in, one ball per chord travels from left to right towards the hit line (with the hit zone shaded): press its button just as the ball reaches the line and, if it has an arrow above it, also hold that joystick direction. The thin stroke between two balls is how long that chord lasts. The ball fills in when you hit and is crossed out when you miss. The closer to the beat, the better the grade: Perfect, Great, OK or Miss. Your streak and best streak are counted. Each song sets its own key, sound and rhythm; your settings come back when it ends.</p>
@@ -1039,6 +1039,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
+const APP_VERSION = 'phase 44c · 5 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -2760,6 +2761,7 @@ function showDiag(text, id) {
 }
 async function runDiag() {
   const L = [], t = (k, v) => L.push(k + ': ' + v);
+  t('version', APP_VERSION);
   t('navegador', navigator.userAgent.replace(/\s+/g, ' ').slice(0, 120));
   t('ventana', innerWidth + '×' + innerHeight + ' @' + devicePixelRatio + (navigator.standalone ? ' · installed app' : ''));
   t('protocolo', location.protocol + ' · secure: ' + (window.isSecureContext ? 'yes' : 'no'));
