@@ -664,8 +664,6 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 
 
 /* ===== FASE 33 ===== */
-/* Sin franja de modos: el modo se cambia en su menú (toque en el modo de la pantalla) o con la selección rápida; la pantalla gana su altura */
-.display .modes { display: none; }
 .display .screen { border-radius: 6px; }
 /* Acorde grande y onda a la vez (en los modos de tocar): la onda es una línea en reposo y la señal en vivo si «Onda» está activada */
 .display .screen:not(.hiro):not(.ear):not(.tuner) .scope { display: block; }
@@ -858,6 +856,31 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 .controls .menu-key .mk-label { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); font: 600 7px/1 var(--sans); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; opacity: .82; }
 .controls .menu-key.pressed, .controls .menu-key:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.35); }
 .controls .menu-key.held { outline: 1px solid color-mix(in srgb, var(--led) 75%, transparent); outline-offset: 2px; }
+/* ===== PHASE 50: contextual REV 3.0 looper display ===== */
+.screen-top > #sKey, .screen-top > #sSound { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.screen-top > #sSound { text-align: right; }
+.loop-hud { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 35px; color: var(--scr-active); }
+.loop-hud[hidden], .loop-transport-hud[hidden] { display: none !important; }
+.loop-slot, .loop-transport-hud { position: relative; width: 14px; height: 14px; box-sizing: border-box; display: grid; place-items: center; color: var(--scr-active); }
+.loop-slot.sel, .loop-transport-hud.sel { outline: 1px solid currentColor; outline-offset: 1px; }
+.loop-mark { width: 7px; height: 7px; box-sizing: border-box; border: 1.2px solid currentColor; background: transparent; }
+.loop-mark.circle { border-radius: 50%; }
+.loop-mark.square { border-radius: 0; }
+.loop-mark.triangle { width: 8px; height: 7px; border: 0; background: currentColor; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.loop-slot.filled .loop-mark.circle, .loop-slot.filled .loop-mark.square { background: currentColor; }
+.loop-slot.empty .loop-mark.triangle { position: relative; background: transparent; clip-path: none; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 7px solid currentColor; opacity: .55; }
+.loop-slot.empty .loop-mark.triangle::after { content: ''; position: absolute; left: -3px; top: 2px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; border-bottom: 5px solid var(--panel); }
+.loop-slot.empty .loop-mark.circle, .loop-slot.empty .loop-mark.square { opacity: .45; }
+.loop-slot.armed .loop-mark { opacity: .7; animation: blink 1s steps(1) infinite; }
+.loop-r { font: 700 8px/1 var(--pixel); letter-spacing: 0; }
+.loop-transport-hud { margin-right: 2px; color: var(--scr-active); }
+.loop-transport-hud .tr-bars { display: flex; gap: 2px; align-items: center; justify-content: center; }
+.loop-transport-hud .tr-bars::before, .loop-transport-hud .tr-bars::after { content: ''; width: 2px; height: 8px; background: currentColor; }
+.loop-transport-hud .tr-play { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 7px solid currentColor; margin-left: 1px; }
+.loop-transport-hud .tr-r { font: 700 9px/1 var(--pixel); }
+:root[data-screen="moss"] .loop-slot, :root[data-screen="moss"] .loop-transport-hud { color: var(--panel-ink); }
+:root[data-screen="phosphor"] .loop-slot, :root[data-screen="phosphor"] .loop-transport-hud { filter: drop-shadow(0 0 2px color-mix(in srgb, currentColor 65%, transparent)); }
+:root[data-screen="vector"] .loop-mark { border-width: 1px; }
 @media (max-width: 360px) {
   .controls .menu-keys { width: 126px; grid-template-columns: repeat(3, 38px); gap: 5px; }
   .controls .menu-key { width: 38px; height: 40px; }
@@ -891,12 +914,10 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
    Source logic: keep the instrument's 4 / 3 / 4 spatial rhythm without copying industrial dimensions:
    WHEEL + KEY/SOUND/MODE, then 2/4/6, then 1/3/5/7. The external looper strip is retired;
    looper state/control lives in the display + joystick. Visible hardware surface = active touch surface. */
-.app { gap: 10px; padding: 12px; }
-.topbar { height: 24px; margin: -4px 2px -2px; justify-content: flex-start; }
-.topbar .brand { margin-right: 0; }
-
-/* Legacy physical strips stay in the DOM temporarily for code safety, but are no longer part of the instrument surface. */
-#looper, #modes { display: none !important; }
+.app { gap: 10px; padding: 8px 12px 12px; }
+/* Phase 48b: the case front is intentionally unbranded for now.
+   The old topbar is retired so the display can sit at the top of the instrument surface. */
+.topbar { display: none !important; }
 
 .hardware-row {
   flex: 0 0 auto;
@@ -1020,10 +1041,9 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 </head>
 <body>
 <main class="app">
-  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span></div>
   <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Screen">
-    <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
+    <div class="screen-top"><span id="sKey"></span><span class="loop-hud" id="loopHud" hidden aria-label="Looper tracks"></span><span id="sSound"></span></div>
     <button class="gear" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
     <div class="chord idle" id="chordName">—</div>
     <canvas class="scope" id="scope" aria-hidden="true"></canvas>
@@ -1032,6 +1052,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
     <div class="screen-bottom">
       <span id="sMode"></span>
       <span style="display:flex;gap:10px;align-items:center">
+        <span class="loop-transport-hud" id="loopTransportHud" hidden aria-label="Looper transport"></span>
         <button class="oscbtn" id="wavBtn" aria-label="Save audio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button>
         <button class="oscbtn" id="oscBtn" aria-label="Wave"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
         <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
@@ -1048,11 +1069,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
     </div>
     <div class="toast" id="toast"></div>
   </section>
-
-  <section class="modes" id="modes"></section>
   </div>
-
-  <section class="looper" id="looper" aria-label="Looper" aria-hidden="true"></section>
 
   <section class="hardware-row" id="hardwareRow" aria-label="Performance controls">
     <div class="wheel-module">
@@ -1076,14 +1093,6 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 
   <section class="controls">
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
-    <div class="tools legacy-tools" id="tools" aria-hidden="true">
-      <div class="target-lbl" id="targetLbl">Button 1</div>
-      <button id="tInv" tabindex="-1" aria-hidden="true"></button>
-      <button id="tLock" tabindex="-1" aria-hidden="true"></button>
-      <button id="tOctDn" tabindex="-1" aria-hidden="true"></button>
-      <button id="tOctUp" tabindex="-1" aria-hidden="true"></button>
-      <span class="oct-cap" aria-hidden="true">octave</span>
-    </div>
   </section>
 </main>
 
@@ -1104,7 +1113,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Menu buttons</h4>
       <p>The three physical buttons follow the REV 3.0 hardware: gray Key, yellow Sound and red Mode. They sit in the control row directly above the chord deck, next to the wheel. Tap them to open their menus. Hold a chord and press Key for octave down, Sound for inversion (or Sound while holding a joystick modification to lock it), and Mode for octave up. Holding a menu button first turns the seven chord buttons into its quick-select choices.</p>
       <h4>Wheel</h4>
-      <p>The wheel is the left control in the row under the display, beside Key/Sound/Mode. Slide a finger left or right across its visible surface (on a computer, also use the mouse wheel or the arrow keys when it is selected). On the real HiChord, the wheel by itself controls master volume. A web page cannot control the iPhone/PC hardware volume, so in notes the wheel by itself intentionally does nothing. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets that track's volume; with button 7 held, it sets metronome volume. Turning the wheel promotes the press into a level gesture, so the track/metronome keeps its previous mute/on state. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls when a contextual function is active, and the screen shows the value while you turn it.</p>
+      <p>The wheel is the left control in the row under the display, beside Key/Sound/Mode. Slide a finger left or right across its visible surface (on a computer, also use the mouse wheel or the arrow keys when it is selected). On the real HiChord, the wheel by itself controls master volume. A web page cannot control the iPhone/PC hardware volume, so in notes the bare wheel normally does nothing. Hold Key and turn it for attack, Sound for release, or Mode for filter, as on the device. For a live filter sweep while a chord is held, turn on Filter in Sound → FX: this is the HiChord's Filter Wheel mode, and the wheel then controls cutoff directly without touching Mode (so the chord's per-button octave does not change). In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets that track's volume; with button 7 held, it sets metronome volume. Turning the wheel promotes the press into a level gesture, so the track/metronome keeps its previous mute/on state. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls when a contextual function is active, and the screen shows the value while you turn it.</p>
       <p>Use the device's own volume buttons for overall volume. The unused bare-wheel gesture is deliberately kept free rather than reassigned; it may receive an optional app-specific function later.</p>
       <h4>Dimmed controls</h4>
       <p>A dimmed button or tool has no function in the current mode (for example, empty tracks in the Mixer) and does not respond to touch.</p>
@@ -1127,7 +1136,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h3 class="grp">Modes and rhythms</h3>
       <h4>Modes</h4>
       <p><b>Play</b> full chord. <b>Strum</b> strummed chord. <b>Lead</b> one note, the root. <b>Drone</b> the chord keeps sounding when you let go. <b>Arp</b> arpeggio at the tempo. <b>Repeat</b> the chord pulses at the tempo. To change mode, tap the mode on the screen (bottom left) and move with the joystick, or hold it for quick select (see "Menus" and "Quick select"); each mode's setting (speed, kit, variation or level) is in that same menu, downwards.</p>
-      <p><b>Drum</b> each button is a hit; hold a pad and move the joystick to repeat it. <b>Drum Loop</b> each button starts a rhythm; while holding that pad, Up/Down changes its variation and Left/Right changes kit. With no pad held, Left/Right selects the target looper track. A joystick click records the playing beat into that track — the manual calls this a <b>bounce</b>. <b>Sequencer</b> builds a repeating progression and joystick click starts or stops it. <b>Mixer</b> uses buttons 1–6 as loop tracks and button 7 as the metronome.</p>
+      <p><b>Drum</b> each button is a hit; hold a pad and move the joystick to repeat it. <b>Drum Loop</b> each button starts a rhythm; while holding that pad, Up/Down changes its variation and Left/Right changes kit. With no pad held, Left/Right selects the target looper track. A joystick click records the playing beat into that track — the manual calls this a <b>bounce</b>. Its screen follows REV 3.0: variation at the left, tempo at the right, looper track shapes between them and the beat name large in the main area; after a bounce it shows which track holds the beat. <b>Sequencer</b> builds a repeating progression and joystick click starts or stops it. <b>Mixer</b> uses buttons 1–6 as loop tracks and button 7 as the metronome.</p>
       <p>In Sequencer, press chord buttons to add steps (four slots at first). Hold the joystick Left/Right to move the edit cursor, then press a chord to replace that step. Joystick Down adds four slots (up to 16), Up removes four, and holding the joystick click while pushing Up trims to the cursor. To store a joystick-modified chord, hold its chord button for about 300 ms and then move the joystick. In Mixer, tap 1–6 to mute/unmute; hold a track + Sound to solo it; hold a track + wheel to set its level. Button 7 toggles the metronome, and hold 7 + wheel sets metronome level. Clicking the joystick stops or starts all loops.</p>
       <h4>Repeat: trance gate</h4>
       <p>In Repeat, hold a chord and it opens and closes to the beat of the tempo following a fixed 32-step pattern, with rests and tied notes, like a trance synth. The pulse speed is changed in the mode menu, downwards (the same speeds as the arpeggio). The release is limited to 200 ms so the cuts stay clean.</p>
@@ -1145,7 +1154,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h3 class="grp">Record and capture</h3>
       <h4>Looper</h4>
       <p>There is no separate looper button strip on the instrument surface: the display shows the looper state and the clickable joystick is the canonical REV 3.0 control. On an empty track, click once for WAITING and click again to record. Click again while it is still WAITING to disarm/cancel before recording starts. Before the first loop, Left/Right while WAITING chooses 0–8 bars (0 = free); fixed bars get a four-beat count-in, while free recording stops on the next click. Once REC has actually started, REV 3.0 has no cancel/undo gesture: finish the take, then hold the joystick click for about 0.7 s on that playing track if you want to clear it. Later tracks start on the next Track-1 loop boundary and stop in sync. After a take, selection advances to the next empty track.</p>
-      <p>With the looper active, Left/Right selects tracks (Drum uses Up/Down). Joystick Down jumps to the transport and Up returns; clicking the transport tape-stops/resumes all loops, while holding it for about 0.7 s clears everything. On a playing track, hold the joystick click for about 0.7 s to clear that track; a short click never erases it. In Drum Loop, Left/Right selects the target track, Down selects transport, and clicking a playing beat bounces it into the highlighted empty track. Leaving Drum Loop pauses the live beat unless it was bounced first.</p>
+      <p>With the looper active, the screen shows two tracks at a time across three pages: circles are tracks 1–2, squares 3–4 and triangles 5–6. Filled shapes contain a loop; outlines are empty; R means that track is recording; a frame marks the track the next click acts on. Left/Right selects tracks (Drum uses Up/Down). Joystick Down jumps to the transport and Up returns. The transport shows two bars while the loops are playing, a triangle while paused and R while recording; clicking it tape-stops/resumes all loops, while holding it for about 0.7 s clears everything. On a playing track, hold the joystick click for about 0.7 s to clear that track; a short click never erases it. In Drum Loop, Left/Right selects the target track, Down selects transport, and clicking a playing beat bounces it into the highlighted empty track. Leaving Drum Loop pauses the live beat unless it was bounced first.</p>
       <h4>Save audio</h4>
       <p>The circle button, next to the wave, records what is sounding (chords, drums, loops and vocoder) for up to four minutes; the screen shows the time. Tapping it again stops it and opens the iPhone share menu, where you choose "Save to Files"; on a computer a 16-bit stereo WAV file is downloaded. If the app goes to the background during recording, it picks up where it was when you return, without a gap. It does not include the direct microphone.</p>
       <h4>Mic Sample (sampler)</h4>
@@ -1212,7 +1221,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 48 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 50 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -1540,7 +1549,7 @@ const BEATS = { '1/4':1, '1/8':0.5, '1/16':0.25, '1/16T':1/6, '1/32':0.125 };
 const DEFAULT_STATE = {
   key:0, scale:0, globalOct:0, joy:'default', sound:'saw', adsr:'TOUCH',
   attack:ADSR.TOUCH.a, release:ADSR.TOUCH.r, bass:'off', vlead:false, stereo:true,
-  cutoff:1000, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
+  cutoff:1000, filterWheel:false, volume:0.8, bpm:120, voices:8, glide:'off', lfo:'off',
   reverb:'off', reverbAmt:0.35, delay:'off', delayAmt:0.35, chorus:'off', flanger:'off',
   drive:'off', tape:'off', tremolo:'off', tweaks:{},
   theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
@@ -1814,7 +1823,7 @@ function cycleModeParam() {
   if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
   const p = modeParam(); if (!p || gameLocked()) return;
   const i = p.list.indexOf(state[p.key]); state[p.key] = p.list[(i + 1) % p.list.length];
-  saveState(); syncSettings(); renderModes(); renderScreen(held.length > 0);
+  saveState(); syncSettings(); renderScreen(held.length > 0);
   if (state.mode === 'hiro') hiroPrepare(); else if (state.mode === 'ear') earPrepare();
 }
 
@@ -1878,47 +1887,15 @@ function setMode(id) {
   for (const [k, v] of voices) if (k !== 'seq') { v.cv.releaseAll(currentEnv().r); voices.delete(k); }
   droneBtn = null; arpTones = []; clockStop(); autoUpdate();
   state.mode = id; saveState();
-  renderModes(); renderScreen(false); renderPads(); syncSettings();
+  renderScreen(false); renderPads(); syncSettings();
   $('screen').classList.toggle('tuner', id === 'tuner');
   $('screen').classList.toggle('hiro', id === 'hiro'); $('screen').classList.toggle('ear', id === 'ear');
-  renderLooper(); scrollModeIntoView();
+  renderLooper();
   if (id === 'beat') { const nx = tracks.findIndex(t => t.state === 'off'); if (nx >= 0) loop.cur = nx; loop.transport = false; }
   if (id === 'hiro') hiroPrepare(); else if (id === 'ear') earPrepare();
   if (id === 'tuner') { const cn = $('chordName'); cn.textContent = '—'; cn.classList.add('idle'); onActivation(tunerStart); }
   if (id === 'mic') onActivation(() => micStart('sampler'));
   if (held.length) refresh();
-}
-function scrollModeIntoView() {   // centra el modo activo en la franja
-  const act = document.querySelector('#modes .chip.on'), sc = $('modeScroll');
-  if (act && sc && sc.scrollTo) sc.scrollTo({ left:Math.max(0, act.offsetLeft - sc.clientWidth / 2 + act.offsetWidth / 2), behavior:'smooth' });
-}
-function renderModes() {
-  document.querySelectorAll('#modes .chip:not(.param)').forEach(el => {
-    el.classList.toggle('on', el.dataset.m === state.mode); el.setAttribute('aria-pressed', el.dataset.m === state.mode ? 'true' : 'false');
-    if (el.dataset.m === 'mixer') el.hidden = !loopHasAudio() && state.mode !== 'mixer';
-  });
-  const p = modeParam(), el = $('modeParam');
-  if (state.mode === 'seq') { el.disabled = false; el.textContent = (seq.playing ? 'stop' : 'play') + ' · ' + seq.steps.length + '/' + seq.capacity; return; }
-  el.disabled = !p || gameLocked(); el.textContent = p ? p.names[state[p.key]] : 'ajuste';
-}
-function buildModes() {
-  const wrap = $('modes'), scroll = document.createElement('div');
-  scroll.className = 'modes-scroll'; scroll.id = 'modeScroll'; wrap.appendChild(scroll);
-  for (const m of MODES) {
-    const b = document.createElement('button'); b.className = 'chip'; b.dataset.m = m.id; b.textContent = m.name;
-    onChipTap(b, () => setMode(m.id), scroll); scroll.appendChild(b);
-  }
-  const arrow = (dir) => {   // solo con ratón: desplazan la franja una página
-    const a = document.createElement('button'); a.className = 'modes-arrow'; a.setAttribute('aria-label', dir < 0 ? 'Previous modes' : 'Next modes');
-    a.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + (dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>';
-    a.addEventListener('click', () => scroll.scrollBy({ left: dir * scroll.clientWidth * 0.7, behavior: 'smooth' }));
-    return a;
-  };
-  wrap.insertBefore(arrow(-1), scroll); wrap.appendChild(arrow(1));
-  scroll.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { scroll.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });   // rueda del ratón = desplazar en horizontal
-  const p = document.createElement('button'); p.className = 'chip param'; p.id = 'modeParam';
-  onTap(p, cycleModeParam); wrap.appendChild(p);
-  fadeEdges(scroll);
 }
 function glideTc() {
   const snd = curSound();
@@ -2420,7 +2397,7 @@ function beatPattern(style, variation) {
 }
 
 // Reloj del ritmo (independiente del reloj de arpegio)
-const beat = { style:null, timer:null, next:0, step:0, recArmed:false, bouncing:false };
+const beat = { style:null, timer:null, next:0, step:0, recArmed:false, bouncing:false, lastLoopTrack:null, lastStyle:null };
 function beatStart(style, at) {
   ensureAudio(); beat.style = style;
   const startAt = at || ctx.currentTime + 0.03;
@@ -2446,6 +2423,8 @@ function beatBounce(at) {
   const dur = first ? 4 * beatSec() : loop.len, t1 = t0 + dur;
   cancelJob(t); const job = t.job = {}; beat.bouncing = true;
   t.isMaster = first; t.free = false; t.f0 = frameAt(t0); t.state = 'armed'; t.countdown = true;
+  t.origin = 'beat'; t.label = (BEAT_STYLES.find(x => x[0] === beat.style) || [null, beat.style || 'Beat'])[1];
+  beat.lastLoopTrack = loop.cur; beat.lastStyle = beat.style;
   loop.focus = true; loop.transport = false;
   t.startTimer = setTimeout(() => { if (t.job === job && t.state === 'armed') { t.state = 'rec'; t.countdown = false; renderLooper(); renderScreen(false); } }, Math.max(0,(t0 - now) * 1000));
   scheduleStop(t, t1, job); toast('Recording beat on track ' + (loop.cur + 1)); renderLooper(); renderScreen(false); return true;
@@ -2568,7 +2547,7 @@ function setupRecorder() {
 }
 
 // ----- pistas -----
-const tracks = Array.from({ length:6 }, () => ({ state:'off', buffer:null, len:0, src:null, gain:null, vol:1, mute:false, solo:false }));
+const tracks = Array.from({ length:6 }, () => ({ state:'off', buffer:null, len:0, src:null, gain:null, vol:1, mute:false, solo:false, origin:null, label:null }));
 const loop = { len:0, start:0, paused:false, bars:0, cur:0, transport:false, focus:false, metro:true, metroVol:1, countTimer:null };
 const frameAt = t => Math.round(t * ctx.sampleRate);
 const beatSec = () => 60 / state.bpm;
@@ -2658,6 +2637,7 @@ function startRecording(t) {
   cancelJob(t);
   const now = ctx.currentTime, first = !loop.len, job = t.job = {};
   t.isMaster = first; t.free = false;
+  if (t.origin !== 'beat') { t.origin = state.mode; t.label = MODES.find(m => m.id === state.mode)?.name || state.mode; }
   const beginAt = t0 => {   // pasa de «esperando» a «grabando» cuando llega t0
     t.startTimer = setTimeout(() => {
       if (t.job === job && t.state === 'armed') { t.state = 'rec'; t.countdown = false; renderLooper(); renderScreen(held.length > 0); }
@@ -2713,7 +2693,7 @@ function finalizeTrack(p) {
   // Avanza a la siguiente pista libre
   const nx = tracks.findIndex(x => x.state === 'off'); if (nx >= 0) loop.cur = nx;
   loop.focus = true; loop.transport = false;
-  haptic(true); renderLooper(); renderModes(); renderScreen(held.length > 0);
+  haptic(true); renderLooper(); renderScreen(held.length > 0);
 }
 
 function wipeTrack(t) {
@@ -2721,7 +2701,7 @@ function wipeTrack(t) {
   if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; }
   cancelJob(t); t.free = false;
   for (let k = pendingFinal.length - 1; k >= 0; k--) if (pendingFinal[k].t === t) pendingFinal.splice(k, 1);   // una pista borrada no puede «resucitar»
-  t.buffer = null; t.len = 0; t.state = 'off'; t.isMaster = false; t.mute = false; t.solo = false; t.countdown = false;
+  t.buffer = null; t.len = 0; t.state = 'off'; t.isMaster = false; t.mute = false; t.solo = false; t.countdown = false; t.origin = null; t.label = null;
 }
 function clearTrack(i) {
   wipeTrack(tracks[i]);
@@ -2731,10 +2711,10 @@ function clearTrack(i) {
     loop.len = 0; loop.paused = false; loop.cur = 0; loop.transport = false; loop.focus = false;
     pendingFinal.length = 0;
   }
-  applyMutesSafe(); renderLooper(); renderModes();
+  applyMutesSafe(); renderLooper();
 }
 function applyMutesSafe() { if (ctx) applyMutes(); }
-function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; loop.transport = false; loop.focus = false; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderModes(); renderScreen(false); toast('Loops cleared'); }
+function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; loop.transport = false; loop.focus = false; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderScreen(false); toast('Loops cleared'); }
 
 function togglePause() {
   if (!loopHasAudio()) return;
@@ -2760,7 +2740,7 @@ function looperSuspend() {   // al ir a segundo plano
   if (loopHasAudio()) loop.paused = true;
 }
 
-// Canonical REV 3.0 looper navigation. The legacy external strip remains visible only until the hardware layout redesign.
+// Canonical REV 3.0 looper navigation. The external strip has been removed; display + joystick are the sole looper UI.
 const LOOP_CHORD_MODES = new Set(['play','strum','lead','drone','arp','repeat']);
 function looperJoyMode() { return LOOP_CHORD_MODES.has(state.mode) || state.mode === 'drum'; }
 function looperActive() { return loop.focus || loopHasAudio() || tracks.some(t => t.state === 'armed' || t.state === 'rec' || t.state === 'finishing'); }
@@ -2802,55 +2782,47 @@ function looperLongHold() {
   return false;
 }
 
-// ----- interfaz del looper -----
-function buildLooper() {
-  const wrap = $('looper');
-  const rec = document.createElement('button'); rec.className = 'lp-rec'; rec.id = 'lpRec'; rec.setAttribute('aria-label', 'Record');
-  rec.innerHTML = '<span></span>'; wrap.appendChild(rec);
-  rec.addEventListener('pointerdown', e => { e.preventDefault(); looperClick(); });
-  for (let i = 0; i < 6; i++) {
-    const c = document.createElement('button'); c.className = 'lp-track'; c.dataset.i = i; c.textContent = i + 1;
-    let hold = null;
-    c.addEventListener('pointerdown', e => {
-      e.preventDefault(); haptic(false);
-      const t = tracks[i];
-      if (t.state === 'armed' && loop.cur === i) { disarm(t); return; }
-      for (const x of tracks) if (x !== t && x.state === 'armed' && !x.countdown) x.state = 'off';   // solo una pista armada a la vez
-      loop.cur = i; renderLooper();
-      if (t.buffer || t.state === 'rec') {
-        c.classList.add('hold');
-        hold = setTimeout(() => { hold = null; c.classList.remove('hold'); clearTrack(i); toast('Track ' + (i + 1) + ' cleared'); haptic(true); }, 700);
-      }
-    });
-    const end = () => { if (hold) clearTimeout(hold); hold = null; c.classList.remove('hold'); };
-    c.addEventListener('pointerdown', e => { try { c.setPointerCapture(e.pointerId); } catch (err) {} });
-    c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
-    wrap.appendChild(c);
-  }
-  const tr = document.createElement('button'); tr.className = 'lp-transport'; tr.id = 'lpTransport'; tr.setAttribute('aria-label', 'Play or pause');
-  let th = null;
-  tr.addEventListener('pointerdown', e => {
-    e.preventDefault(); if (!loopHasAudio()) return;
-    th = setTimeout(() => { th = null; clearAll(); haptic(true); }, 700);
+// Shared semantic looper-display model. Every screen technology reads the same 2-track/page state.
+const LOOP_PAGE_SHAPES = ['circle','square','triangle'];
+function looperDisplayModel() {
+  const recording = tracks.findIndex(t => t.state === 'rec' || t.state === 'finishing');
+  const armed = tracks.findIndex(t => t.state === 'armed');
+  const page = Math.max(0, Math.min(2, Math.floor(loop.cur / 2)));
+  const base = page * 2;
+  const slots = [base, base + 1].map(i => {
+    const t = tracks[i];
+    return { index:i, state:t.state, filled:!!t.buffer || t.state === 'play' || t.state === 'finishing', recording:t.state === 'rec' || t.state === 'finishing', armed:t.state === 'armed', selected:!loop.transport && loop.cur === i };
   });
-  const tend = () => { if (th) { clearTimeout(th); th = null; togglePause(); } };
-  tr.addEventListener('pointerup', tend); tr.addEventListener('pointercancel', () => { if (th) clearTimeout(th); th = null; });
-  wrap.appendChild(tr);
-  const bars = document.createElement('button'); bars.className = 'lp-bars'; bars.id = 'lpBars';
-  bars.addEventListener('click', () => { haptic(false); loop.bars = (loop.bars + 1) % 9; renderLooper(); });
-  wrap.appendChild(bars);
-  renderLooper();
+  const beatMode = state.mode === 'beat';
+  const visible = beatMode || looperActive();
+  const transportVisible = recording >= 0 || loopHasAudio();
+  return { visible, page, shape:LOOP_PAGE_SHAPES[page], slots, recording, armed, transport:{ visible:transportVisible, selected:!!loop.transport, paused:!!loop.paused, recording:recording >= 0 } };
 }
-function renderLooper() {
-  for (let i = 0; i < 6; i++) {
-    const t = tracks[i], el = document.querySelector('.lp-track[data-i="' + i + '"]');
-    el.className = 'lp-track s-' + t.state + (!loop.transport && loop.cur === i ? ' cur' : '') + (t.mute ? ' muted' : '') + (t.solo ? ' solo' : '') + (el.classList.contains('hold') ? ' hold' : '');
+function looperTransientLabel(m) {
+  if (!m) m = looperDisplayModel();
+  if (m.recording >= 0) return 'REC ' + (m.recording + 1);
+  if (m.armed >= 0) { const t = tracks[m.armed]; if (t && t.countdown) return 'WAITING ' + (m.armed + 1); return 'WAITING ' + (loop.bars ? loop.bars + ' BARS' : 'FREE'); }
+  if (loop.transport && loopHasAudio()) return loop.paused ? 'PAUSED' : 'PLAYING';
+  return '';
+}
+function renderLooperHud() {
+  const hud = $('loopHud'), tr = $('loopTransportHud'); if (!hud || !tr) return;
+  const m = looperDisplayModel();
+  hud.hidden = !m.visible; tr.hidden = !m.transport.visible;
+  if (!m.visible) { hud.innerHTML = ''; } else {
+    hud.innerHTML = m.slots.map(sl => {
+      const stateClass = sl.recording ? 'rec' : sl.armed ? 'armed' : sl.filled ? 'filled' : 'empty';
+      const mark = sl.recording ? '<span class="loop-r">R</span>' : '<span class="loop-mark ' + m.shape + '"></span>';
+      return '<span class="loop-slot ' + stateClass + (sl.selected ? ' sel' : '') + '" aria-label="Track ' + (sl.index + 1) + '">' + mark + '</span>';
+    }).join('');
   }
-  const rec = $('lpRec'), cur = tracks[loop.cur];
-  rec.className = 'lp-rec s-' + cur.state + (recEnabled() ? '' : ' off');
-  const tr = $('lpTransport'); tr.innerHTML = loop.paused || !loopHasAudio() ? I.play : I.pause; tr.disabled = !loopHasAudio(); tr.classList.toggle('cur', !!loop.transport);
-  $('lpBars').textContent = loop.bars ? loop.bars + (loop.bars === 1 ? ' bar' : ' bars') : 'free'; $('lpBars').disabled = !!loop.len;
+  if (!m.transport.visible) { tr.innerHTML = ''; return; }
+  tr.classList.toggle('sel', m.transport.selected);
+  tr.innerHTML = m.transport.recording ? '<span class="tr-r">R</span>' : (m.transport.paused ? '<span class="tr-play"></span>' : '<span class="tr-bars"></span>');
 }
+
+// Looper has no external hardware strip. Its state is rendered in the display and controlled by the joystick/pads.
+function renderLooper() { renderScreen(held.length > 0); }
 function looperStatus() {
   const rec = tracks.find(t => t.state === 'rec' || (t.state === 'armed' && t.countdown));
   if (rec) return (rec.state === 'rec' ? 'rec ' : 'waiting ') + (tracks.indexOf(rec) + 1);
@@ -2903,7 +2875,7 @@ function seqCapture(btn, dir) {
   }
   return { btn, dir:dir || null, root:ch.root, rootBase:ch.rootBase, iv:[...ch.iv], suffix:ch.suffix, name:ch.name, bass:state.bass, bassMidi };
 }
-function seqPaint() { seqSave(); renderModes(); renderScreen(false); renderPads(); }
+function seqPaint() { seqSave(); renderScreen(false); renderPads(); }
 function seqWrite(btn, dir) {
   let i;
   if (seq.editing && seq.steps.length) { i = Math.max(0, Math.min(seq.steps.length - 1, seq.cursor)); seq.steps[i] = seqCapture(btn, dir); }
@@ -2963,12 +2935,12 @@ function seqStart() {
   if (!seq.steps.length) return;
   ensureAudio(); seq.playing = true; seq.pos = 0; seq.next = ctx.currentTime + 0.05;
   if (!seq.timer) seq.timer = setInterval(seqTick, 25);
-  renderModes(); renderScreen(false);
+  renderScreen(false);
 }
 function seqStop() {
   seq.playing = false; if (seq.timer) clearInterval(seq.timer); seq.timer = null;
   const v = voices.get('seq'); if (v) { v.cv.releaseAll(currentEnv().r); voices.delete('seq'); }
-  renderModes(); renderScreen(false); renderPads();
+  renderScreen(false); renderPads();
 }
 function seqTick() {
   if (!seq.playing || !seq.steps.length) { seqStop(); return; }
@@ -3033,17 +3005,9 @@ function mixerSoloAt(btn) {
   renderPads(); renderLooper();
   return true;
 }
-function mixerTool(which) {
-  const t = tracks[target]; if (!t || !t.buffer) return;
-  if (which === 'solo') { t.solo = !t.solo; applyMutesSafe(); }
-  else if (which === 'down') { t.vol = Math.max(0, +(t.vol - 0.1).toFixed(2)); if (t.gain && ctx) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
-  else if (which === 'up') { t.vol = Math.min(1.5, +(t.vol + 0.1).toFixed(2)); if (t.gain && ctx) t.gain.gain.setTargetAtTime(t.vol, ctx.currentTime, 0.02); }
-  toast('Track ' + (target + 1) + (which === 'solo' ? (t.solo ? ' soloed' : ' solo off') : ': ' + Math.round(t.vol * 100) + '%'));
-  renderPads(); renderLooper();
-}
 
 // pointerdown responde aunque otro dedo esté pulsando un acorde (en iPhone, click no)
-// Listas que se deslizan (franja de modos, pestañas de Ajustes): eligen al LEVANTAR el dedo y solo si no se ha deslizado,
+// Scrollable settings tabs choose on finger lift and only if the finger did not slide,
 // como cualquier lista del iPhone. Si el navegador empieza a desplazar la lista, cancela el toque (pointercancel) y no se elige nada.
 function onChipTap(el, fn, scroller) {
   let st = null;
@@ -3619,129 +3583,6 @@ function setJoyDir(source, dir) {
   if (held.length) refresh(); else renderScreen(false);
 }
 
-// ===== LEGACY FUNCTION-BUTTON HELPERS (hidden since Phase 46; retained temporarily for migration/keyboard compatibility) =====
-const NO_TOOLS = ['drum', 'beat', 'mic', 'tuner', 'hiro', 'ear'];
-function toolInversion() {
-  if (state.mode === 'hiro') { hiroTool(0); return; }
-  if (state.mode === 'ear') { earTool(0); return; }
-  if (NO_TOOLS.includes(state.mode) || state.vlead) return;
-  if (state.mode === 'seq') { if (seq.playing) seqStop(); else seqStart(); return; }
-  if (state.mode === 'mixer') { mixerTool('solo'); return; }
-  state.inv[target] = (state.inv[target] + 1) % 3; saveState();
-  const names = ['root position', '1st inversion', '2nd inversion'];
-  toast('Button ' + (target + 1) + ': ' + names[state.inv[target]]);
-  if (held.length) refresh(); else renderPads();
-}
-function toolLock() {
-  if (state.mode === 'hiro') { hiroTool(1); return; }
-  if (state.mode === 'ear') { earTool(1); return; }
-  if (NO_TOOLS.includes(state.mode)) return;
-  if (state.mode === 'seq') { seqRemoveFour(); return; }
-  if (state.mode === 'mixer') { mixerTool('down'); return; }
-  if (state.locks[target]) {
-    state.locks[target] = null; saveState();
-    toast('Button ' + (target + 1) + ' released');
-  } else {
-    const dir = held.includes(target) ? dirFor(target) : lastDirUsed[target];
-    if (!dir) return;
-    const ch = resolveChord(Object.assign({}, state, { locks:[] }), target, dir);
-    state.locks[target] = { rootBase:ch.rootBase, iv:ch.iv, suffix:ch.suffix };
-    saveState();
-    toast('Button ' + (target + 1) + ' locked at ' + ch.name);
-  }
-  if (held.length) refresh(); else renderPads();
-}
-let clearArm = null;
-function toolOct(d) {
-  if (state.mode === 'hiro') { hiroTool(d < 0 ? 2 : 3); return; }
-  if (state.mode === 'ear') { earTool(d < 0 ? 2 : 3); return; }
-  if (NO_TOOLS.includes(state.mode)) return;
-  if (state.mode === 'seq') { if (d < 0) seqRemoveFour(); else seqAddFour(); return; }
-  if (state.mode === 'mixer') {
-    if (d < 0) { mixerTool('up'); return; }
-    const t = tracks[target]; if (!t.buffer) return;
-    if (clearArm === target) { clearArm = null; clearTrack(target); toast('Track ' + (target + 1) + ' cleared'); renderPads(); }
-    else { clearArm = target; toast('Press again to clear track ' + (target + 1)); setTimeout(() => { if (clearArm === target) clearArm = null; }, 2500); }
-    return;
-  }
-  const v = Math.max(-2, Math.min(2, state.btnOct[target] + d));
-  state.btnOct[target] = v; saveState();
-  toast('Button ' + (target + 1) + ': octave ' + (v > 0 ? '+' + v : v));
-  if (held.length) refresh(); else renderPads();
-}
-
-// ===== ICONOS (SVG propios, nunca emojis) =====
-const I = {
-  inv:    '<svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h10"/><path d="M19 5v14M16 8l3-3 3 3"/></svg>',
-  lock:   '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
-  unlock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0"/></svg>',
-  down:   '<svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg>',
-  up:     '<svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></svg>',
-  play:   '<svg viewBox="0 0 24 24" class="f"><path d="M7 5l12 7-12 7z"/></svg>',
-  stop:   '<svg viewBox="0 0 24 24" class="f"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>',
-  pause:  '<svg viewBox="0 0 24 24" class="f"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
-  minus:  '<svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg>',
-  plus:   '<svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg>',
-  next:   '<svg viewBox="0 0 24 24" class="f"><path d="M5 5l10 7-10 7z"/><rect x="17" y="5" width="2.5" height="14" rx="1"/></svg>',
-  replay: '<svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 0 2.2-5.1"/><path d="M5 4v4h4"/></svg>',
-  note:   '<svg viewBox="0 0 24 24"><path d="M9 17V6l9-2v11"/><circle cx="7" cy="17" r="2.2"/><circle cx="16" cy="15" r="2.2"/></svg>',
-  practice: '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 13V9M9.5 3.5h5"/></svg>',
-  trash:  '<svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>',
-  step:   '<svg viewBox="0 0 24 24"><path d="M4 16h4v-4H4zM10 12h4V8h-4zM16 8h4V4h-4z"/><path d="M4 20h16"/></svg>',
-  solo:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M14.5 9.5a2.5 2.5 0 0 0-5 0c0 2.5 5 2.5 5 5a2.5 2.5 0 0 1-5 0"/></svg>',
-  volDn:  '<svg viewBox="0 0 24 24"><path d="M4 10v4h3l4 3V7l-4 3z"/><path d="M15 12h5"/></svg>',
-  volUp:  '<svg viewBox="0 0 24 24"><path d="M4 10v4h3l4 3V7l-4 3z"/><path d="M15 12h5M17.5 9.5v5"/></svg>',
-  none:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.2"/></svg>',
-};
-function setTool(id, icon, label, opts = {}) {
-  const b = $(id); b.innerHTML = I[icon] + '<span>' + label + '</span>';
-  b.disabled = !!opts.off; b.classList.toggle('locked', !!opts.on);
-}
-function renderTools() {
-  const m = state.mode;
-  // Los mismos botones en todos los modos (misma forma, color y posición): solo cambian el icono y el texto. `alt` = las funciones no son las de los acordes (cada mitad del balancín lleva su propio texto)
-  $('tools').classList.add('std');
-  $('tools').classList.toggle('alt', ['seq', 'mixer', 'hiro', 'ear'].includes(m));
-  $('tools').classList.toggle('idle', ['drum', 'beat', 'mic', 'tuner'].includes(m));   // sin función: las teclas se ocultan
-  if (m === 'seq') {
-    const none = !seq.steps.length;
-    setTool('tInv', seq.playing ? 'stop' : 'play', seq.playing ? 'stop' : 'play', { off: none });
-    setTool('tLock', 'minus', 'remove', { off: none }); setTool('tOctDn', 'trash', 'clear', { off: none });
-    setTool('tOctUp', 'step', 'step ×' + seq.stepLen);
-    $('targetLbl').textContent = 'Sequencer'; return;
-  }
-  if (m === 'mixer') {
-    const t = tracks[target] || {};
-    setTool('tInv', 'solo', 'solo', { on: !!t.solo, off: !t.buffer }); setTool('tLock', 'volDn', 'vol −', { off: !t.buffer });
-    setTool('tOctDn', 'volUp', 'vol +', { off: !t.buffer }); setTool('tOctUp', 'trash', 'clear', { off: !t.buffer });
-    $('targetLbl').textContent = 'Track ' + (target + 1); return;
-  }
-  if (m === 'hiro') {
-    const pl = hiro.phase === 'count' || hiro.phase === 'play', res = hiro.phase === 'result', sp = state.hiroPractice && !pl && !res;
-    setTool('tInv', pl ? 'stop' : res ? 'next' : 'play', pl ? 'stop' : res ? 'next' : 'play');
-    setTool('tLock', res ? 'replay' : 'practice', res ? 'replay' : 'practice', { on: !res && state.hiroPractice, off: pl });
-    setTool('tOctDn', 'minus', 'speed −', { off: !sp }); setTool('tOctUp', 'plus', Math.round(state.hiroSpeed * 100) + '%', { off: !sp });
-    $('targetLbl').textContent = 'Notes Hero'; return;
-  }
-  if (m === 'ear') {
-    const act = ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback', res = ear.phase === 'result';
-    setTool('tInv', act ? 'stop' : res ? 'next' : 'play', act ? 'stop' : res ? 'next' : 'play');
-    setTool('tLock', 'replay', 'replay', { off: ear.phase !== 'answer' && !res });
-    setTool('tOctDn', 'note', 'tonic', { off: ear.phase !== 'answer' }); setTool('tOctUp', 'none', '', { off: true });
-    $('targetLbl').textContent = 'Ear Trainer'; return;
-  }
-  if (m === 'drum' || m === 'beat' || m === 'mic' || m === 'tuner') {
-    setTool('tInv', 'none', '', { off:true }); setTool('tLock', 'none', '', { off:true });
-    setTool('tOctDn', 'none', '', { off:true }); setTool('tOctUp', 'none', '', { off:true });
-    $('targetLbl').textContent = { drum:'Drum', beat:'Drum Loop', mic:'Mic Sample', tuner:'Tuner' }[m]; return;
-  }
-  const locked = !!state.locks[target];
-  const canLock = locked || !!(held.includes(target) ? dirFor(target) : lastDirUsed[target]);
-  setTool('tInv', 'inv', 'inv', { off: state.vlead, on: state.inv[target] > 0 && !state.vlead }); setTool('tLock', locked ? 'lock' : 'unlock', locked ? 'liberar' : 'fijar', { on: locked, off: !canLock });
-  setTool('tOctDn', 'down', 'oct −', { on: state.btnOct[target] < 0 }); setTool('tOctUp', 'up', 'oct +', { on: state.btnOct[target] > 0 });
-  $('targetLbl').textContent = 'Button ' + (target + 1);
-}
-
 // ===== RENDER =====
 const $ = id => document.getElementById(id);
 let toastTimer = null;
@@ -3758,20 +3599,40 @@ function toast(msg) {
 
 function renderScreen(active) {
   const sound = SOUNDS.find(s => s.id === state.sound);
-  $('sKey').textContent = NOTE_NAMES[state.key] + ' ' + SCALES[state.scale].name.toLowerCase()
-    + (state.globalOct ? ' ' + (state.globalOct > 0 ? '+' : '') + state.globalOct : '');
-  const named = sound || allSounds().find(s => s.id === state.sound);   // la biblioteca e importados también tienen nombre
-  $('sSound').textContent = named ? named.name : '';
+  const named = sound || allSounds().find(s => s.id === state.sound);   // library/imported sounds also have names
+  const lm = looperDisplayModel();
   const p = modeParam();
-  const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
-  const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map((st,i) => (i === seq.cursor && seq.editing ? '[' : '') + (seqChord(st)?.name || '—') + (i === seq.cursor && seq.editing ? ']' : '')).join(' ') + ' · ' + seq.steps.length + '/' + seq.capacity : state.mode === 'mic' ? (micTake ? ' recording' : '') : '';
-  $('sMode').classList.remove('live');
-  const modeLine = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt + beatName;
-  // With the external looper strip retired, active looper state gets display priority over the passive BPM readout.
-  $('sMode').textContent = modeLine + (lp ? ' · ' + lp : ' · ' + Math.round(state.bpm)) + (wavRec ? ' · audio ' + wavClock() : '');
   const cn = $('chordName');
-  if (lastDisplay && !OWN_TITLE.includes(state.mode)) cn.textContent = lastDisplay.name;
-  if (!OWN_TITLE.includes(state.mode)) cn.classList.toggle('idle', !active);
+
+  if (state.mode === 'beat') {
+    const v = BEAT_VARS.find(x => x[0] === state.beatVar);
+    $('sKey').textContent = (v ? v[1] : state.beatVar).toUpperCase();
+    $('sSound').textContent = Math.round(state.bpm) + ' BPM';
+    const liveName = beat.style ? (BEAT_STYLES.find(x => x[0] === beat.style) || [null,'Beat'])[1] : null;
+    let remembered = null;
+    if (beat.lastLoopTrack != null) {
+      const t = tracks[beat.lastLoopTrack];
+      if (t && t.buffer && t.origin === 'beat') remembered = t.label || (BEAT_STYLES.find(x => x[0] === beat.lastStyle) || [null,'Beat'])[1];
+    }
+    cn.textContent = liveName || remembered || 'NO BEAT';
+    cn.classList.toggle('idle', !liveName && !remembered);
+    const inLoop = beat.lastLoopTrack != null && tracks[beat.lastLoopTrack] && tracks[beat.lastLoopTrack].buffer && tracks[beat.lastLoopTrack].origin === 'beat';
+    const transient = looperTransientLabel(lm);
+    $('sMode').textContent = beat.recArmed ? 'REC ARMED' : transient || (inLoop ? 'IN LOOP ' + (beat.lastLoopTrack + 1) : (KITS.find(k => k[0] === state.kit)?.[1] || 'DRUM LOOP'));
+  } else {
+    $('sKey').textContent = NOTE_NAMES[state.key] + ' ' + SCALES[state.scale].name.toLowerCase()
+      + (state.globalOct ? ' ' + (state.globalOct > 0 ? '+' : '') + state.globalOct : '');
+    $('sSound').textContent = named ? named.name : '';
+    const seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map((st,i) => (i === seq.cursor && seq.editing ? '[' : '') + (seqChord(st)?.name || '—') + (i === seq.cursor && seq.editing ? ']' : '')).join(' ') + ' · ' + seq.steps.length + '/' + seq.capacity : state.mode === 'mic' ? (micTake ? ' recording' : '') : '';
+    const modeLine = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt;
+    const transient = looperTransientLabel(lm);
+    $('sMode').textContent = modeLine + ' · ' + (transient || Math.round(state.bpm)) + (wavRec ? ' · audio ' + wavClock() : '');
+    if (lastDisplay && !OWN_TITLE.includes(state.mode)) cn.textContent = lastDisplay.name;
+    if (!OWN_TITLE.includes(state.mode)) cn.classList.toggle('idle', !active);
+  }
+
+  $('sMode').classList.remove('live');
+  renderLooperHud();
   const d = padDir || keyDir || (held.length ? dirFor(held[held.length - 1]) : null);
   if (!$('sDir').childElementCount) {
     $('sDir').innerHTML = DIRS.map(k => '<circle data-d="' + k + '" cx="' + (10 + DIR_VEC[k][0] * 7) + '" cy="' + (10 + DIR_VEC[k][1] * 7) + '" r="1.6"/>').join('');
@@ -3860,7 +3721,7 @@ function renderPads() {
     const el = padEls[b];
     const beatOn = state.mode === 'beat' && beat.style === BEAT_STYLES[b][0];
     const on = held.includes(b) || (state.mode === 'drone' && droneBtn === b) || beatOn;
-    el.className = 'cb' + (on ? ' held' : '') + (b === target && !NO_TOOLS.includes(state.mode) ? ' target' : '');
+    el.className = 'cb' + (on ? ' held' : '');
     let label = resolveChord(state, b, null).name;
     if (state.mode === 'drum') label = PAD_NAMES[b];
     else if (state.mode === 'beat') label = BEAT_STYLES[b][1];
@@ -3888,7 +3749,7 @@ function renderPads() {
   renderWheel();
   // Teclas limpias en todos los modos: sin notas, números ni nombres (salvo que se active «Notas y números en las teclas»); la selección rápida, que es un menú temporal, sí los muestra
   $('pads').classList.toggle('bare', !(state.keyLabels || quick));
-  renderTools();
+ 
 }
 const CHORD_LABEL_MODES = ['play', 'strum', 'lead', 'drone', 'arp', 'repeat'];
 
@@ -3958,7 +3819,6 @@ function buildJoy() {
   joy.addEventListener('pointercancel', end);
 }
 // The joystick click is a real REV 3.0 control: randomise while a menu button is held, mode-native actions, and looper transport/state.
-// External looper/mode controls still exist temporarily during migration and will be removed after the joystick/display model is complete.
 function joyClickAction() { return (!!setv && !quick) || (!!menu && !quick) || !!quick || state.mode === 'seq' || state.mode === 'mixer' || state.mode === 'hiro' || state.mode === 'ear' || state.mode === 'beat' || looperJoyMode() || loopHasAudio(); }
 function joyClick() {
   quickPromote();
@@ -4009,10 +3869,6 @@ window.addEventListener('keydown', e => {
   else if (menu && MENU_ARROWS[k]) { e.preventDefault(); menuNav(MENU_ARROWS[k]); }
   else if (k === 'escape' && menu) menuClose();
   else if (k === ' ') { e.preventDefault(); quickPromote(); joyClick(); }
-  else if (k === 'i') toolInversion();
-  else if (k === 'f') toolLock();
-  else if (k === ',') toolOct(-1);
-  else if (k === '.') toolOct(1);
 });
 const MENU_ARROWS = { arrowleft:'l', arrowright:'r', arrowup:'u', arrowdown:'d' };
 window.addEventListener('keyup', e => {
@@ -4034,10 +3890,11 @@ const WHEEL_NAMES = { cutoff:'filter', attack:'attack', release:'release', micGa
 let wheelRot = 0; const wheelMuteFixed = new Set();
 function wheelTarget() {
   if (setv) { if (setv.detail) return 'setvText'; const r = setvRow(); if (r && r.kind === 'range') return 'setv'; }
-  if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; }
+  if (menu && menu.kind === 'fx') { const it = FX_ITEMS[menu.fx]; if (it === 'reverb') return 'reverbAmt'; if (it === 'delay') return 'delayAmt'; if (it === 'filterWheel') return 'cutoff'; }
   const mg = hwHeldGroup || (quick && quick.group); if (mg) return mg === 'key' ? 'attack' : mg === 'sound' ? 'release' : 'cutoff';
   if (state.mode === 'mixer') { if (held.includes(6)) return 'metro'; const b = held.find(x => x < 6 && tracks[x] && tracks[x].buffer); if (b != null) return 'track:' + b; }
   if (state.mode === 'mic') return 'micGain';
+  if (state.filterWheel) return 'cutoff';   // REV 3.0 Filter Wheel: bare wheel becomes a live low-pass sweep
   return null;
 }
 function renderWheel() {
@@ -4241,9 +4098,9 @@ onChipTap($('setvPos'), () => { if (setv && setv.detail && setv.detail.copy) set
 //   MODE:  izq/der modo · arriba = BPM (izq/der ±1, se repite al mantener) · abajo = ajuste del modo
 // Se cierra al tocar un acorde, con un clic de la perilla, tocando otra vez la etiqueta, con Esc o tras 6 s sin tocar nada.
 const MENU_TIMEOUT = 6000;
-const FX_ITEMS = ['reverb', 'delay', 'chorus', 'flanger', 'drive', 'tape', 'tremolo', 'lfo', 'vocoder', 'voices', 'adsr', 'bass', 'glide', 'scale', 'vlead', 'stereo', 'joy', 'osc'];
+const FX_ITEMS = ['reverb', 'delay', 'chorus', 'flanger', 'drive', 'tape', 'tremolo', 'lfo', 'filterWheel', 'vocoder', 'voices', 'adsr', 'bass', 'glide', 'scale', 'vlead', 'stereo', 'joy', 'osc'];
 const FX_NAMES = { reverb:'Reverb', delay:'Delay', chorus:'Chorus', flanger:'Flanger', drive:'Drive', tape:'Tape', tremolo:'Tremolo', lfo:'LFO', vocoder:'Vocoder', voices:'Voice', adsr:'ADSR',
-  bass:'Bass', glide:'Glide', scale:'Scale', vlead:'V.Lead', stereo:'Stereo', joy:'Joystick', osc:'OSC View' };
+  filterWheel:'Filter', bass:'Bass', glide:'Glide', scale:'Scale', vlead:'V.Lead', stereo:'Stereo', joy:'Joystick', osc:'OSC View' };
 const MENU_TITLES = { key:'Key', sound:'Sound', fx:'FX', mode:'Mode', bpm:'BPM', param:'Mode' };
 let menuTimer = null, menuRep = null;
 function menuToggle(group) {
@@ -4267,7 +4124,7 @@ function menuJoy(dir) {   // del joystick: un paso al empujar; mantener izquierd
 const menuStep = (list, cur, d) => list[(Math.max(0, list.indexOf(cur)) + d + list.length) % list.length];
 function menuSoundList() { return allSounds().filter(s => s.id !== 'micsample' || sampleBuf.mic); }
 function menuModeList() { return MODES.filter(m => m.id !== 'mixer' || loopHasAudio()).map(m => m.id); }
-function fxOptions(id) { const st = SETTINGS.find(s => s.id === id); if (!st) return null; return st.type === 'check' ? [[false, 'Off'], [true, 'On']] : st.options(); }
+function fxOptions(id) { if (id === 'filterWheel') return [[false, 'Off'], [true, 'On']]; const st = SETTINGS.find(s => s.id === id); if (!st) return null; return st.type === 'check' ? [[false, 'Off'], [true, 'On']] : st.options(); }
 function fxValueName(id) {
   const opts = fxOptions(id); if (!opts) return '';
   const cur = opts.find(o => String(o[0]) === String(id === 'osc' ? !!state.osc : state[id])); return cur ? cur[1] : '';
@@ -4276,6 +4133,7 @@ function fxCycle(id) {
   const opts = fxOptions(id); if (!opts) return;
   const cur = id === 'osc' ? !!state.osc : state[id], i = opts.findIndex(o => String(o[0]) === String(cur)), next = opts[(i + 1) % opts.length][0];
   if (id === 'osc') { setOsc(!!next); saveState(); return; }
+  if (id === 'filterWheel') { state.filterWheel = !!next; saveState(); renderWheel(); return; }
   const st = SETTINGS.find(s => s.id === id);
   quickSet(id, st.type === 'check' ? !!next : st.numeric ? Number(next) : next);
 }
@@ -4303,7 +4161,7 @@ function menuNav(dir) {
     const p = modeParam();
     if (!p) menu.kind = 'mode';
     else if (h && !gameLocked()) {
-      state[p.key] = menuStep(p.list, state[p.key], h); saveState(); syncSettings(); renderModes();
+      state[p.key] = menuStep(p.list, state[p.key], h); saveState(); syncSettings();
       if (state.mode === 'hiro') hiroPrepare(); else if (state.mode === 'ear') earPrepare();
     } else if (dir === 'u') menu.kind = 'mode';
   }
@@ -4604,20 +4462,19 @@ function arpGrayCombo(btn) {
     const nx = ARP_LAYERS[(i + 1) % ARP_LAYERS.length]; quickSet('arpLayer', nx[0]); toast('Arp: ' + nx[1]);
   }
 }
-function hwChordCombo(group) {
-  const btn = comboBtn(); if (btn == null) return false;
+function hwChordCombo(group, explicitBtn = null, explicitDir = null) {
+  const btn = explicitBtn == null ? comboBtn() : explicitBtn; if (btn == null) return false;
   // In these modes the seven pads are no longer chord controls. Consume the combo instead of mutating hidden chord state.
   if (state.mode === 'mixer') {
     if (group === 'sound' && btn < 6) return mixerSoloAt(btn);
     return true;
   }
   if (['drum','beat','hiro','ear','mic','tuner'].includes(state.mode)) return true;
-  if (group === 'key') {
-    if (state.mode === 'arp') arpGrayCombo(btn); else chordOctaveAt(btn, -1);
-    return true;
-  }
+  // Order matters on the hardware: chord first + KEY = per-button octave down,
+  // including in Arp. KEY first + chord is the Arp pattern/layer quick-select path.
+  if (group === 'key') { chordOctaveAt(btn, -1); return true; }
   if (group === 'sound') {
-    const dir = dirFor(btn) || padDir || keyDir;
+    const dir = dirFor(btn) || padDir || keyDir || explicitDir;
     if (dir) chordLockAt(btn, dir); else chordInvertAt(btn);
     return true;
   }
@@ -4938,20 +4795,67 @@ function puIcon(name, x, y, t) {
   else C(12, 12, 8, false);
 }
 function puT(id) { const e = $(id); return e ? e.textContent : ''; }
+function puLoopShape(cx, cy, shape, filled) {
+  if (shape === 'circle') puCircle(cx, cy, 3, 1, filled);
+  else if (shape === 'square') { if (filled) puRect(cx - 3, cy - 3, 7, 7, 1); else puFrame(cx - 3, cy - 3, 7, 7, 1); }
+  else { // triangle
+    const pts = [[0,-3],[-3,3],[3,3]];
+    if (filled) { for (let yy = -3; yy <= 3; yy++) { const half = Math.max(0, Math.floor((yy + 3) / 2)); puRect(cx - half, cy + yy, half * 2 + 1, 1); } }
+    else { puLine(cx, cy - 3, cx - 3, cy + 3); puLine(cx - 3, cy + 3, cx + 3, cy + 3); puLine(cx + 3, cy + 3, cx, cy - 3); }
+  }
+}
+function puLooperPair(m, w) {
+  if (!m.visible) return;
+  const cx = Math.floor((w - 11) / 2), xs = [cx - 5, cx + 5], cy = 4;
+  m.slots.forEach((sl, j) => {
+    if (sl.selected) puFrame(xs[j] - 5, 0, 10, 9, 0); // selection cut out of the inverted title bar
+    if (sl.recording) puText('R', xs[j], 0, { v:0, align:'c' });
+    else puLoopShape(xs[j], cy, m.shape, sl.filled);
+  });
+}
+function puLooperBar(left, right, w, m) {
+  puRect(0, 0, w, 9, 1);
+  if (!m.visible) { puPair(String(left || '').replace(/ · /g, ' '), right, 0, 2, w - 13, 5, { rightShare:0.50, left:{v:0}, right:{v:0} }); puGear(w - 10, 1); return; }
+  const cx = Math.floor((w - 11) / 2), leftRoom = Math.max(12, cx - 16), rightStart = cx + 15, rightRoom = Math.max(10, (w - 13) - rightStart);
+  puText(puFit(puCompact(left), leftRoom), 2, 0, { v:0 });
+  puText(puFit(puCompact(right), rightRoom), w - 13, 0, { v:0, align:'r' });
+  puLooperPair(m, w); puGear(w - 10, 1);
+}
+function puLoopTransport(m, x, y) {
+  if (!m.transport.visible) return x;
+  const bx = x - 9;
+  if (m.transport.selected) puFrame(bx - 1, y - 1, 10, 9, 1);
+  if (m.transport.recording) puText('R', bx + 4, y, { align:'c' });
+  else if (m.transport.paused) puTri(bx + 6, y + 3, 3, 'r');
+  else { puRect(bx + 2, y + 1, 2, 6); puRect(bx + 6, y + 1, 2, 6); }
+  return bx - 3;
+}
 function puIndicators(w, h, t) {   // bottom right: joystick compass always; record ring only while recording; wave box only when «Wave» is on (mirrors the DOM state)
   const rec = $('wavBtn') && ($('wavBtn').classList.contains('on') || $('wavBtn').classList.contains('rec')), osc = !!state.osc; let x0 = w - 12;
   document.querySelectorAll('#sDir circle').forEach(c => { const x = w - 9 + Math.round((+c.getAttribute('cx') - 10) / 7 * 3) + 3, y = h - 8 + Math.round((+c.getAttribute('cy') - 10) / 7 * 3) + 3; if (c.classList.contains('on')) puRect(x - 1, y - 1, 2, 2, 1); else puPx(x, y, 1); });
   if (osc) { puRect(x0 - 14, h - 9, 13, 8, 1); for (let i = 0; i < 11; i++) puPx(x0 - 13 + i, h - 5 + Math.round(Math.sin(i / 10 * 6.28 * 1.25) * 2), 0); x0 -= 16; }
   if (rec) { puCircle(x0 - 3, h - 5, 3, 1, true); x0 -= 8; }
+  x0 = puLoopTransport(looperDisplayModel(), x0, h - 8);
   return x0;
 }
 function puPlay(t, w, h) {
-  puBar(puT('sKey'), puT('sSound'), w);
+  const lm = looperDisplayModel();
+  if (state.mode === 'beat') {
+    const v = BEAT_VARS.find(x => x[0] === state.beatVar), bpm = Math.round(state.bpm) + ' BPM';
+    puLooperBar(v ? v[1] : state.beatVar, bpm, w, lm);
+    const live = beat.style ? (BEAT_STYLES.find(x => x[0] === beat.style) || [null,'Beat'])[1] : null;
+    let remembered = null, inLoop = false;
+    if (beat.lastLoopTrack != null) { const bt = tracks[beat.lastLoopTrack]; if (bt && bt.buffer && bt.origin === 'beat') { remembered = bt.label || 'Beat'; inLoop = true; } }
+    puBig((live || remembered || 'NO BEAT').toUpperCase(), Math.floor(w / 2), 15, w - 10);
+    const transient = looperTransientLabel(lm), bottom = beat.recArmed ? 'REC ARMED' : transient || (inLoop ? 'IN LOOP ' + (beat.lastLoopTrack + 1) : (KITS.find(k => k[0] === state.kit)?.[1] || 'DRUM LOOP'));
+    const x0 = puIndicators(w, h, t); puText(puFit(puHint(bottom), Math.max(0, x0 - 5)), 2, h - 8); return;
+  }
+  puLooperBar(puT('sKey'), puT('sSound'), w, lm);
   const name = puT('chordName'), el = $('chordName'), idle = !el || el.classList.contains('idle') || !name || name === '—';
   if (idle) { if (Math.floor(t * 2) % 2 === 0) puRect(4, 13, 7, 16, 1); } else puBig(name, Math.floor(w / 2) - 0, 10, w - 6);
   const cy = Math.round(h * 0.77);
   if (state.osc && analyser && ctx && ctx.state === 'running') { analyser.getByteTimeDomainData(scopeData); let prev = null; for (let x = 0; x < w; x++) { const v = (scopeData[Math.min(699, Math.floor(x / w * 700))] - 128) / 128, y = Math.round(cy - v * 6), y0 = prev == null ? y : prev; puRect(x, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; } }
-  else for (let x = 0; x < w; x += 2) puPx(x, cy);   // dotted line = the dim rest line
+  else for (let x = 0; x < w; x += 2) puPx(x, cy);
   const x0 = puIndicators(w, h, t), short = puHint(puT('sMode').replace(/ · /g, ' '));
   const modeTxt = puFit(short, Math.max(0, x0 - 5));
   if (modeTxt) puText(modeTxt, 2, h - 8);
@@ -5381,14 +5285,14 @@ function applyLibPreset(snd) {
   state.glide = e.gl ? (e.gl < 30 ? 'short' : e.gl < 60 ? 'medium' : 'long') : 'off';
   state.bass = e.bass ? 'root' : (state.bass === 'root' ? 'off' : state.bass);
   state.voices = snd.v === 3 ? 1 : 8;
-  state.cutoff = e.filt ? Math.round(g[4] / 127 * 1000) : 1000;
+  state.filterWheel = !!e.filt; state.cutoff = e.filt ? Math.round(g[4] / 127 * 1000) : 1000;
   for (const id of ['reverb', 'chorus', 'delay', 'flanger']) updateFx(id);
   applyFilter();
 }
 
 function onSettingChanged(id) {
   if (id === 'mode') { const m = state.mode; state.mode = 'play'; setMode(m); }
-  if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id)) renderModes();
+  if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id))
   if (id === 'drumVol' && ctx && drumBus) drumBus.gain.setTargetAtTime(state.drumVol, ctx.currentTime, 0.02);
   if (id === 'micGain' && micGain) micGain.gain.setTargetAtTime(state.micGain, ctx.currentTime, 0.02);
   if (id === 'micHold' && !state.micHold && !micUsers.size) micRelease();
@@ -5598,7 +5502,7 @@ function openSettings() { if (menu) menuClose(); if (setv) setvClose(); syncSett
 function closeSettings() { $('sheet').hidden = true; }
 
 // ===== PRESETS, AZAR Y COPIA DE SEGURIDAD =====
-const PRESET_KEYS = ['sound','adsr','attack','release','bass','vlead','stereo','cutoff','bpm','voices','glide','lfo','reverb','reverbAmt','delay','delayAmt',
+const PRESET_KEYS = ['sound','adsr','attack','release','bass','vlead','stereo','cutoff','filterWheel','bpm','voices','glide','lfo','reverb','reverbAmt','delay','delayAmt',
   'chorus','flanger','drive','tape','tremolo','key','scale','globalOct','joy','mode','strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar',
   'vocFormant','vocQ','vocRelease','vocNoise','tweaks','btnOct','inv','locks'];
 function loadPresets() { try { const p = JSON.parse(localStorage.getItem('notes-presets-v1')); if (Array.isArray(p) && p.length === 4) return p; } catch (e) {} return [null, null, null, null]; }
@@ -5632,7 +5536,7 @@ function reapplyAll() {
   }
   rebuildSoundOptions(); syncSettings();
   const m = state.mode; state.mode = 'play'; setMode(m);
-  renderModes(); renderPads(); renderScreen(false);
+  renderPads(); renderScreen(false);
 }
 function presetLoad(i) {
   const p = presets[i]; if (!p) return;
@@ -5680,7 +5584,7 @@ function randomize(kind) {
   if (kind === 'sound') msg = randomSound().name;
   else if (kind === 'pattern') { randomPattern(); msg = 'New pattern'; }
   else { state.key = Math.floor(Math.random() * 12); state.bpm = 70 + Math.floor(Math.random() * 71); msg = randomSound().name + ' · ' + NOTE_NAMES[state.key] + ' · ' + state.bpm; }
-  saveState(); lastUpper = null; syncSettings(); renderModes(); renderPads(); renderScreen(held.length > 0);
+  saveState(); lastUpper = null; syncSettings(); renderPads(); renderScreen(held.length > 0);
   if (held.length) refresh();
   toast(msg);
 }
@@ -5774,7 +5678,7 @@ function restoreSnapshot(s) {
   for (const id of FX_ORDER) updateFx(id);
   applyFilter(true); applyVibrato(); lastUpper = null;
 }
-const NEUTRAL = { scale:0, bass:'off', vlead:false, voices:8, glide:'off', lfo:'off', cutoff:1000, chorus:'off', delay:'off', flanger:'off', drive:'off', tape:'off', tremolo:'off',
+const NEUTRAL = { scale:0, bass:'off', vlead:false, voices:8, glide:'off', lfo:'off', cutoff:1000, filterWheel:false, chorus:'off', delay:'off', flanger:'off', drive:'off', tape:'off', tremolo:'off',
   globalOct:0, reverb:'room', reverbAmt:0.25 };
 function neutralize() {
   Object.assign(state, NEUTRAL, { btnOct:[0, 0, 0, 0, 0, 0, 0], inv:[0, 0, 0, 0, 0, 0, 0], locks:[null, null, null, null, null, null, null] });
@@ -5826,7 +5730,7 @@ function hiroPrepare() {
   hiro.song = HIRO_SONGS[state.hiroLevel] || HIRO_SONGS[0];
   hiro.events = parseChart(hiro.song);
   hiro.phase = 'idle'; hiro.streak = 0; hiro.stats = null; hiro.last = ''; hiro.flash = null; hiro.idx = 0;
-  renderTools(); renderModes(); renderScreen(false);
+  renderScreen(false);
 }
 function hiroBeep(t, accent) {   // pitido de la cuenta atrás
   const o = ctx.createOscillator(), g = ctx.createGain();
@@ -5846,7 +5750,7 @@ function hiroStart() {
   for (const ev of hiro.events) ev.time = hiro.t0 + ev.beat * hiro.spb;
   beatStop(); beatStart(song.beat[0], hiro.t0);
   hiro.stats = { perfect:0, great:0, ok:0, miss:0 }; hiro.idx = 0; hiro.streak = 0; hiro.best = 0; hiro.last = ''; hiro.flash = null; hiro.meanErr = null;
-  hiro.phase = 'count'; renderTools(); renderModes(); hiroTick();
+  hiro.phase = 'count'; hiroTick();
 }
 function hiroEnd(finished) {
   { const es = (hiro.events || []).filter(e => typeof e.err === 'number' && e.result && e.result !== 'miss').map(e => e.err * 1000); hiro.meanErr = es.length ? es.reduce((a, b) => a + b, 0) / es.length : null; }
@@ -5859,7 +5763,7 @@ function hiroEnd(finished) {
     hiro.acc = (s.perfect + s.great * 0.8 + s.ok * 0.5) / n; hiro.phase = 'result';
     if (hiro.best > state.hiroBest) { state.hiroBest = hiro.best; saveState(); }
   } else { hiro.phase = 'idle'; hiro.streak = 0; }
-  renderPads(); renderTools(); renderModes(); renderScreen(false);
+  renderPads(); renderScreen(false);
 }
 function hiroJudge(ev, grade) {
   ev.result = grade; hiro.stats[grade]++; hiro.last = grade;
@@ -5984,20 +5888,6 @@ function hiroRender() {
   }
   g.textAlign = 'left'; g.lineCap = 'butt';
 }
-function hiroTool(i) {
-  const playing = hiro.phase === 'count' || hiro.phase === 'play', res = hiro.phase === 'result';
-  if (i === 0) {
-    if (playing) hiroEnd(false);
-    else if (res) { state.hiroLevel = (state.hiroLevel + 1) % HIRO_SONGS.length; saveState(); hiroPrepare(); }
-    else hiroStart();
-  } else if (i === 1) {
-    if (res) { hiroPrepare(); hiroStart(); }
-    else if (!playing) { state.hiroPractice = !state.hiroPractice; saveState(); renderTools(); renderScreen(false); }
-  } else if ((i === 2 || i === 3) && !playing && !res && state.hiroPractice) {
-    state.hiroSpeed = Math.max(0.5, Math.min(1, +(state.hiroSpeed + (i === 3 ? 0.05 : -0.05)).toFixed(2)));
-    saveState(); renderTools(); renderScreen(false);
-  }
-}
 
 // ----- entrenador de oído -----
 const EAR_LEVELS = [
@@ -6036,7 +5926,7 @@ function earPlay(notes, at, dur) {
   for (const s of cv.slots) if (s) s.release(Math.min(currentEnv().r, 0.4), at + dur);
   const gate = cv.gate; setTimeout(() => { try { gate.disconnect(); } catch (e) {} }, Math.max(0, (at - ctx.currentTime + dur + 3) * 1000));
 }
-function earRefresh() { renderTools(); renderModes(); renderScreen(false); }
+function earRefresh() { renderScreen(false); }
 function earSpeak() {   // tónica de referencia y después la pregunta
   ear.phase = 'listen'; ear.idx = 0; ear.marks = ear.q.map(() => null); ear.hint = null; ear.shown = '?';
   let at = ctx.currentTime + 0.1;
@@ -6114,17 +6004,6 @@ function earRender() {
   }
   if (ear.hint) { g.strokeStyle = acc; g.lineWidth = 2.4; drawArrow(g, W - 34, y, ear.hint, 14); }   // dirección correcta del joystick
 }
-function earTool(i) {
-  const active = ear.phase === 'listen' || ear.phase === 'answer' || ear.phase === 'feedback';
-  if (i === 0) {
-    if (active) earEnd();
-    else if (ear.phase === 'result') { state.earLevel = (state.earLevel + 1) % EAR_LEVELS.length; saveState(); earPrepare(); }
-    else earStart();
-  } else if (i === 1) {
-    if (ear.phase === 'answer') { ear.timers.forEach(clearTimeout); ear.timers = []; earSpeak(); }
-    else if (ear.phase === 'result') { earPrepare(); earStart(); }
-  } else if (i === 2 && ear.phase === 'answer') earReplayRoot();
-}
 function earPrepare() { ear.phase = 'idle'; ear.q = []; ear.marks = []; ear.hint = null; ear.streak = 0; earRefresh(); }
 
 function gameTexts() {
@@ -6133,7 +6012,7 @@ function gameTexts() {
 }
 
 // ===== ARRANQUE =====
-sanitizeState(); buildPads(); buildJoy(); buildModes(); buildLooper(); buildSettings(); fadeEdges($('sheetNav')); renderModes(); scrollModeIntoView();
+sanitizeState(); buildPads(); buildJoy(); buildSettings(); fadeEdges($('sheetNav'));
 $('oscBtn').addEventListener('click', () => setOsc(!state.osc));
 applyTheme();
 if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) {} }
@@ -6149,10 +6028,6 @@ onTap($('closeSheetTop'), closeSettings);
 let sheetDownOutside = false;
 $('sheet').addEventListener('pointerdown', e => { sheetDownOutside = e.target === $('sheet'); });
 $('sheet').addEventListener('click', e => { if (e.target === $('sheet') && sheetDownOutside) closeSettings(); sheetDownOutside = false; });
-onTap($('tInv'), toolInversion);
-onTap($('tLock'), toolLock);
-onTap($('tOctDn'), () => toolOct(-1));
-onTap($('tOctUp'), () => toolOct(1));
 $('gear').addEventListener('click', () => { if (setv) setvClose(); else setvOpen(); });   // los ajustes se abren DENTRO de la pantalla
 function goneToBackground() {
   if (micPending) { micTrace('page hidden while asking for the mic (ignored)'); return; }   // the iOS permission sheet can hide the page: do not tear the audio down under it
