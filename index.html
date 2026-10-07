@@ -1201,9 +1201,11 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Instruments and library</h4>
       <p>The drop-down in Settings → Sound gathers three kinds of sound. Instruments are the base sounds (saw, piano, strings, organ…). Library are 50 presets from the official app, grouped by type (Analog, FM, Sample, Texture, Hybrid): each one combines several layers and brings its own envelope and effects, which are applied when you choose it. They are included and cannot be removed. Imported appears only if you load a .json file in Settings → Presets; there you can also see how many there are and remove them.</p>
       <h4>Presets and random</h4>
-      <p>In Settings → Presets there are four slots (P1 to P4). Save writes the instrument, the effects, the key, the scale, the mode, the tempo, the octaves, the inversions and the locked chords into the slot; Load restores them. Loops, the theme and the volumes are not saved.</p>
+      <p>Hold Sound + Mode together to open the REV 3.0 preset menu. Joystick left/right chooses P1–P4, Up saves and Down loads a filled slot; saved slots show an asterisk. Settings → Presets exposes the same four slots as a touchscreen convenience. A slot stores the instrument, effects, envelope, key, scale, mode, tempo, chord octaves/inversions/locks, drum and vocoder settings and the latest mic sample. Loops and app-only case/screen choices are not part of the slot.</p>
       <p>Random suggests new things. Sound chooses another instrument with effects; Pattern changes the pattern of the current mode (arpeggio, rhythm or sequence) and the octave layout; All also changes the key and the tempo.</p>
       <p>With the key, the sound or the mode held, tapping the joystick knob randomises instantly (see "Randomise with the knob").</p>
+      <h4>Effects and FX limits</h4>
+      <p>The Sound → FX list follows REV 3.0 option order for Reverb, Delay, Chorus, Flanger, Drive, Tape, Tremolo, LFO, Filter and Vocoder. Some combinations are deliberately refused just like the hardware: Reverb cannot be switched on over Delay or Flanger, over a running Drum Loop, or over Chorus in Strum/Drum; with Reverb active, Chorus is refused in Strum and Tremolo is refused in Strum/Drum. Turning Vocoder on switches Delay, Chorus and Flanger off, and those effects stay unavailable until Vocoder is off. Filter Wheel is not disabled by Vocoder. Drive and Tape are bypassed in Drum and Drum Loop modes. The web app does not fake the HiChord chip's transient CPU-overload shutdown because browser/device processing headroom is different.</p>
       <h4>Vocoder</h4>
       <p>Makes the sound "talk" with your voice. In Settings → Effects, choose Mic (your voice) or Loop (what you recorded on looper track 1, which then stops sounding directly). Hold a chord and speak or sing: the synth takes the shape of your voice. It works best with rich sounds such as Saw or Square. Formant Shift changes the character of the voice (higher or lower) and Noise Level adds noise so that s, t and k are understandable. Use headphones: with the speaker it feeds back.</p>
       <h3 class="grp">Record and capture</h3>
@@ -1234,13 +1236,15 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Look</h4>
       <p>The current Case choices are temporary visual shells and do not define the instrument geometry; they are kept only while the next case system is designed. Do not learn any function from a case skin: controls stay in the same places. The screen is independent and remains the meaningful visual technology choice: VECTOR (high-definition conceptual display), PIXEL (the HiChord-inspired 1-bit firmware display), MOSS (green reflective handheld LCD) and PHOSPHOR (analogue oscilloscope). "By case" still selects a temporary default screen for compatibility. The chord keys are clean by default; turn on "Notes and numbers on keys" if you want labels. "Wave" shows the live signal on non-PHOSPHOR screens; PHOSPHOR uses its simulated oscilloscope instead.</p>
       <h4>MIDI</h4>
-      <p>PC only (Chrome or Edge) and Android; Safari on iPhone does not support it, which is why the setting does not appear there. Turn it on in Settings → Sound. The white keys of any octave play buttons 1 to 7 (C is 1). The chord that sounds goes out as MIDI notes on every connected output (if an output sends the notes back to the input, the app ignores that echo). In Arp and Repeat the held chord is sent, not every hit.</p>
+      <p>MIDI is the largest remaining REV 3.0 conformance gap in this development build. Safari on iPhone does not expose Web MIDI at all. On browsers that do, the current legacy mapping is intentionally not documented here as HiChord behaviour because it is being replaced by the REV 3.0 model: incoming notes/drums with sustain and transport, looper tracks on channels 1–6, live playing on the layer being built, drums on channel 10, and MIDI clock/Start/Stop where the browser permits it.</p>
       <h4>Backup</h4>
       <p>Export saves your settings, presets, imported sounds and the last microphone sample to a file. Import restores that backup and also accepts the preset files of the official app.</p>
+      <h4>Factory reset</h4>
+      <p>The REV 3.0 hardware gesture is preserved: hold Key + Mode for about five seconds, release only after the reset prompt appears, then Joystick Up confirms ERASE ALL? and Down cancels; pressing any chord also cancels the confirmation. It clears notes settings, presets, imported sounds and the saved mic sample. Holding all three menu buttons for firmware DFU is a hardware-only FORCED DELTA: a web app cannot enter the HiChord bootloader.</p>
       <h4>Offline</h4>
       <p>Open the page once with internet and add it to the home screen (Share → Add to Home Screen). From then on it works offline. New versions are downloaded when you open it with internet. On recent iOS versions the installed app can reserve or blur a system-controlled strip around the status bar; notes pins an opaque top edge and keeps the instrument inside the reported safe area, but that system strip itself is not part of the web page.</p>
       <h4>Audio and lock screen</h4>
-      <p>After 20 seconds of nothing being touched or sounding, the app suspends audio so it does not show as "playing"; the first tap wakes it up and the first note may take a moment. When you leave the app or lock the iPhone everything stops, including the loops.</p>
+      <p>After 30 seconds of nothing being touched or sounding, the app suspends audio so it does not show as "playing"; the first tap wakes it up and the first note may take a moment. When you leave the app or lock the iPhone everything stops, including the loops.</p>
       <h4>If something fails</h4>
       <p>If nothing sounds when you press a button, a notice appears with the reason. Settings → Presets → Diagnostics runs a test (audio, a chord, microphone, MIDI, saved state, cache and the latest errors) and shows a report that you can copy or send to ask for help; the "audio parameters" line tells you whether a browser extension (privacy or anti-tracking) is blocking the audio: the app works around it by itself.</p>
       <p>If something is stuck in a strange state, "Reset the app", in the same place, erases the settings, the presets and the cache and starts over; it asks you to confirm with a second tap. Before that you can save a backup with Export (see "Backup").</p>
@@ -1276,7 +1280,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 53b · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 54 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -1683,10 +1687,10 @@ function audioSleep() {
   try { ctx.suspend(); } catch (e) {}
   applySession();
 }
-function audioIdleCheck() {   // tras 20 s sin sonar ni tocar, el audio se suspende
+function audioIdleCheck() {   // REV 3.0: after 30 s idle; audioBusy() skips sleep mid-performance
   if (!ctx || audioAsleep) return;
   if (audioBusy()) { lastBusy = Date.now(); return; }
-  if (Date.now() - lastBusy > 20000) audioSleep();
+  if (Date.now() - lastBusy > 30000) audioSleep();
 }
 // Pausa o parada desde la pantalla de bloqueo o el Centro de control: se detiene todo de verdad
 function registerMediaSession() {
@@ -1942,6 +1946,7 @@ function setMode(id) {
   for (const [k, v] of voices) if (k !== 'seq') { v.cv.releaseAll(currentEnv().r); voices.delete(k); }
   droneBtn = null; arpTones = []; clockStop(); autoUpdate();
   state.mode = id; saveState();
+  if (ctx) { updateFx('drive'); updateFx('tape'); }
   renderScreen(false); renderPads(); syncSettings();
   $('screen').classList.toggle('tuner', id === 'tuner');
   $('screen').classList.toggle('hiro', id === 'hiro'); $('screen').classList.toggle('ear', id === 'ear');
@@ -2185,6 +2190,8 @@ function updateFx(id) {
   const s = fxSlots[id]; s.clear();
   const v = state[id];
   if (!v || v === 'off') return;
+  // REV 3.0: Drive and Tape affect chords/melodies; Drum and Drum Loop bypass them.
+  if ((id === 'drive' || id === 'tape') && (state.mode === 'drum' || state.mode === 'beat')) return;
   s.input.disconnect();
   const keep = (...ns) => { s.nodes.push(...ns); return ns[0]; };
   FX_BUILD[id](v, s, keep);
@@ -3174,10 +3181,17 @@ async function runDiag() {
   t('audio', a + (ctx ? ' · ' + ctx.state + ' · ' + ctx.sampleRate + ' Hz · base latency ' + (ctx.baseLatency != null ? Math.round(ctx.baseLatency * 1000) + ' ms' : '?') : ''));
   let c;
   try {
-    pressInner(0); await new Promise(r => setTimeout(r, 200));
-    c = held.length === 1 && voices.size >= 1 ? 'ok (a chord should have sounded)' : 'The chord was NOT created (pressed ' + held.length + ', voices ' + voices.size + ')';
+    // Mode-independent engine self-test. The old diagnostic called pressInner(0), which is intentionally
+    // silent in modes such as Arp/Drum/Mixer and therefore produced false negatives on a healthy engine.
+    ensureAudio();
+    const ch = resolveChord(state, 0, null), upper = sortNum(chordTones(ch.root, ch.iv));
+    const bassMidi = state.bass === 'root' ? ch.root - 24 : null;
+    const notes = applyVoiceCount(slotNotes(upper, bassMidi), state.voices);
+    const cv = new ChordVoice(); cv.apply(notes);
+    const activeSlots = cv.slots.filter(Boolean).length;
+    c = activeSlots ? 'ok (' + activeSlots + ' voice slot' + (activeSlots === 1 ? '' : 's') + ' created)' : 'The audio engine created no voice slots';
+    setTimeout(() => { try { cv.releaseAll(0.05); } catch (e) {} }, 100);
   } catch (e) { c = 'FAILS → ' + (e.message || e); logErr('diag-acorde', e); }
-  try { releaseInner(0); } catch (e) {}
   t('test chord', c);
   t('audio parameters', apStatus);
   t('worklet', ctx && ctx.audioWorklet ? (recWorkletLoaded === ctx ? 'cargado' : 'not loaded (using the fallback)') : 'unavailable');
@@ -3191,13 +3205,16 @@ async function runDiag() {
   showDiag(L.join('\n'), 'set-diag');
 }
 let resetArmed = false;
-async function resetApp() {
-  const el = $('set-reset_app');
-  if (!resetArmed) { resetArmed = true; el.textContent = 'Sure?'; if (setv) setvRender(); setTimeout(() => { resetArmed = false; el.textContent = 'Reset'; if (setv) setvRender(); }, 3500); return; }
+async function eraseAppNow() {
   try { for (const k of Object.keys(localStorage)) if (k.startsWith('notes-')) localStorage.removeItem(k); } catch (e) {}
   try { for (const k of await caches.keys()) await caches.delete(k); } catch (e) {}
   try { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); } catch (e) {}
   location.reload();
+}
+async function resetApp() {
+  const el = $('set-reset_app');
+  if (!resetArmed) { resetArmed = true; el.textContent = 'Sure?'; if (setv) setvRender(); setTimeout(() => { resetArmed = false; el.textContent = 'Reset'; if (setv) setvRender(); }, 3500); return; }
+  await eraseAppNow();
 }
 async function runMicTest() {
   const out = [];
@@ -3557,7 +3574,7 @@ function refresh() {
     for (const n of notes) if (n != null) midiNow.add(Math.max(0, Math.min(127, Math.round(n))));
     tones = sortNum(upper);
     if (!arpOnly) {
-      const opts = { stagger: mode === 'strum' ? STRUM_MS[state.strumSpeed] : 0, mono: !!s.lead };
+      const opts = { stagger: mode === 'strum' ? STRUM_MS[state.strumSpeed] : 0, mono: !!s.lead }; // Rev 3.0 Lead: centered, no stereo pair detune
       if (existing) { existing.cv.apply(notes, opts); existing.ref = upper; existing.name = name; }
       else { const cv = new ChordVoice(); cv.apply(notes, opts); voices.set(s.key, { cv, ref:upper, name }); }
     }
@@ -3576,7 +3593,11 @@ function pressInner(btn) {
   quickPromote();
   if (!padEnabled(btn)) return;
   if (quick) { const it = quickItems()[btn]; if (it) { quickSwallow.add(btn); quick.used = true; haptic(true); it.pick(); renderPads(); } return; }
-  if (menu) menuClose();   // tocar un acorde cierra el menú, como en el aparato
+  if (menu) {
+    const cancellingFactory = menu.kind === 'factory';
+    menuClose();   // touching a chord closes menus; during ERASE ALL? this is the documented cancel gesture
+    if (cancellingFactory) { toast('Reset cancelled'); return; }
+  }
   ensureAudio(); haptic(true); hapticLater();
   if (!held.includes(btn)) held.push(btn);
   target = btn; lastDirUsed[btn] = null;
@@ -4180,7 +4201,7 @@ const MENU_TIMEOUT = 6000;
 const FX_ITEMS = ['reverb', 'delay', 'chorus', 'flanger', 'drive', 'tape', 'tremolo', 'lfo', 'filterWheel', 'vocoder', 'voices', 'adsr', 'bass', 'glide', 'scale', 'vlead', 'stereo', 'joy', 'osc'];
 const FX_NAMES = { reverb:'Reverb', delay:'Delay', chorus:'Chorus', flanger:'Flanger', drive:'Drive', tape:'Tape', tremolo:'Tremolo', lfo:'LFO', vocoder:'Vocoder', voices:'Voice', adsr:'ADSR',
   filterWheel:'Filter', bass:'Bass', glide:'Glide', scale:'Scale', vlead:'V.Lead', stereo:'Stereo', joy:'Joystick', osc:'OSC View' };
-const MENU_TITLES = { key:'Key', sound:'Sound', fx:'FX', mode:'Mode', bpm:'BPM', param:'Mode' };
+const MENU_TITLES = { key:'Key', sound:'Sound', fx:'FX', mode:'Mode', bpm:'BPM', param:'Mode', preset:'Preset', factory:'Reset' };
 let menuTimer = null, menuRep = null;
 function menuToggle(group) {
   if (gameLocked()) return;   // en partida no hay menús: se sale con «parar»
@@ -4189,9 +4210,14 @@ function menuToggle(group) {
   if (same) menuClose(); else menuOpen(group);
 }
 let menuOpenedAt = 0;
-function menuOpen(kind) { menuOpenedAt = performance.now(); if (setv) setvClose(); menu = { kind, fx: menu ? menu.fx : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+function menuOpen(kind) { menuOpenedAt = performance.now(); if (setv) setvClose(); const prev = menu; menu = { kind, fx: prev ? prev.fx : 0, preset: prev && Number.isInteger(prev.preset) ? prev.preset : 0 }; haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+function menuOpenPreset() { menuOpen('preset'); }
+function menuOpenFactory() {
+  menuOpen('factory');
+  menuPoke(10000);
+}
 function menuClose() { if (!menu) return; menu = null; clearTimeout(menuTimer); clearTimeout(menuRep); renderMenu(); renderWheel(); renderScreen(held.length > 0); }
-function menuPoke() { clearTimeout(menuTimer); menuTimer = setTimeout(menuClose, MENU_TIMEOUT); }
+function menuPoke(ms = MENU_TIMEOUT) { clearTimeout(menuTimer); menuTimer = setTimeout(menuClose, ms); }
 function menuJoy(dir) {   // del joystick: un paso al empujar; mantener izquierda/derecha repite
   clearTimeout(menuRep); if (!dir || dir.length !== 1) return;
   menuNav(dir);
@@ -4243,8 +4269,15 @@ function menuNav(dir) {
       state[p.key] = menuStep(p.list, state[p.key], h); saveState(); syncSettings();
       if (state.mode === 'hiro') hiroPrepare(); else if (state.mode === 'ear') earPrepare();
     } else if (dir === 'u') menu.kind = 'mode';
+  } else if (k === 'preset') {
+    if (h) menu.preset = (menu.preset + h + 4) % 4;
+    else if (dir === 'u') presetSave(menu.preset);
+    else if (dir === 'd' && presets[menu.preset]) presetLoad(menu.preset);
+  } else if (k === 'factory') {
+    if (dir === 'u') { menuClose(); eraseAppNow(); return; }
+    if (dir === 'd') { menuClose(); toast('Reset cancelled'); return; }
   }
-  if (menu) { haptic(false); menuPoke(); renderMenu(); renderWheel(); }
+  if (menu) { haptic(false); menuPoke(k === 'factory' ? 10000 : MENU_TIMEOUT); renderMenu(); renderWheel(); }
 }
 // ----- forma de onda del sonido (MATRIX): una representación real de cada sonido, como hace el aparato -----
 const GLYPH_WAVE = { sawtooth: p => 2 * (p % 1) - 1, sine: p => Math.sin(2 * Math.PI * p), square: p => (p % 1) < 0.5 ? 1 : -1, triangle: p => 1 - 4 * Math.abs((p % 1) - 0.5) };
@@ -4415,6 +4448,14 @@ function renderMenu() {
     const p = modeParam(); title = (MODES.find(m => m.id === state.mode) || {}).name || 'Mode';
     if (p) { [prev, val, next, pos] = around(p.list, state[p.key], v => p.names[v] || String(v)); }
     up = '▲ Mode';
+  } else if (k === 'preset') {
+    const slot = Math.max(0, Math.min(3, menu.preset || 0)), have = !!presets[slot];
+    title = 'Preset'; val = 'P' + (slot + 1) + (have ? ' *' : ''); pos = have ? 'Saved' : 'Empty';
+    prev = 'P' + (((slot + 3) % 4) + 1); next = 'P' + (((slot + 1) % 4) + 1);
+    up = '▲ Save'; down = have ? '▼ Load' : '';
+  } else if (k === 'factory') {
+    title = 'ERASE ALL?'; val = 'No undo'; pos = '10 sec';
+    prev = ''; next = ''; up = '▲ Yes'; down = '▼ No';
   }
   $('menuTitle').textContent = title; $('menuPos').textContent = pos; $('menuVal').textContent = val;
   $('menuPrev').textContent = prev; $('menuNext').textContent = next; $('menuUp').textContent = up; $('menuDown').textContent = down;
@@ -4570,17 +4611,81 @@ function hardwareTap(group) {
   if (state.mode === 'ear' && group === 'key') { earReplayRoot(); return true; }
   return false;
 }
+const hwPressedGroups = new Set();
+const hwComboConsumed = new Set();
+let hwFactoryTimer = null, hwDfuTimer = null;
+function hardwareHoldCombosUpdate() {
+  const key = hwPressedGroups.has('key'), sound = hwPressedGroups.has('sound'), mode = hwPressedGroups.has('mode');
+  if (!(key && mode && !sound) && hwFactoryTimer) { clearTimeout(hwFactoryTimer); hwFactoryTimer = null; }
+  if (!(key && sound && mode) && hwDfuTimer) { clearTimeout(hwDfuTimer); hwDfuTimer = null; }
+}
+async function hardwareBatteryStatus() {
+  // HiChord shows its own battery gauge. iOS Safari/PWA does not expose host battery state.
+  try {
+    if (navigator.getBattery) {
+      const b = await navigator.getBattery();
+      toast('Battery ' + Math.round(b.level * 100) + '%');
+      return;
+    }
+  } catch (e) {}
+  toast('BATTERY N/A');
+}
+function hardwareMenuCombo() {
+  if (held.length) return false;
+  const key = hwPressedGroups.has('key'), sound = hwPressedGroups.has('sound'), mode = hwPressedGroups.has('mode');
+
+  // All three held for 5s = hardware DFU on HiChord. Consume the literal gesture so it cannot
+  // accidentally trigger another combo; a web app cannot enter HiChord firmware-update mode.
+  if (key && sound && mode) {
+    if (hwFactoryTimer) { clearTimeout(hwFactoryTimer); hwFactoryTimer = null; }
+    quickCancel(); quickClose(); ['key','sound','mode'].forEach(x => hwComboConsumed.add(x));
+    if (!hwDfuTimer) hwDfuTimer = setTimeout(() => { hwDfuTimer = null; toast('DFU unavailable in web app'); }, 5000);
+    return true;
+  }
+
+  // KEY + MODE held 5s -> ERASE ALL? -> joystick UP yes / DOWN no.
+  if (key && mode && !sound) {
+    quickCancel(); quickClose(); hwComboConsumed.add('key'); hwComboConsumed.add('mode');
+    if (!hwFactoryTimer) {
+      toast('HOLD TO CLEAR');
+      hwFactoryTimer = setTimeout(() => {
+        hwFactoryTimer = null;
+        if (hwPressedGroups.has('key') && hwPressedGroups.has('mode') && !hwPressedGroups.has('sound')) menuOpenFactory();
+      }, 5000);
+    }
+    return true;
+  }
+
+  // SOUND + MODE opens the four-slot preset menu.
+  if (!key && sound && mode) {
+    quickCancel(); quickClose(); hwComboConsumed.add('sound'); hwComboConsumed.add('mode'); menuOpenPreset(); return true;
+  }
+
+  // KEY + SOUND shows battery. Unsupported browsers show N/A instead of inventing a value.
+  if (key && sound && !mode) {
+    quickCancel(); quickClose(); hwComboConsumed.add('key'); hwComboConsumed.add('sound'); hardwareBatteryStatus(); return true;
+  }
+  return false;
+}
 function bindHardwareMenu(id, group) {
   const el = $(id); let ptr = null, combo = false, direct = false;
   el.addEventListener('pointerdown', e => {
-    e.preventDefault(); ptr = e.pointerId; combo = false; direct = false; hwHeldGroup = group; el.classList.add('pressed','held');
+    e.preventDefault(); ptr = e.pointerId; combo = false; direct = false; hwHeldGroup = group; hwPressedGroups.add(group); el.classList.add('pressed','held');
     try { el.setPointerCapture(ptr); } catch (err) {}
     if (held.length) { combo = hwChordCombo(group); return; }
+    if (hardwareMenuCombo()) { combo = true; return; }
     if (state.mode === 'ear' && group === 'key') { direct = true; return; }   // KEY is the Ear Trainer hint, not a menu/quick-select gesture
     quickArm(group); // short press = menu; hold = quick-select/randomise context
   });
   const end = e => {
-    if (e.pointerId !== ptr) return; ptr = null; el.classList.remove('pressed','held'); hwHeldGroup = null;
+    if (e.pointerId !== ptr) return; ptr = null; el.classList.remove('pressed','held'); hwPressedGroups.delete(group); hwHeldGroup = hwPressedGroups.size === 1 ? [...hwPressedGroups][0] : null;
+    hardwareHoldCombosUpdate();
+    const consumed = hwComboConsumed.has(group);
+    if (consumed) {
+      quickCancel(); combo = false; direct = false;
+      if (!hwPressedGroups.size) hwComboConsumed.clear();
+      return;
+    }
     if (direct) { direct = false; if (e.type === 'pointerup') hardwareTap(group); return; }
     if (combo) { combo = false; quickCancel(); return; }
     if (quickCancel()) { if (e.type === 'pointerup') { if (hardwareTap(group)) return; if (group === 'mode') tapTempo(); menuToggle(group); } return; }
@@ -5390,8 +5495,39 @@ function applyLibPreset(snd) {
   applyFilter();
 }
 
+function fxRev3Conform(id) {
+  // REV 3.0 user-visible FX-limit rules. We intentionally do not fake transient CPU overload
+  // protection because browser/device processing headroom is not the HiChord's STM32 headroom.
+  const on = v => !!v && v !== 'off';
+  if (id === 'vocoder' && on(state.vocoder)) {
+    let changed = false;
+    for (const x of ['chorus','flanger','delay']) {
+      if (on(state[x])) { state[x] = 'off'; changed = true; if (ctx) updateFx(x); }
+    }
+    if (changed) toast('Vocoder · incompatible FX off');
+    return true;
+  }
+  if (!['reverb','delay','flanger','chorus','tremolo'].includes(id) || !on(state[id])) return true;
+  let blocked = false;
+  if (state.vocoder !== 'off' && ['delay','flanger','chorus'].includes(id)) blocked = true;
+  if (id === 'reverb') {
+    blocked = blocked || on(state.delay) || on(state.flanger) || !!beat.style ||
+      ((state.mode === 'strum' || state.mode === 'drum') && on(state.chorus));
+  }
+  if (id === 'chorus' && state.mode === 'strum' && on(state.reverb)) blocked = true;
+  if (id === 'tremolo' && (state.mode === 'strum' || state.mode === 'drum') && on(state.reverb)) blocked = true;
+  if (blocked) {
+    state[id] = 'off';
+    if (ctx) updateFx(id);
+    toast('FX LIMIT · TURN 1 OFF');
+    return false;
+  }
+  return true;
+}
+
 function onSettingChanged(id) {
   if (id === 'adsr') { const e = ADSR[state.adsr] || ADSR.TOUCH; state.attack = e.a; state.release = e.r; }
+  if (['reverb','delay','flanger','chorus','tremolo','vocoder'].includes(id)) fxRev3Conform(id);
   if (id === 'mode') { const m = state.mode; state.mode = 'play'; setMode(m); }
   if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id))
   if (id === 'drumVol' && ctx && drumBus) drumBus.gain.setTargetAtTime(state.drumVol, ctx.currentTime, 0.02);
@@ -5604,8 +5740,8 @@ function closeSettings() { $('sheet').hidden = true; }
 
 // ===== PRESETS, AZAR Y COPIA DE SEGURIDAD =====
 const PRESET_KEYS = ['sound','adsr','attack','release','bass','vlead','stereo','cutoff','filterWheel','bpm','voices','glide','lfo','reverb','reverbAmt','delay','delayAmt',
-  'chorus','flanger','drive','tape','tremolo','key','scale','globalOct','joy','mode','strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar',
-  'vocFormant','vocQ','vocRelease','vocNoise','tweaks','btnOct','inv','locks'];
+  'chorus','flanger','drive','tape','tremolo','key','scale','globalOct','joy','mode','strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar','drumVol',
+  'vocoder','vocFormant','vocQ','vocRelease','vocNoise','micGain','osc','tweaks','btnOct','inv','locks'];
 function loadPresets() { try { const p = JSON.parse(localStorage.getItem('notes-presets-v1')); if (Array.isArray(p) && p.length === 4) return p; } catch (e) {} return [null, null, null, null]; }
 function savePresets() { try { localStorage.setItem('notes-presets-v1', JSON.stringify(presets)); } catch (e) {} }
 let presets = loadPresets();
@@ -5624,7 +5760,8 @@ function refreshPresetRows() {
 }
 function presetSave(i) {
   const snap = {}; for (const k of PRESET_KEYS) snap[k] = structuredClone(state[k]);
-  presets[i] = { snap, at:Date.now() }; savePresets(); refreshPresetRows(); toast('P' + (i + 1) + ' saved');
+  let mic = null; try { const raw = localStorage.getItem('notes-mic-v1'); if (raw) mic = JSON.parse(raw); } catch (e) {}
+  presets[i] = { snap, mic, at:Date.now() }; savePresets(); refreshPresetRows(); toast('P' + (i + 1) + ' saved');
 }
 // Aplica al motor y a la interfaz todo el estado (tras cargar un preset o restaurar una copia)
 function reapplyAll() {
@@ -5643,8 +5780,12 @@ function presetLoad(i) {
   const p = presets[i]; if (!p) return;
   setMode('play');
   const next = structuredClone(p.snap);
-  if (['mic', 'tuner', 'mixer', 'hiro', 'ear'].includes(next.mode)) next.mode = 'play';
+  if (['mixer', 'hiro', 'ear'].includes(next.mode)) next.mode = 'play';   // these depend on transient loop/game state that a preset does not store
   Object.assign(state, next);
+  if (p.mic) {
+    try { localStorage.setItem('notes-mic-v1', JSON.stringify(p.mic)); } catch (e) {}
+    delete sampleBuf.mic; if (ctx) loadMicSample();
+  }
   if (!allSounds().find(x => x.id === state.sound)) state.sound = 'saw';
   reapplyAll(); toast('P' + (i + 1) + ' loaded');
 }
