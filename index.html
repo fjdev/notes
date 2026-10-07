@@ -886,11 +886,141 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 :root[data-screen="pixel"] .display .screen.pxui .setv-row.k-select .vl, :root[data-screen="pixel"] .display .screen.pxui .setv-row.k-range .vl { flex: 0 0 52%; max-width: 52%; justify-content: space-between; }
 :root[data-screen="pixel"] .display .screen.pxui .setv-row .vl .v { flex: 1 1 auto; text-align: center; }
 :root[data-screen="pixel"] .display .screen.pxui .setv-text { padding: 0; }
+
+/* ===== PHASE 48 · hardware layout prototype: HiChord topology adapted to touch =====
+   Source logic: keep the instrument's 4 / 3 / 4 spatial rhythm without copying industrial dimensions:
+   WHEEL + KEY/SOUND/MODE, then 2/4/6, then 1/3/5/7. The external looper strip is retired;
+   looper state/control lives in the display + joystick. Visible hardware surface = active touch surface. */
+.app { gap: 10px; padding: 12px; }
+.topbar { height: 24px; margin: -4px 2px -2px; justify-content: flex-start; }
+.topbar .brand { margin-right: 0; }
+
+/* Legacy physical strips stay in the DOM temporarily for code safety, but are no longer part of the instrument surface. */
+#looper, #modes { display: none !important; }
+
+.hardware-row {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+  padding: 0 2px;
+  position: relative;
+}
+.wheel-module {
+  grid-column: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.hardware-row .wheel {
+  width: 100%;
+  max-width: none;
+  height: 52px;
+  border-radius: 10px;
+  margin: 0;
+}
+.hardware-row .wheel-rim { inset: 9px 7px; border-radius: 7px; }
+.hardware-row .wheel-lbl {
+  position: absolute;
+  left: 0; right: 0; bottom: -10px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hardware-row .menu-keys {
+  grid-column: 2 / 5;
+  width: auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.hardware-row .menu-key {
+  position: relative;
+  width: 100%;
+  height: 52px;
+  min-width: 0;
+  border: 1px solid rgba(0,0,0,.55);
+  border-radius: 10px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: #171717;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 2px 0 rgba(0,0,0,.42);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hardware-row .menu-key.key { background: #A7AAA7; }
+.hardware-row .menu-key.sound { background: #E2BF2F; }
+.hardware-row .menu-key.mode { background: #C84635; color: #fff; }
+.hardware-row .menu-key .mk-svg {
+  width: 25px; height: 25px;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+  pointer-events: none;
+}
+.hardware-row .menu-key.pressed,
+.hardware-row .menu-key:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
+}
+.hardware-row .menu-key.held {
+  outline: 1px solid color-mix(in srgb, var(--led) 75%, transparent);
+  outline-offset: 2px;
+}
+
+/* Seven diatonic buttons keep the real HiChord topology.
+   Logical order in the DOM stays 1..7 so the audio/control code does not change. */
+.pads {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: minmax(76px, .78fr) minmax(108px, 1.22fr);
+  gap: 8px;
+  min-height: 200px;
+}
+.pads .cb { grid-column: auto; grid-row: auto; }
+.pads .cb:nth-child(1) { grid-row: 2; grid-column: 1 / span 3; }
+.pads .cb:nth-child(2) { grid-row: 1; grid-column: 1 / span 4; }
+.pads .cb:nth-child(3) { grid-row: 2; grid-column: 4 / span 3; }
+.pads .cb:nth-child(4) { grid-row: 1; grid-column: 5 / span 4; }
+.pads .cb:nth-child(5) { grid-row: 2; grid-column: 7 / span 3; }
+.pads .cb:nth-child(6) { grid-row: 1; grid-column: 9 / span 4; }
+.pads .cb:nth-child(7) { grid-row: 2; grid-column: 10 / span 3; }
+.pads .cb:nth-child(2) .num,
+.pads .cb:nth-child(4) .num,
+.pads .cb:nth-child(6) .num { font-size: 36px; }
+
+/* Joystick remains separate and left-biased: performance geometry wins over visual symmetry. */
+.controls {
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: 0 2px;
+}
+.controls .legacy-tools { display: none !important; }
+
+@media (max-width: 360px) {
+  .hardware-row { gap: 6px; padding: 0; }
+  .hardware-row .menu-keys { gap: 6px; }
+  .hardware-row .wheel, .hardware-row .menu-key { height: 48px; }
+  .hardware-row .menu-key .mk-svg { width: 22px; height: 22px; }
+  .pads { gap: 7px; grid-template-rows: minmax(70px, .78fr) minmax(102px, 1.22fr); min-height: 188px; }
+}
+@media (max-height: 700px) {
+  .app { gap: 8px; padding-top: 10px; }
+  .hardware-row .wheel, .hardware-row .menu-key { height: 48px; }
+  .hardware-row .wheel-rim { inset: 8px 7px; }
+  .pads { min-height: 188px; grid-template-rows: minmax(68px, .75fr) minmax(100px, 1.25fr); }
+}
+
 </style>
 </head>
 <body>
 <main class="app">
-  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span><span class="wheel-lbl dim" id="wheelLbl" aria-hidden="true"></span><div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Wheel"><div class="wheel-rim" id="wheelRim"></div></div></div>
+  <div class="topbar" id="topbar"><span class="brand" aria-hidden="true">notes</span></div>
   <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Screen">
     <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
@@ -922,17 +1052,30 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
   <section class="modes" id="modes"></section>
   </div>
 
-  <section class="looper" id="looper" aria-label="Looper"></section>
+  <section class="looper" id="looper" aria-label="Looper" aria-hidden="true"></section>
+
+  <section class="hardware-row" id="hardwareRow" aria-label="Performance controls">
+    <div class="wheel-module">
+      <span class="wheel-lbl dim" id="wheelLbl" aria-hidden="true"></span>
+      <div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Wheel"><div class="wheel-rim" id="wheelRim"></div></div>
+    </div>
+    <div class="menu-keys" id="menuKeys" aria-label="HiChord menu buttons">
+      <button class="menu-key key" id="hwKey" aria-label="Key">
+        <svg class="mk-svg" aria-hidden="true" viewBox="0 0 24 24"><circle cx="7.5" cy="12" r="4.2"/><path d="M11.7 12H21M16.5 12V9M19 12V10"/></svg>
+      </button>
+      <button class="menu-key sound" id="hwSound" aria-label="Sound">
+        <svg class="mk-svg" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12h3l2.2-5 3.2 10 3.2-10 2.2 5h5.2"/></svg>
+      </button>
+      <button class="menu-key mode" id="hwMode" aria-label="Mode">
+        <svg class="mk-svg" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.2"/><path d="M12 7.5v5l3.3 2"/></svg>
+      </button>
+    </div>
+  </section>
 
   <section class="pads" id="pads"></section>
 
   <section class="controls">
     <div class="joy" id="joy" aria-label="Joystick"><div class="knob" id="knob"></div></div>
-    <div class="menu-keys" id="menuKeys" aria-label="HiChord menu buttons">
-      <button class="menu-key key" id="hwKey" aria-label="Key"><span class="mk-icon" aria-hidden="true">K</span><span class="mk-label">Key</span></button>
-      <button class="menu-key sound" id="hwSound" aria-label="Sound"><span class="mk-icon wave" aria-hidden="true">~</span><span class="mk-label">Sound</span></button>
-      <button class="menu-key mode" id="hwMode" aria-label="Mode"><span class="mk-icon" aria-hidden="true">M</span><span class="mk-label">Mode</span></button>
-    </div>
     <div class="tools legacy-tools" id="tools" aria-hidden="true">
       <div class="target-lbl" id="targetLbl">Button 1</div>
       <button id="tInv" tabindex="-1" aria-hidden="true"></button>
@@ -955,13 +1098,13 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
     <div class="sec manual" id="manualSec" hidden>
       <h3 class="grp">Play</h3>
       <h4>Chords</h4>
-      <p>The seven buttons play the chords of the key: 1, 4 and 5 are major; 2, 3 and 6 are minor; 7 is diminished. They never sound bad together. Try 1 → 5 → 6 → 4.</p>
+      <p>The seven buttons play the chords of the key: 1, 4 and 5 are major; 2, 3 and 6 are minor; 7 is diminished. Their physical map follows the HiChord deck: 2–4–6 on the upper row and 1–3–5–7 below, so the same degree keeps the same place when you change key. They never sound bad together. Try 1 → 5 → 6 → 4.</p>
       <p>Hold a button and move the joystick: each direction changes the colour of the chord. Let go and you are back to the normal chord. In Settings → Chords you can choose between five joystick maps.</p>
       <p>The screen shows the name of the chord that is sounding; if you also want to see it on the keys, turn on "Notes and numbers on keys" in Settings → Look. In Settings → Chords, "Bass" adds the root an octave down (Root) or lets you hold one button for the bass and press another for the chord (Slash), and "V.Lead" (Voice Leading) chooses smooth inversions automatically.</p>
       <h4>Menu buttons</h4>
-      <p>The three physical buttons follow the REV 3.0 hardware: gray Key, yellow Sound and red Mode. Tap them to open their menus. Hold a chord and press Key for octave down, Sound for inversion (or Sound while holding a joystick modification to lock it), and Mode for octave up. Holding a menu button first turns the seven chord buttons into its quick-select choices.</p>
+      <p>The three physical buttons follow the REV 3.0 hardware: gray Key, yellow Sound and red Mode. They sit in the control row directly above the chord deck, next to the wheel. Tap them to open their menus. Hold a chord and press Key for octave down, Sound for inversion (or Sound while holding a joystick modification to lock it), and Mode for octave up. Holding a menu button first turns the seven chord buttons into its quick-select choices.</p>
       <h4>Wheel</h4>
-      <p>The wheel at the top right turns when you slide a finger left or right (on a computer, also with the mouse wheel or with the arrow keys when it is selected). On the real HiChord, the wheel by itself controls master volume. A web page cannot control the iPhone/PC hardware volume, so in notes the wheel by itself intentionally does nothing. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets that track's volume; with button 7 held, it sets metronome volume. Turning the wheel promotes the press into a level gesture, so the track/metronome keeps its previous mute/on state. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls when a contextual function is active, and the screen shows the value while you turn it.</p>
+      <p>The wheel is the left control in the row under the display, beside Key/Sound/Mode. Slide a finger left or right across its visible surface (on a computer, also use the mouse wheel or the arrow keys when it is selected). On the real HiChord, the wheel by itself controls master volume. A web page cannot control the iPhone/PC hardware volume, so in notes the wheel by itself intentionally does nothing. With the key on screen held it sets the attack; with the sound, the release; with the mode, the filter, as on the device. In the effects menu, on Reverb or Delay, it sets the amount. In Mixer, with a track held, it sets that track's volume; with button 7 held, it sets metronome volume. Turning the wheel promotes the press into a level gesture, so the track/metronome keeps its previous mute/on state. In Mic Sample it sets the microphone gain (Mic Gain). The small text next to the wheel says what it controls when a contextual function is active, and the screen shows the value while you turn it.</p>
       <p>Use the device's own volume buttons for overall volume. The unused bare-wheel gesture is deliberately kept free rather than reassigned; it may receive an optional app-specific function later.</p>
       <h4>Dimmed controls</h4>
       <p>A dimmed button or tool has no function in the current mode (for example, empty tracks in the Mixer) and does not respond to touch.</p>
@@ -984,7 +1127,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h3 class="grp">Modes and rhythms</h3>
       <h4>Modes</h4>
       <p><b>Play</b> full chord. <b>Strum</b> strummed chord. <b>Lead</b> one note, the root. <b>Drone</b> the chord keeps sounding when you let go. <b>Arp</b> arpeggio at the tempo. <b>Repeat</b> the chord pulses at the tempo. To change mode, tap the mode on the screen (bottom left) and move with the joystick, or hold it for quick select (see "Menus" and "Quick select"); each mode's setting (speed, kit, variation or level) is in that same menu, downwards.</p>
-      <p><b>Drum</b> each button is a hit; hold a pad and move the joystick to repeat it. <b>Drum Loop</b> each button starts a rhythm; while holding that pad, Up/Down changes its variation and Left/Right changes kit. A joystick click bounces the beat into the selected looper track. <b>Sequencer</b> builds a repeating progression and joystick click starts or stops it. <b>Mixer</b> uses buttons 1–6 as loop tracks and button 7 as the metronome.</p>
+      <p><b>Drum</b> each button is a hit; hold a pad and move the joystick to repeat it. <b>Drum Loop</b> each button starts a rhythm; while holding that pad, Up/Down changes its variation and Left/Right changes kit. With no pad held, Left/Right selects the target looper track. A joystick click records the playing beat into that track — the manual calls this a <b>bounce</b>. <b>Sequencer</b> builds a repeating progression and joystick click starts or stops it. <b>Mixer</b> uses buttons 1–6 as loop tracks and button 7 as the metronome.</p>
       <p>In Sequencer, press chord buttons to add steps (four slots at first). Hold the joystick Left/Right to move the edit cursor, then press a chord to replace that step. Joystick Down adds four slots (up to 16), Up removes four, and holding the joystick click while pushing Up trims to the cursor. To store a joystick-modified chord, hold its chord button for about 300 ms and then move the joystick. In Mixer, tap 1–6 to mute/unmute; hold a track + Sound to solo it; hold a track + wheel to set its level. Button 7 toggles the metronome, and hold 7 + wheel sets metronome level. Clicking the joystick stops or starts all loops.</p>
       <h4>Repeat: trance gate</h4>
       <p>In Repeat, hold a chord and it opens and closes to the beat of the tempo following a fixed 32-step pattern, with rests and tied notes, like a trance synth. The pulse speed is changed in the mode menu, downwards (the same speeds as the arpeggio). The release is limited to 200 ms so the cuts stay clean.</p>
@@ -1001,7 +1144,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>Makes the sound "talk" with your voice. In Settings → Effects, choose Mic (your voice) or Loop (what you recorded on looper track 1, which then stops sounding directly). Hold a chord and speak or sing: the synth takes the shape of your voice. It works best with rich sounds such as Saw or Square. Formant Shift changes the character of the voice (higher or lower) and Noise Level adds noise so that s, t and k are understandable. Use headphones: with the speaker it feeds back.</p>
       <h3 class="grp">Record and capture</h3>
       <h4>Looper</h4>
-      <p>The canonical REV 3.0 control is the clickable joystick. On an empty track, click once for WAITING and click again to record. Before the first loop, Left/Right while WAITING chooses 0–8 bars (0 = free); fixed bars get a four-beat count-in, while free recording stops on the next click. Later tracks start on the next Track-1 loop boundary and stop in sync. After a take, selection advances to the next empty track.</p>
+      <p>There is no separate looper button strip on the instrument surface: the display shows the looper state and the clickable joystick is the canonical REV 3.0 control. On an empty track, click once for WAITING and click again to record. Click again while it is still WAITING to disarm/cancel before recording starts. Before the first loop, Left/Right while WAITING chooses 0–8 bars (0 = free); fixed bars get a four-beat count-in, while free recording stops on the next click. Once REC has actually started, REV 3.0 has no cancel/undo gesture: finish the take, then hold the joystick click for about 0.7 s on that playing track if you want to clear it. Later tracks start on the next Track-1 loop boundary and stop in sync. After a take, selection advances to the next empty track.</p>
       <p>With the looper active, Left/Right selects tracks (Drum uses Up/Down). Joystick Down jumps to the transport and Up returns; clicking the transport tape-stops/resumes all loops, while holding it for about 0.7 s clears everything. On a playing track, hold the joystick click for about 0.7 s to clear that track; a short click never erases it. In Drum Loop, Left/Right selects the target track, Down selects transport, and clicking a playing beat bounces it into the highlighted empty track. Leaving Drum Loop pauses the live beat unless it was bounced first.</p>
       <h4>Save audio</h4>
       <p>The circle button, next to the wave, records what is sounding (chords, drums, loops and vocoder) for up to four minutes; the screen shows the time. Tapping it again stops it and opens the iPhone share menu, where you choose "Save to Files"; on a computer a 16-bit stereo WAV file is downloaded. If the app goes to the background during recording, it picks up where it was when you return, without a gap. It does not include the direct microphone.</p>
@@ -1069,7 +1212,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 47 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 48 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -2324,7 +2467,11 @@ function beatHeldJoy(dir) {
   }
   if (dir === 'l' || dir === 'r') {
     const list = KITS.map(k => k[0]), i = Math.max(0,list.indexOf(state.kit));
-    state.kit = list[(i + (dir === 'r' ? 1 : -1) + list.length) % list.length]; saveState(); renderScreen(false); renderPads(); return true;
+    state.kit = list[(i + (dir === 'r' ? 1 : -1) + list.length) % list.length];
+    saveState(); renderScreen(false); renderPads();
+    const kit = KITS.find(k => k[0] === state.kit);
+    toast(kit ? kit[1] : 'Kit');   // REV 3.0 gesture was working; give the touchscreen the missing transient confirmation.
+    return true;
   }
   return false;
 }
@@ -3619,8 +3766,9 @@ function renderScreen(active) {
   const beatName = beat.style ? ' · ' + BEAT_STYLES.find(s => s[0] === beat.style)[1] : '';
   const lp = looperStatus(), seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map((st,i) => (i === seq.cursor && seq.editing ? '[' : '') + (seqChord(st)?.name || '—') + (i === seq.cursor && seq.editing ? ']' : '')).join(' ') + ' · ' + seq.steps.length + '/' + seq.capacity : state.mode === 'mic' ? (micTake ? ' recording' : '') : '';
   $('sMode').classList.remove('live');
-  $('sMode').textContent = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt
-    + ' · ' + Math.round(state.bpm) + beatName + (lp ? ' · ' + lp : '') + (wavRec ? ' · audio ' + wavClock() : '');
+  const modeLine = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt + beatName;
+  // With the external looper strip retired, active looper state gets display priority over the passive BPM readout.
+  $('sMode').textContent = modeLine + (lp ? ' · ' + lp : ' · ' + Math.round(state.bpm)) + (wavRec ? ' · audio ' + wavClock() : '');
   const cn = $('chordName');
   if (lastDisplay && !OWN_TITLE.includes(state.mode)) cn.textContent = lastDisplay.name;
   if (!OWN_TITLE.includes(state.mode)) cn.classList.toggle('idle', !active);
