@@ -1236,7 +1236,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Look</h4>
       <p>The current Case choices are temporary visual shells and do not define the instrument geometry; they are kept only while the next case system is designed. Do not learn any function from a case skin: controls stay in the same places. The screen is independent and remains the meaningful visual technology choice: VECTOR (high-definition conceptual display), PIXEL (the HiChord-inspired 1-bit firmware display), MOSS (green reflective handheld LCD) and PHOSPHOR (analogue oscilloscope). "By case" still selects a temporary default screen for compatibility. The chord keys are clean by default; turn on "Notes and numbers on keys" if you want labels. "Wave" shows the live signal on non-PHOSPHOR screens; PHOSPHOR uses its simulated oscilloscope instead.</p>
       <h4>MIDI</h4>
-      <p>MIDI is the largest remaining REV 3.0 conformance gap in this development build. Safari on iPhone does not expose Web MIDI at all. On browsers that do, the current legacy mapping is intentionally not documented here as HiChord behaviour because it is being replaced by the REV 3.0 model: incoming notes/drums with sustain and transport, looper tracks on channels 1–6, live playing on the layer being built, drums on channel 10, and MIDI clock/Start/Stop where the browser permits it.</p>
+      <p>MIDI follows the REV 3.0 model on browsers with Web MIDI. MIDI OUT and MIDI IN are separate settings; MIDI IN starts OFF. Incoming pitched notes play the current synth sound directly, channel 10 uses a GM-style drum map, CC64 is sustain and CC120/123 are panic/all-notes-off. MIDI Start/Stop and 24 PPQN clock are accepted; incoming clock follows tempo. MIDI OUT uses fixed velocity 100: normal live playing starts on channel 1 and, while building looper layers, follows the selected track on channels 1–6; drums use channel 10. Arp/Repeat/Sequencer events and newly recorded looper MIDI events are also mirrored to MIDI. Safari/Home Screen on iPhone does not expose Web MIDI, so MIDI is unavailable there; this is a platform limitation, not a substitute interaction.</p>
       <h4>Backup</h4>
       <p>Export saves your settings, presets, imported sounds and the last microphone sample to a file. Import restores that backup and also accepts the preset files of the official app.</p>
       <h4>Factory reset</h4>
@@ -1280,7 +1280,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 54 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 55 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -1614,7 +1614,7 @@ const DEFAULT_STATE = {
   theme:'auto', screen:'auto', keyLabels:false, swipe:false, osc:false, haptics:false,
   library:[],
   scopeMode:'yt', hiroLevel:0, hiroPractice:false, hiroSpeed:0.75, hiroBest:0, hiroLatency:0, earLevel:0, earBest:0,
-  micGain:1, micHold:false, midi:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
+  micGain:1, micHold:false, midi:false, midiIn:false, vocoder:'off', vocFormant:0, vocQ:1, vocRelease:20, vocNoise:0.15,
   mode:'play', strumSpeed:'medium', arpRate:'1/8', arpPattern:'up', arpLayer:'arp', repeatRate:'1/8',
   kit:'tight', beatVar:'orig', drumVol:0.8,
   seqSteps:[], seqCapacity:4,
@@ -1656,7 +1656,8 @@ let gameLock = false;
 let quick = null, quickPtr = null; const quickSwallow = new Set();
 let menu = null;
 let setv = null;   // ajustes abiertos dentro de la pantalla (fase 33): { sec, row } (row −1 = la cabecera de pestañas)   // menú abierto en la pantalla (fase 31): { kind: 'key' | 'sound' | 'fx' | 'mode' | 'bpm' | 'param', fx }
-let midiAcc = null, midiSent = new Set();
+let midiAcc = null, midiSent = { channel:1, notes:new Set() };
+let midiLiveNotes = new Set();
 let wavRec = null, wavTimer = null; const WAV_MAX = 240;   // guardar audio: máximo 4 min
 function saveState() {
   if (gameLock) return;
@@ -1892,9 +1893,9 @@ let arpTones = [], arpVoices = [], arpIndex = 0, arpDirUp = true, droneBtn = nul
 function clockStart() {
   if (clock.timer || !ctx) return;
   clock.next = ctx.currentTime + 0.03; clock.step = 0; arpIndex = 0; arpDirUp = true;
-  clock.timer = setInterval(clockTick, 25);
+  clock.timer = setInterval(clockTick, 25); midiTransportRefresh();
 }
-function clockStop() { if (clock.timer) clearInterval(clock.timer); clock.timer = null; }
+function clockStop() { if (clock.timer) clearInterval(clock.timer); clock.timer = null; midiTransportRefresh(); }
 function clockTick() {
   if (!ctx || (state.mode !== 'arp' && state.mode !== 'repeat')) { clockStop(); return; }
   const rate = state.mode === 'arp' ? state.arpRate : state.repeatRate;
@@ -1922,6 +1923,7 @@ function scheduleStep(t, step, dur) {
   if (state.mode === 'repeat') {
     const i = step % 32, on = GATE32[i], nextOn = GATE32[(i + 1) % 32];
     for (const [, v] of voices) v.cv.gateStep(t, dur, on, nextOn);
+    if (on && liveMidiNotes.size) midiPulseNotes([...liveMidiNotes], t, dur * 0.88);
     return;
   }
   if (!arpTones.length) return;
@@ -1930,6 +1932,7 @@ function scheduleStep(t, step, dur) {
   for (const midi of arpPick(step)) {
     const v = new SlotVoice(4, midi, { startAt:t, pan: state.arpLayer === 'chord' ? 0.6 : null });
     v.release(r, t + dur * 0.5);
+    midiPulseNotes([midi], t, dur * 0.5);
     arpVoices.push(v);
   }
   arpVoices = arpVoices.filter(v => v !== null).slice(-24);
@@ -1944,6 +1947,7 @@ function setMode(id) {
   if (state.mode === 'ear' && id !== 'ear') earEnd();
   if (state.mode === 'mic' && id !== 'mic') { if (micTake) { clearTimeout(micTake.timer); micTake = null; } micStop('sampler'); }
   for (const [k, v] of voices) if (k !== 'seq') { v.cv.releaseAll(currentEnv().r); voices.delete(k); }
+  midiLiveNotes = new Set(); midiSync(new Set());
   droneBtn = null; arpTones = []; clockStop(); autoUpdate();
   state.mode = id; saveState();
   if (ctx) { updateFx('drive'); updateFx('tape'); }
@@ -2361,8 +2365,9 @@ function osc(type, f, t, dur) {
   const o = ctx.createOscillator(); o.type = type; pv(o.frequency, f); o.start(t); o.stop(t + dur + 0.05); return o;
 }
 
-function drumHit(kitId, pad, t, vel) {
+function drumHit(kitId, pad, t, vel, midiOut=true) {
   if (!ctx || !drumBus) return;
+  if (midiOut) midiDrumOut(pad, t, true);
   const kit = KIT_P[kitId] || KIT_P.tight; vel = vel == null ? 1 : vel;
   if (pad === 0 || pad === 1) {
     const k = kit.kick, alt = pad === 1, dec = alt ? k.dec * 0.55 : k.dec, dur = dec + 0.1;
@@ -2463,10 +2468,10 @@ const beat = { style:null, timer:null, next:0, step:0, recArmed:false, bouncing:
 function beatStart(style, at) {
   ensureAudio(); beat.style = style;
   const startAt = at || ctx.currentTime + 0.03;
-  if (!beat.timer) { beat.next = startAt; beat.step = 0; beat.timer = setInterval(beatTick, 25); }
+  if (!beat.timer) { beat.next = startAt; beat.step = 0; beat.timer = setInterval(beatTick, 25); midiTransportRefresh(); }
   if (beat.recArmed) { beat.recArmed = false; beatBounce(startAt); }
 }
-function beatStop() { if (beat.timer) clearInterval(beat.timer); beat.timer = null; beat.style = null; }
+function beatStop() { if (beat.timer) clearInterval(beat.timer); beat.timer = null; beat.style = null; midiTransportRefresh(); }
 function beatNextBarTime() {
   if (!ctx) return 0;
   if (!beat.timer) return ctx.currentTime + 0.05;
@@ -2484,7 +2489,7 @@ function beatBounce(at) {
   const t0 = first ? (at || beatNextBarTime()) : nextLoopPoint(now + 0.05);
   const dur = first ? 4 * beatSec() : loop.len, t1 = t0 + dur;
   cancelJob(t); const job = t.job = {}; beat.bouncing = true;
-  t.isMaster = first; t.free = false; t.f0 = frameAt(t0); t.state = 'armed'; t.countdown = true;
+  t.isMaster = first; t.free = false; t.midiEvents = []; t.f0 = frameAt(t0); t.state = 'armed'; t.countdown = true;
   t.origin = 'beat'; t.label = (BEAT_STYLES.find(x => x[0] === beat.style) || [null, beat.style || 'Beat'])[1];
   beat.lastLoopTrack = loop.cur; beat.lastStyle = beat.style;
   loop.focus = true; loop.transport = false;
@@ -2609,7 +2614,7 @@ function setupRecorder() {
 }
 
 // ----- pistas -----
-const tracks = Array.from({ length:6 }, () => ({ state:'off', buffer:null, len:0, src:null, gain:null, vol:1, mute:false, solo:false, origin:null, label:null }));
+const tracks = Array.from({ length:6 }, () => ({ state:'off', buffer:null, len:0, src:null, gain:null, vol:1, mute:false, solo:false, origin:null, label:null, midiEvents:[] }));
 const loop = { len:0, start:0, paused:false, bars:0, cur:0, transport:false, focus:false, metro:true, metroVol:1, countTimer:null };
 const frameAt = t => Math.round(t * ctx.sampleRate);
 const beatSec = () => 60 / state.bpm;
@@ -2698,7 +2703,7 @@ function disarm(t) {
 function startRecording(t) {
   cancelJob(t);
   const now = ctx.currentTime, first = !loop.len, job = t.job = {};
-  t.isMaster = first; t.free = false;
+  t.isMaster = first; t.free = false; t.midiEvents = [];
   if (t.origin !== 'beat') { t.origin = state.mode; t.label = MODES.find(m => m.id === state.mode)?.name || state.mode; }
   const beginAt = t0 => {   // pasa de «esperando» a «grabando» cuando llega t0
     t.startTimer = setTimeout(() => {
@@ -2747,7 +2752,7 @@ function stopRecording(t, t1) {
 }
 function finalizeTrack(p) {
   const t = p.t;
-  t.buffer = ringExtract(p.f0, p.f1); t.len = t.buffer.duration; t.state = 'play';
+  t.buffer = ringExtract(p.f0, p.f1); t.len = t.buffer.duration; t.state = 'play'; midiFinalizeEvents(t);
   const now = ctx.currentTime + 0.01;
   startTrackSource(t, now, ((now - p.t1) % t.len + t.len) % t.len);
   // Si venía de un ritmo en directo (bounce), el ritmo pasa a vivir en la pista
@@ -2755,6 +2760,7 @@ function finalizeTrack(p) {
   // Avanza a la siguiente pista libre
   const nx = tracks.findIndex(x => x.state === 'off'); if (nx >= 0) loop.cur = nx;
   loop.focus = true; loop.transport = false;
+  midiLoopStartScheduler(); midiTransportRefresh();
   haptic(true); renderLooper(); renderScreen(held.length > 0);
 }
 
@@ -2763,9 +2769,10 @@ function wipeTrack(t) {
   if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; }
   cancelJob(t); t.free = false;
   for (let k = pendingFinal.length - 1; k >= 0; k--) if (pendingFinal[k].t === t) pendingFinal.splice(k, 1);   // una pista borrada no puede «resucitar»
-  t.buffer = null; t.len = 0; t.state = 'off'; t.isMaster = false; t.mute = false; t.solo = false; t.countdown = false; t.origin = null; t.label = null;
+  t.buffer = null; t.len = 0; t.state = 'off'; t.isMaster = false; t.mute = false; t.solo = false; t.countdown = false; t.origin = null; t.label = null; t.midiEvents = [];
 }
 function clearTrack(i) {
+  if (midiAcc) midiSendRaw([midiStatus(0xB0, i + 1), 123, 0], undefined, true);
   wipeTrack(tracks[i]);
   if (i === 0 || !tracks.some(x => x.buffer)) {
     // Sin la pista 1 (la que marca la duración) todo se borra
@@ -2773,10 +2780,11 @@ function clearTrack(i) {
     loop.len = 0; loop.paused = false; loop.cur = 0; loop.transport = false; loop.focus = false;
     pendingFinal.length = 0;
   }
+  if (!loopHasAudio()) midiLoopStopScheduler(true); midiTransportRefresh();
   applyMutesSafe(); renderLooper();
 }
-function applyMutesSafe() { if (ctx) applyMutes(); }
-function clearAll() { metroCancel(); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; loop.transport = false; loop.focus = false; pendingFinal.length = 0; applyMutesSafe(); renderLooper(); renderScreen(false); toast('Loops cleared'); }
+function applyMutesSafe() { if (ctx) applyMutes(); if (midiLoopTimer && ctx) midiLoopScheduledUntil = ctx.currentTime + 0.01; }
+function clearAll() { metroCancel(); midiLoopStopScheduler(true); for (const t of tracks) wipeTrack(t); loop.len = 0; loop.paused = false; loop.cur = 0; loop.transport = false; loop.focus = false; pendingFinal.length = 0; applyMutesSafe(); midiTransportRefresh(); renderLooper(); renderScreen(false); toast('Loops cleared'); }
 
 function togglePause() {
   if (!loopHasAudio()) return;
@@ -2788,18 +2796,18 @@ function togglePause() {
       t.src.playbackRate.setValueAtTime(1, now); t.src.playbackRate.exponentialRampToValueAtTime(0.02, now + 0.6);
       const s = t.src; s.stop(now + 0.65); t.src = null;
     }
-    loop.paused = true;
+    loop.paused = true; midiLoopStopScheduler(true);
   } else {
     const at = now + 0.05; loop.start = at; loop.paused = false;
-    for (const t of tracks) if (t.buffer) startTrackSource(t, at, 0);
+    for (const t of tracks) if (t.buffer) startTrackSource(t, at, 0); midiLoopStartScheduler();
   }
-  haptic(true); renderLooper();
+  midiTransportRefresh(); haptic(true); renderLooper();
 }
 function looperSuspend() {   // al ir a segundo plano
   metroCancel();
   for (const t of tracks) { if (t.src) { try { t.src.stop(); } catch (e) {} t.src = null; } if (t.state === 'rec' || t.state === 'armed' || t.state === 'finishing') { cancelJob(t); t.state = 'off'; } }
-  pendingFinal.length = 0;
-  if (loopHasAudio()) loop.paused = true;
+  pendingFinal.length = 0; midiLoopStopScheduler(true);
+  if (loopHasAudio()) loop.paused = true; midiTransportRefresh();
 }
 
 // Canonical REV 3.0 looper navigation. The external strip has been removed; display + joystick are the sole looper UI.
@@ -2809,7 +2817,7 @@ function looperActive() { return loop.focus || loopHasAudio() || tracks.some(t =
 function looperSelect(delta) {
   loop.focus = true; loop.transport = false;
   const next = Math.max(0, Math.min(5, loop.cur + delta));
-  if (next !== loop.cur) { loop.cur = next; haptic(false); }
+  if (next !== loop.cur) { midiSync(new Set()); loop.cur = next; haptic(false); if (held.length) refresh(); }
   renderLooper(); renderScreen(false);
 }
 function looperBars(delta) {
@@ -3001,12 +3009,12 @@ function seqStart() {
   if (!seq.steps.length) return;
   ensureAudio(); seq.playing = true; seq.pos = 0; seq.next = ctx.currentTime + 0.05;
   if (!seq.timer) seq.timer = setInterval(seqTick, 25);
-  renderScreen(false);
+  midiTransportRefresh(); renderScreen(false);
 }
 function seqStop() {
   seq.playing = false; if (seq.timer) clearInterval(seq.timer); seq.timer = null;
   const v = voices.get('seq'); if (v) { v.cv.releaseAll(currentEnv().r); voices.delete('seq'); }
-  renderScreen(false); renderPads();
+  midiSync(new Set()); midiTransportRefresh(); renderScreen(false); renderPads();
 }
 function seqTick() {
   if (!seq.playing || !seq.steps.length) { seqStop(); return; }
@@ -3030,6 +3038,7 @@ function seqPlayStep(i) {
   const notes = applyVoiceCount(slotNotes(upper, bassMidi), state.voices);
   if (existing) { existing.cv.apply(notes); existing.ref = upper; }
   else { const cv = new ChordVoice(); cv.apply(notes); voices.set('seq', { cv, ref:upper, name:ch.name }); }
+  midiLiveNotes = new Set(notes.filter(n => n != null)); midiSync(midiLiveNotes);
   seq.cur = i; lastDisplay = { name:ch.name, notes, dir:st.dir };
   renderScreen(true); renderPads();
 }
@@ -3043,7 +3052,7 @@ function seqBounce() {
   const t0 = loop.len ? nextLoopPoint(now + 0.05) : seq.next - Math.floor((seq.next - now) / dur) * dur;
   seq.pos = 0; seq.next = t0;
   cancelJob(free); const job = free.job = {};
-  free.isMaster = !loop.len; free.free = false; free.f0 = frameAt(t0); free.state = 'armed'; free.countdown = true;
+  free.isMaster = !loop.len; free.free = false; free.midiEvents = []; free.f0 = frameAt(t0); free.state = 'armed'; free.countdown = true;
   loop.cur = tracks.indexOf(free); loop.focus = true; loop.transport = false;
   free.startTimer = setTimeout(() => { if (free.job === job && free.state === 'armed') { free.state = 'rec'; free.countdown = false; renderLooper(); } }, Math.max(0,(t0 - now) * 1000));
   const t1 = t0 + (loop.len || dur);
@@ -3196,7 +3205,7 @@ async function runDiag() {
   t('audio parameters', apStatus);
   t('worklet', ctx && ctx.audioWorklet ? (recWorkletLoaded === ctx ? 'cargado' : 'not loaded (using the fallback)') : 'unavailable');
   t('muestras', typeof SAMPLE_DATA === 'undefined' ? 'samples.js did NOT load' : Object.keys(SAMPLE_DATA).length + ' defined, ' + Object.keys(sampleBuf).length + ' ready');
-  t('MIDI', (navigator.requestMIDIAccess ? 'disponible' : 'unavailable') + ' · setting ' + (state.midi ? 'ON' : 'apagado') + (midiAcc ? ' · inputs ' + midiAcc.inputs.size + ', outputs ' + midiAcc.outputs.size : ''));
+  t('MIDI', (navigator.requestMIDIAccess ? 'available' : 'unavailable') + ' · OUT ' + (state.midi ? 'ON' : 'OFF') + ' · IN ' + (state.midiIn ? 'ON' : 'OFF') + (midiAcc ? ' · inputs ' + midiAcc.inputs.size + ', outputs ' + midiAcc.outputs.size : ''));
   t('estado', 'mode ' + state.mode + ' · ' + NOTE_NAMES[state.key] + ' · scale ' + state.scale + ' · sound ' + state.sound + ' · theme ' + state.theme + ' · quick select ' + (quick ? 'OPEN' : 'cerrada'));
   try { t('caches', (await caches.keys()).join(', ') || 'ninguna'); } catch (e) { t('caches', 'not queryable'); }
   try { const r = await navigator.serviceWorker.getRegistrations(); t('service worker', r.length ? 'activo' + (navigator.serviceWorker.controller ? ' and controls the page' : '') : 'ninguno'); } catch (e) {}
@@ -3532,7 +3541,7 @@ function refresh() {
   const mode = state.mode, sounding = [];
   if (mode === 'drum' || mode === 'beat' || mode === 'seq' || mode === 'mixer' || mode === 'mic' || mode === 'tuner') {
     for (const [k, v] of voices) if (k !== 'seq') { v.cv.releaseAll(currentEnv().r); voices.delete(k); }
-    clockStop(); midiSync(new Set());
+    clockStop(); midiLiveNotes = new Set(); midiSync(new Set());
     renderScreen(false); renderPads(); return;
   }
   const bassFor = b => state.bass === 'root' ? b : null;
@@ -3581,7 +3590,9 @@ function refresh() {
     lastUpper = upper;
     disp = { name, notes:s.lead ? notes : notes, dir };
   }
-  midiSync(midiNow);
+  midiLiveNotes = new Set(midiNow);
+  if (mode === 'repeat' || (mode === 'arp' && state.arpLayer === 'arp')) midiSync(new Set());
+  else midiSync(midiNow);
   if (mode === 'arp') { arpTones = tones || []; if (arpTones.length) clockStart(); else clockStop(); }
   else if (mode === 'repeat') { if (voices.size) clockStart(); else clockStop(); }
   if (disp) lastDisplay = disp;
@@ -4695,50 +4706,276 @@ function bindHardwareMenu(id, group) {
 }
 bindHardwareMenu('hwKey','key'); bindHardwareMenu('hwSound','sound'); bindHardwareMenu('hwMode','mode');
 
-// ===== MIDI (Web MIDI: PC y Android; Safari en iOS no lo ofrece) =====
-// Entrada: las teclas blancas de cualquier octava tocan los botones 1–7 (Do = 1). Salida: el acorde que suena, como notas.
-const WHITE_PAD = { 0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6 };
-const midiHeld = new Map();
-const midiLast = { on:new Map(), off:new Map() };   // cuándo envié cada nota: para ignorar el eco de un puerto en bucle
-function midiSend(bytes) {
-  if (!midiAcc) return;
-  if (bytes[0] === 0x90) midiLast.on.set(bytes[1], performance.now()); else if (bytes[0] === 0x80) midiLast.off.set(bytes[1], performance.now());
-  for (const o of midiAcc.outputs.values()) { try { o.send(bytes); } catch (e) {} } }
-function midiSync(now) {
-  if (!state.midi || !midiAcc) { midiSent.clear(); return; }
-  for (const n of midiSent) if (!now.has(n)) midiSend([0x80, n, 0]);
-  for (const n of now) if (!midiSent.has(n)) midiSend([0x90, n, 100]);
-  midiSent = new Set(now);
+// ===== MIDI · REV 3.0 (Web MIDI: desktop/Android; Safari iPhone has no standard Web MIDI) =====
+// MIDI OUT and MIDI IN are independent. IN defaults OFF. Live tonal output is ch1 unless a looper
+// layer is selected/built (tracks 1–6 → channels 1–6). Drums are always channel 10. Velocity OUT = 100.
+const MIDI_GM_DRUM = new Map([
+  [35,1],[36,0],                 // acoustic/bass drum → Kick 2 / Kick
+  [38,2],[40,2],                 // snare
+  [42,3],[44,3],                 // closed/pedal hat
+  [41,4],[43,4],[45,4],[47,4],[48,4],[50,4], // tom family
+  [51,5],[53,5],[56,5],[59,5],   // ride/bell family
+  [46,6],[49,6],[52,6],[55,6],[57,6] // open hat / cymbal family
+]);
+const midiInVoices = new Map();   // note -> { voice, slot, down, born }
+const midiInSlots = Array(6).fill(null);
+let midiSustain = false, midiBorn = 0, midiRxTransport = false;
+const midiLast = new Map();       // status/channel/note -> scheduled timestamp, for loopback suppression
+const midiClockIn = { times:[], ticks:0, running:false, lastTick:0, lastSave:0 };
+const midiClockOut = { timer:null, next:0, running:false, scheduledUntil:0 };
+let midiLoopTimer = null, midiLoopScheduledUntil = 0;
+
+function midiStatus(base, ch) { return base | ((Math.max(1, Math.min(16, ch)) - 1) & 15); }
+function midiLiveChannel() {
+  if (loop.focus || loopHasAudio() || tracks.some(t => t.state === 'armed' || t.state === 'rec' || t.state === 'finishing')) return Math.max(1, Math.min(6, loop.cur + 1));
+  return 1;
+}
+function midiPerfAt(audioTime) {
+  if (!ctx || audioTime == null) return performance.now();
+  return performance.now() + Math.max(0, audioTime - ctx.currentTime) * 1000;
+}
+function midiCtxAt(perfTime) {
+  if (!ctx || perfTime == null) return ctx ? ctx.currentTime : 0;
+  return ctx.currentTime + (perfTime - performance.now()) / 1000;
+}
+function midiSendRaw(bytes, atMs, force) {
+  if (!midiAcc || (!force && !state.midi)) return;
+  const when = atMs == null ? undefined : Math.max(performance.now(), atMs);
+  const cmd = bytes[0] & 0xF0, ch = (bytes[0] & 15) + 1;
+  if ((cmd === 0x90 || cmd === 0x80) && bytes.length > 2) {
+    const key = cmd + ':' + ch + ':' + bytes[1];
+    midiLast.set(key, when == null ? performance.now() : when);
+  }
+  for (const o of midiAcc.outputs.values()) { try { when == null ? o.send(bytes) : o.send(bytes, when); } catch (e) {} }
+}
+function midiRecordingTrack(atCtx) {
+  if (!ctx) return null;
+  for (let i = 0; i < tracks.length; i++) {
+    const t = tracks[i];
+    if (!['armed','rec','finishing'].includes(t.state) || !Number.isFinite(t.f0)) continue;
+    const t0 = t.f0 / ctx.sampleRate, t1 = Number.isFinite(t.t1) ? t.t1 : Infinity;
+    if (atCtx >= t0 - 0.003 && atCtx <= t1 + 0.003) return { t, i, t0 };
+  }
+  return null;
+}
+function midiRecordEvent(kind, note, vel, ch, atCtx) {
+  const hit = midiRecordingTrack(atCtx); if (!hit) return;
+  const rel = Math.max(0, atCtx - hit.t0);
+  hit.t.midiEvents.push({ t:rel, kind, n:note|0, v:vel|0, ch:ch|0 });
+}
+function midiNoteOut(note, on, ch, atMs, record=true, vel=100) {
+  note = Math.max(0, Math.min(127, Math.round(note))); ch = Math.max(1, Math.min(16, ch|0));
+  const v = on ? Math.max(1, Math.min(127, vel|0)) : 0;
+  midiSendRaw([midiStatus(on ? 0x90 : 0x80, ch), note, v], atMs, false);
+  if (record && state.midi && ctx) midiRecordEvent(on ? 'on' : 'off', note, v, ch, midiCtxAt(atMs));
+}
+function midiAllOffOut(force=false) {
+  if (!midiAcc) { midiSent = { channel:1, notes:new Set() }; return; }
+  const ch = midiSent.channel || 1;
+  for (const n of midiSent.notes) midiSendRaw([midiStatus(0x80, ch), n, 0], undefined, force);
+  midiSent = { channel:1, notes:new Set() };
+  for (const c of [1,2,3,4,5,6,10]) midiSendRaw([midiStatus(0xB0, c), 123, 0], undefined, force);
+}
+function midiSync(now, channel=midiLiveChannel()) {
+  const set = new Set([...now].filter(n => Number.isFinite(n)).map(n => Math.max(0, Math.min(127, Math.round(n)))));
+  if (!state.midi || !midiAcc) { midiSent = { channel, notes:new Set() }; return; }
+  const prevCh = midiSent.channel || channel;
+  if (prevCh !== channel) {
+    for (const n of midiSent.notes) midiNoteOut(n, false, prevCh);
+    midiSent.notes = new Set();
+  }
+  for (const n of midiSent.notes) if (!set.has(n)) midiNoteOut(n, false, channel);
+  for (const n of set) if (!midiSent.notes.has(n)) midiNoteOut(n, true, channel, undefined, true, 100);
+  midiSent = { channel, notes:set };
+}
+function midiPulseNotes(notes, atAudio, dur, channel=midiLiveChannel()) {
+  if (!state.midi || !midiAcc || !notes || !notes.length) return;
+  const onAt = midiPerfAt(atAudio), offAt = midiPerfAt(atAudio + Math.max(0.02, dur));
+  for (const n0 of notes) {
+    const n = Math.max(0, Math.min(127, Math.round(n0)));
+    midiNoteOut(n, true, channel, onAt, true, 100);
+    midiNoteOut(n, false, channel, offAt, true, 0);
+  }
+}
+function midiDrumOut(pad, atAudio, record=true) {
+  if (!state.midi || !midiAcc) return;
+  const GM = [36,35,38,42,45,51,46], n = GM[pad] == null ? 36 : GM[pad];
+  const onAt = midiPerfAt(atAudio), offAt = midiPerfAt((atAudio == null ? (ctx ? ctx.currentTime : 0) : atAudio) + 0.07);
+  midiNoteOut(n, true, 10, onAt, record, 100); midiNoteOut(n, false, 10, offAt, record, 0);
+}
+function midiFinalizeEvents(t) {
+  if (!Array.isArray(t.midiEvents) || !t.len) { t.midiEvents = []; return; }
+  const ev = t.midiEvents.filter(e => Number.isFinite(e.t) && e.t >= 0 && e.t <= t.len + 0.01).sort((a,b) => a.t - b.t);
+  const active = new Map();
+  for (const e of ev) {
+    const k = e.ch + ':' + e.n;
+    if (e.kind === 'on') active.set(k, e); else active.delete(k);
+  }
+  for (const [k,e] of active) ev.push({ t:Math.max(0, t.len - 0.002), kind:'off', n:e.n, v:0, ch:e.ch });
+  t.midiEvents = ev.sort((a,b) => a.t - b.t);
+}
+function midiLoopStopScheduler(force=false) {
+  if (midiLoopTimer) clearInterval(midiLoopTimer); midiLoopTimer = null; midiLoopScheduledUntil = 0;
+  if (midiAcc) for (const c of [1,2,3,4,5,6,10]) midiSendRaw([midiStatus(0xB0,c),123,0], undefined, force);
+}
+function midiLoopPump() {
+  if (!ctx || !state.midi || !midiAcc || loop.paused || !loop.len || !loopHasAudio()) { midiLoopStopScheduler(); return; }
+  const now = ctx.currentTime, from = Math.max(now + 0.01, midiLoopScheduledUntil || now + 0.01), to = now + 0.16;
+  if (to <= from) return;
+  const anySolo = tracks.some(t => t.solo), c0 = Math.floor((from - loop.start) / loop.len) - 1, c1 = Math.floor((to - loop.start) / loop.len) + 1;
+  for (let ti = 0; ti < tracks.length; ti++) {
+    const t = tracks[ti]; if (!t.buffer || t.mute || (anySolo && !t.solo) || !t.midiEvents.length) continue;
+    for (let c = c0; c <= c1; c++) for (const e of t.midiEvents) {
+      const at = loop.start + c * loop.len + e.t; if (at < from || at >= to) continue;
+      const ch = e.ch === 10 ? 10 : ti + 1, atMs = midiPerfAt(at);
+      midiNoteOut(e.n, e.kind === 'on', ch, atMs, false, e.kind === 'on' ? 100 : 0);
+    }
+  }
+  midiLoopScheduledUntil = to;
+}
+function midiLoopStartScheduler() {
+  if (!state.midi || !midiAcc || !ctx || loop.paused || !loop.len || !loopHasAudio()) return;
+  if (!midiLoopTimer) { midiLoopScheduledUntil = ctx.currentTime + 0.01; midiLoopTimer = setInterval(midiLoopPump, 25); }
+  midiLoopPump();
+}
+function midiTransportWanted() {
+  return !!((clock && clock.timer) || (seq && seq.playing) || (beat && beat.timer) || (loopHasAudio() && !loop.paused));
+}
+function midiClockPump() {
+  if (!state.midi || !midiAcc || !midiClockOut.running) return;
+  const now = performance.now(), horizon = now + 120;
+  if (!midiClockOut.next || midiClockOut.next < now - 100) midiClockOut.next = now + 5;
+  while (midiClockOut.next < horizon) {
+    midiSendRaw([0xF8], midiClockOut.next, false);
+    midiClockOut.next += 60000 / Math.max(40, Math.min(300, state.bpm)) / 24;
+  }
+}
+function midiExternalClockFresh() { return performance.now() - midiClockIn.lastTick < 500; }
+function midiTransportRefresh(force=false) {
+  if (!midiAcc || !state.midi) { if (midiClockOut.timer) clearInterval(midiClockOut.timer); midiClockOut.timer = null; midiClockOut.running = false; return; }
+  const want = midiTransportWanted();
+  // Do not echo transport/clock back to a master that is currently clocking us.
+  if (midiRxTransport || midiExternalClockFresh()) return;
+  if (want && !midiClockOut.running) {
+    midiClockOut.running = true; midiClockOut.next = performance.now() + 5;
+    midiSendRaw([0xFA], undefined, force);
+    midiClockOut.timer = setInterval(midiClockPump, 20); midiClockPump();
+  } else if (!want && midiClockOut.running) {
+    midiClockOut.running = false; if (midiClockOut.timer) clearInterval(midiClockOut.timer); midiClockOut.timer = null;
+    midiSendRaw([0xFC], undefined, force);
+  }
+}
+function midiInRelease(note, fast=false) {
+  const x = midiInVoices.get(note); if (!x) return;
+  try { x.voice.release(fast ? 0.02 : currentEnv().r); } catch (e) {}
+  midiInVoices.delete(note); if (midiInSlots[x.slot] === note) midiInSlots[x.slot] = null;
+}
+function midiInAllOff() {
+  for (const n of [...midiInVoices.keys()]) midiInRelease(n, true);
+  midiSustain = false;
+}
+function midiInAllocSlot() {
+  const free = midiInSlots.findIndex(x => x == null); if (free >= 0) return free;
+  let oldest = null;
+  for (const [n,x] of midiInVoices) if (!oldest || x.born < oldest.x.born) oldest = { n, x };
+  if (oldest) { const slot = oldest.x.slot; midiInRelease(oldest.n, true); return slot; }
+  return 0;
+}
+function midiInNoteOn(note, vel) {
+  ensureAudio();
+  if (midiInVoices.has(note)) midiInRelease(note, true);
+  const slot = midiInAllocSlot(), voice = new SlotVoice(slot, note);
+  const scale = Math.max(0.12, Math.min(1, vel / 127));
+  try { voice.out.gain.setValueAtTime(voice.out.gain.value * scale, ctx.currentTime); } catch (e) {}
+  midiInSlots[slot] = note; midiInVoices.set(note, { voice, slot, down:true, born:++midiBorn });
+}
+function midiInNoteOff(note) {
+  const x = midiInVoices.get(note); if (!x) return;
+  x.down = false; if (!midiSustain) midiInRelease(note);
+}
+function midiClockInputTick(ts) {
+  midiClockIn.lastTick = ts; midiClockIn.ticks++;
+  const a = midiClockIn.times; a.push(ts); if (a.length > 49) a.shift();
+  if (a.length < 13) return;
+  const ds = []; for (let i = 1; i < a.length; i++) { const d = a[i] - a[i-1]; if (d > 2 && d < 100) ds.push(d); }
+  if (ds.length < 8) return;
+  ds.sort((x,y) => x-y); const core = ds.slice(Math.floor(ds.length * .15), Math.ceil(ds.length * .85));
+  const avg = core.reduce((x,y) => x+y, 0) / Math.max(1, core.length), bpm = Math.max(40, Math.min(300, 60000 / (avg * 24)));
+  if (Math.abs(state.bpm - bpm) >= 0.4) {
+    state.bpm = Math.round(bpm * 10) / 10; syncSettings(); renderScreen(held.length > 0);
+    if (ts - midiClockIn.lastSave > 1000) { midiClockIn.lastSave = ts; saveState(); }
+  }
+}
+function midiExternalStart() {
+  midiClockIn.running = true; midiRxTransport = true;
+  try {
+    ensureAudio();
+    if (loopHasAudio() && loop.paused) togglePause();
+    if (state.mode === 'seq' && seq.steps.length && !seq.playing) seqStart();
+    else if ((state.mode === 'arp' || state.mode === 'repeat') && liveMidiNotes.size && !clock.timer) clockStart();
+  } finally { midiRxTransport = false; }
+}
+function midiExternalStop() {
+  midiClockIn.running = false; midiRxTransport = true;
+  try {
+    if (loopHasAudio() && !loop.paused) togglePause();
+    if (seq.playing) seqStop(); if (clock.timer) clockStop(); if (beat.timer) beatStop();
+    midiInAllOff();
+  } finally { midiRxTransport = false; }
+}
+function midiEchoed(st, n, v) {
+  const cmd = st & 0xF0, ch = (st & 15) + 1;
+  if (cmd !== 0x90 && cmd !== 0x80) return false;
+  const base = (cmd === 0x90 && v > 0) ? 0x90 : 0x80, key = base + ':' + ch + ':' + n, at = midiLast.get(key);
+  return at != null && Math.abs(performance.now() - at) < 250;
 }
 function midiIn(e) {
-  if (!state.midi || !e.data) return;
-  const st = e.data[0], n = e.data[1], v = e.data[2], cmd = st & 0xF0;
-  if (cmd === 0x90 || cmd === 0x80) {   // eco de lo que acabo de enviar (puerto en bucle): se ignora, o se realimentaría sin fin
-    const last = (cmd === 0x90 && v > 0 ? midiLast.on : midiLast.off).get(n);
-    if (last != null && performance.now() - last < 150) return;
+  if (!state.midiIn || !e.data || !e.data.length) return;
+  const d = e.data, st = d[0], cmd = st & 0xF0, ch = (st & 15) + 1, n = d[1] || 0, v = d[2] || 0;
+  if (st === 0xF8) { midiClockInputTick(e.receivedTime || performance.now()); return; }
+  if (st === 0xFA) { midiExternalStart(); return; }
+  if (st === 0xFC) { midiExternalStop(); return; }
+  if (midiEchoed(st,n,v)) return;
+  if (cmd === 0xB0) {
+    if (n === 64) {
+      const down = v >= 64; if (midiSustain && !down) for (const [note,x] of [...midiInVoices]) if (!x.down) midiInRelease(note);
+      midiSustain = down; return;
+    }
+    if (n === 120 || n === 123) { midiInAllOff(); return; }
+    return;
   }
   if (cmd === 0x90 && v > 0) {
-    const pad = WHITE_PAD[n % 12];
-    if (pad == null || midiHeld.has(n)) return;
-    midiHeld.set(n, pad); press(pad);
-  } else if (cmd === 0x80 || cmd === 0x90) {
-    if (!midiHeld.has(n)) return;
-    const pad = midiHeld.get(n); midiHeld.delete(n);
-    if (![...midiHeld.values()].includes(pad)) release(pad);
+    if (ch === 10) { ensureAudio(); const pad = MIDI_GM_DRUM.get(n); if (pad != null) drumHit(state.kit, pad, ctx.currentTime, Math.max(.15, v / 127), false); }
+    else midiInNoteOn(n, v);
+  } else if (cmd === 0x80 || (cmd === 0x90 && v === 0)) {
+    if (ch !== 10) midiInNoteOff(n);
   }
 }
-function midiBind() { if (!midiAcc) return; for (const i of midiAcc.inputs.values()) i.onmidimessage = state.midi ? midiIn : null; }
+function midiBind() {
+  if (!midiAcc) return;
+  for (const i of midiAcc.inputs.values()) i.onmidimessage = state.midiIn ? midiIn : null;
+}
 function midiSetup() {
-  if (!state.midi) {
-    for (const n of midiSent) midiSend([0x80, n, 0]);
-    midiSent.clear(); midiHeld.clear(); midiBind(); return;
+  const want = !!(state.midi || state.midiIn);
+  if (!want) {
+    midiAllOffOut(true); midiLoopStopScheduler(true); midiInAllOff();
+    if (midiClockOut.timer) clearInterval(midiClockOut.timer); midiClockOut.timer = null; midiClockOut.running = false;
+    midiBind(); return;
   }
-  if (!navigator.requestMIDIAccess) return;
-  if (midiAcc) { midiBind(); return; }
-  navigator.requestMIDIAccess().then(a => { midiAcc = a; a.onstatechange = midiBind; midiBind(); if (held.length) refresh(); })
-    .catch(() => { state.midi = false; saveState(); syncSettings(); toast('MIDI unavailable'); });
+  if (!navigator.requestMIDIAccess) { if (state.midi || state.midiIn) toast('Web MIDI unavailable'); return; }
+  if (midiAcc) {
+    midiBind();
+    if (state.midi) { if (held.length) refresh(); midiLoopStartScheduler(); midiTransportRefresh(); }
+    else { midiAllOffOut(true); midiLoopStopScheduler(true); }
+    if (!state.midiIn) midiInAllOff();
+    return;
+  }
+  navigator.requestMIDIAccess().then(a => {
+    midiAcc = a; a.onstatechange = () => { midiBind(); if (state.midi) midiLoopStartScheduler(); }; midiBind();
+    if (state.midi && held.length) refresh(); if (state.midi) { midiLoopStartScheduler(); midiTransportRefresh(); }
+  }).catch(() => { state.midi = false; state.midiIn = false; saveState(); syncSettings(); toast('MIDI unavailable'); });
 }
-if (state.midi) midiSetup();
+if (state.midi || state.midiIn) midiSetup();
 
 // ===== GUARDAR AUDIO (WAV) =====
 // Graba lo que sale por los altavoces (acordes, batería, loops, vocoder) en WAV estéreo de 16 bits.
@@ -5082,7 +5319,7 @@ function puMenu(t, w, h) {
 }
 // --- settings in pixels: rows are drawn exactly where the (invisible) DOM rows are, so every tap still lands on its row ---
 const PU_SHORT_L = { 'NOTES AND NUMBERS ON KEYS':'KEY LABELS', 'PIXEL DISPLAY':'PIXELS', 'OSCILLOSCOPE':'SCOPE', 'TEST VIBRATION':'TEST VIBRA', 'SWIPE ACROSS BUTTONS':'SWIPE',
-  'TEST MICROPHONE':'TEST MIC', 'KEEP MICROPHONE OPEN':'MIC OPEN', 'MIDI (INPUT AND OUTPUT)':'MIDI', 'PAIR DETUNE':'DETUNE', 'BRIGHTNESS':'BRIGHT', 'INSTRUMENT CODE':'CODE',
+  'TEST MICROPHONE':'TEST MIC', 'KEEP MICROPHONE OPEN':'MIC OPEN', 'MIDI OUT':'MIDI OUT', 'MIDI IN':'MIDI IN', 'PAIR DETUNE':'DETUNE', 'BRIGHTNESS':'BRIGHT', 'INSTRUMENT CODE':'CODE',
   'BACK TO ORIGINAL VALUES':'RESET SOUND', 'REVERB AMOUNT':'REV AMT', 'DELAY AMOUNT':'DLY AMT', 'VOCODER: FORMANT SHIFT':'FORMANT', 'VOCODER: NOISE LEVEL':'VOC NOISE',
   'STRUM SPEED':'STRUM', 'ARP PATTERN':'ARP PATT', 'ARP LAYERING':'LAYERS', 'REPEAT RATE':'REPEAT', 'GAME LATENCY':'LATENCY', 'DRUM LOOP VARIATION':'LOOP VAR', 'DRUM VOLUME':'DRUM VOL',
   'V.LEAD (VOICE LEADING)':'V.LEAD', 'CLEAR LOCKS, OCTAVES AND INVERSIONS':'RESET KEYS', 'RANDOM: SOUND':'RND SOUND', 'RANDOM: PATTERN':'RND PATTERN', 'RANDOM: ALL':'RND ALL',
@@ -5402,7 +5639,8 @@ const SETTINGS = [
   { id:'micGain', label:'Mic Gain', type:'range', min:5, max:100, to:v => v / 10, from:v => Math.round(v * 10), fmt:v => v.toFixed(1) + 'x' },
   { id:'mic_test', label:'Test microphone', type:'button', text:'Test', run:() => onActivation(runMicTest) },
   { id:'micHold', label:'Keep microphone open', type:'check' },
-  { id:'midi', label:'MIDI (input and output)', type:'check' },
+  { id:'midi', label:'MIDI OUT', type:'check' },
+  { id:'midiIn', label:'MIDI IN', type:'check' },
   { section:'Instrument editor' },
   { id:'tw_level', label:'Level', type:'range', min:20, max:300, tweak:'level', to:v => v / 100, from:v => Math.round(v * 100), fmt:v => Math.round(v * 100) + '%' },
   { id:'tw_detune', label:'Pair detune', type:'range', min:0, max:30, tweak:'detune', to:v => v, from:v => v, fmt:v => v + ' cents' },
@@ -5533,7 +5771,7 @@ function onSettingChanged(id) {
   if (id === 'drumVol' && ctx && drumBus) drumBus.gain.setTargetAtTime(state.drumVol, ctx.currentTime, 0.02);
   if (id === 'micGain' && micGain) micGain.gain.setTargetAtTime(state.micGain, ctx.currentTime, 0.02);
   if (id === 'micHold' && !state.micHold && !micUsers.size) micRelease();
-  if (id === 'midi') midiSetup();
+  if (id === 'midi' || id === 'midiIn') midiSetup();
   if (id === 'vocoder') { ensureAudio(); updateFx('vocoder'); vocoderSource(); }
   if (id === 'vocFormant' || id === 'vocNoise') { if (state.vocoder !== 'off') updateFx('vocoder'); }
   if (id === 'sound' && state.sound === 'micsample' && !sampleBuf.mic) toast('No sample recorded');
@@ -5722,7 +5960,7 @@ function syncSettings() {
       s.el.value = s.from(v); s.el._out.textContent = s.fmt(v);
       continue;
     }
-    if (s.id === 'midi') s.el.closest('.row').hidden = !navigator.requestMIDIAccess;
+    if (s.id === 'midi' || s.id === 'midiIn') s.el.closest('.row').hidden = !navigator.requestMIDIAccess;
     if (s.type === 'select') s.el.value = String(state[s.id]);
     else if (s.type === 'range') { s.el.value = s.from(state[s.id]); s.el._out.textContent = s.fmt(state[s.id]); }
     else s.el.checked = !!state[s.id];
