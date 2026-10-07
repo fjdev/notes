@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" id="themeColor" content="#E2DAC7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -948,11 +948,30 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 }
 .wav-state[hidden] { display: none !important; }
 
-/* Installed iOS web app: keep the instrument below the opaque status-bar region.
-   The JS --app-vh measurement avoids standalone 100vh/dvh inconsistencies. */
-@media (display-mode: standalone) {
+/* Installed iOS web app.
+   iOS 26/27 may add a system "scroll edge" blur / unreachable top pocket in Home Screen apps.
+   Keep black-translucent for the correct full-screen viewport contract, reserve the safe area for
+   the instrument, and pin a real opaque element to the viewport edge so WebKit can extend a solid
+   case colour instead of sampling/blurring the first rows of the app. */
+#pwaTopGuard { display: none; }
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html, body { overflow: hidden; }
+  #pwaTopGuard {
+    display: block; position: fixed; z-index: 10000; pointer-events: none;
+    top: 0; left: 0; right: 0;
+    height: max(2px, env(safe-area-inset-top, 0px));
+    background: var(--body);
+  }
   .app { height: calc(var(--app-vh, 100dvh) - env(safe-area-inset-top, 0px)); }
 }
+:root.is-standalone body { overflow: hidden; }
+:root.is-standalone #pwaTopGuard {
+  display: block; position: fixed; z-index: 10000; pointer-events: none;
+  top: 0; left: 0; right: 0;
+  height: max(2px, env(safe-area-inset-top, 0px));
+  background: var(--body);
+}
+:root.is-standalone .app { height: calc(var(--app-vh, 100dvh) - env(safe-area-inset-top, 0px)); }
 
 .hardware-row {
   flex: 0 0 auto;
@@ -1075,6 +1094,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 </style>
 </head>
 <body>
+<div id="pwaTopGuard" aria-hidden="true"></div>
 <main class="app">
   <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Screen">
@@ -1218,7 +1238,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Backup</h4>
       <p>Export saves your settings, presets, imported sounds and the last microphone sample to a file. Import restores that backup and also accepts the preset files of the official app.</p>
       <h4>Offline</h4>
-      <p>Open the page once with internet and add it to the home screen (Share → Add to Home Screen). From then on it works offline. New versions are downloaded when you open it with internet.</p>
+      <p>Open the page once with internet and add it to the home screen (Share → Add to Home Screen). From then on it works offline. New versions are downloaded when you open it with internet. On recent iOS versions the installed app can reserve or blur a system-controlled strip around the status bar; notes pins an opaque top edge and keeps the instrument inside the reported safe area, but that system strip itself is not part of the web page.</p>
       <h4>Audio and lock screen</h4>
       <p>After 20 seconds of nothing being touched or sounding, the app suspends audio so it does not show as "playing"; the first tap wakes it up and the first note may take a moment. When you leave the app or lock the iPhone everything stops, including the loops.</p>
       <h4>If something fails</h4>
@@ -1256,7 +1276,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 52 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 53 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -3141,6 +3161,12 @@ async function runDiag() {
   t('version', APP_VERSION);
   t('navegador', navigator.userAgent.replace(/\s+/g, ' ').slice(0, 120));
   t('ventana', innerWidth + '×' + innerHeight + ' @' + devicePixelRatio + (navigator.standalone ? ' · installed app' : ''));
+  { const vv = window.visualViewport, cs = getComputedStyle(document.body);
+    t('viewport iOS', 'screen ' + screen.width + '×' + screen.height +
+      ' · client ' + document.documentElement.clientWidth + '×' + document.documentElement.clientHeight +
+      (vv ? ' · visual ' + Math.round(vv.width) + '×' + Math.round(vv.height) + ' offset ' + Math.round(vv.offsetTop) : '') +
+      ' · safe top ' + cs.paddingTop);
+  }
   t('protocolo', location.protocol + ' · secure: ' + (window.isSecureContext ? 'yes' : 'no'));
   let a = 'ok';
   try { ensureAudio(); } catch (e) { a = 'FAILS → ' + (e.message || e); logErr('diag-audio', e); }
@@ -5207,7 +5233,9 @@ window.addEventListener('resize', () => drawBaseline());
 document.addEventListener('visibilitychange', () => { scopeKick(); puKick(); });   // la traza en reposo sigue a la pantalla, la carcasa y el modo
 
 function syncStandaloneViewport() {
-  const installed = !!navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  const installed = !!navigator.standalone ||
+    (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches));
+  document.documentElement.classList.toggle('is-standalone', installed);
   if (!installed) { document.documentElement.style.removeProperty('--app-vh'); return; }
   const h = Math.round((window.visualViewport && window.visualViewport.height) || window.innerHeight || 0);
   if (h > 0) document.documentElement.style.setProperty('--app-vh', h + 'px');
