@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" id="themeColor" content="#E2DAC7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,7 +158,6 @@ body {
 .gear::after { content: ''; position: absolute; inset: -5px -6px -12px -12px; }   /* área de toque ≈44×43 sin cambiar el dibujo (arriba y a la derecha limita el borde de la pantalla) */
 .oscbtn::after { content: ''; position: absolute; inset: -9px -5px; }
 .oscbtn.on { color: var(--panel-ink); }
-#wavBtn.on circle { fill: currentColor; }
 .compass { width: 20px; height: 20px; }
 .compass circle { fill: var(--panel-dim); opacity: .45; }
 .compass circle.on { fill: var(--accent); opacity: 1; }
@@ -569,7 +568,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .display .screen .scope { flex: 1 1 auto; min-height: 0; height: auto; margin: 2px 0 4px; }
 .display .screen.osc .chord, .display .screen.hiro .chord, .display .screen.ear .chord { font-size: 22px; margin: 0 0 2px; }
 .display .screen.tuner .chord { font-size: 30px; margin: 0; }
-.display .screen.hiro .chord, .display .screen.hiro #wavBtn, .display .screen.hiro #oscBtn { display: none; }   /* Notes Hero: el título va arriba y la cuenta atrás dentro del juego */
+.display .screen.hiro .chord, .display .screen.hiro #oscBtn { display: none; }   /* Notes Hero: el título va arriba y la cuenta atrás dentro del juego */
 .display .screen.hiro .scope { margin: 4px 0 2px; }
 .display .screen .screen-bottom { margin-top: auto; }
 @media (max-height: 640px) { :root { --screen-h: 136px; --joy-size: 124px; --knob-size: 56px; } }
@@ -655,8 +654,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .display .menu-top #menuTitle { color: var(--scr-active); }
 .display .menu-row { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
 .display .menu-val { font: 500 30px/1.05 var(--chord-font, var(--mono)); letter-spacing: -.01em; text-align: center; max-width: 62vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: var(--scr-glow); }
-.display .menu-side { border: 0; background: transparent; color: var(--panel-dim); font: 500 12px/1.2 var(--chord-font, var(--mono)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 10px 0; cursor: pointer; }
+.display .menu-side { border: 0; background: transparent; color: var(--panel-dim); font: 500 12px/1.2 var(--chord-font, var(--mono)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 10px 6px; cursor: pointer; min-width: 56px; min-height: 52px; align-self: stretch; touch-action: none; -webkit-user-select: none; user-select: none; }
 .display #menuPrev { text-align: left; } .display #menuNext { text-align: right; }
+.display .menu-side:active { color: var(--panel-ink); background: color-mix(in srgb, var(--panel-ink) 8%, transparent); }
 .display .menu-bottom { display: flex; justify-content: space-between; gap: 10px; }
 .display .menu-hint { border: 0; background: transparent; color: var(--panel-dim); font: 9.5px/1.2 var(--pixel); letter-spacing: .08em; text-transform: uppercase; padding: 6px 0; cursor: pointer; }
 .display .menu-hint:disabled { visibility: hidden; }
@@ -856,31 +856,51 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 .controls .menu-key .mk-label { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); font: 600 7px/1 var(--sans); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; opacity: .82; }
 .controls .menu-key.pressed, .controls .menu-key:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,.35); }
 .controls .menu-key.held { outline: 1px solid color-mix(in srgb, var(--led) 75%, transparent); outline-offset: 2px; }
-/* ===== PHASE 50: contextual REV 3.0 looper display ===== */
+/* ===== PHASE 51: legible REV 3.0 looper display ===== */
 .screen-top > #sKey, .screen-top > #sSound { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .screen-top > #sSound { text-align: right; }
-.loop-hud { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 3px; min-width: 35px; color: var(--scr-active); }
-.loop-hud[hidden], .loop-transport-hud[hidden] { display: none !important; }
-.loop-slot, .loop-transport-hud { position: relative; width: 14px; height: 14px; box-sizing: border-box; display: grid; place-items: center; color: var(--scr-active); }
-.loop-slot.sel, .loop-transport-hud.sel { outline: 1px solid currentColor; outline-offset: 1px; }
-.loop-mark { width: 7px; height: 7px; box-sizing: border-box; border: 1.2px solid currentColor; background: transparent; }
-.loop-mark.circle { border-radius: 50%; }
-.loop-mark.square { border-radius: 0; }
-.loop-mark.triangle { width: 8px; height: 7px; border: 0; background: currentColor; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.loop-slot.filled .loop-mark.circle, .loop-slot.filled .loop-mark.square { background: currentColor; }
-.loop-slot.empty .loop-mark.triangle { position: relative; background: transparent; clip-path: none; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 7px solid currentColor; opacity: .55; }
-.loop-slot.empty .loop-mark.triangle::after { content: ''; position: absolute; left: -3px; top: 2px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; border-bottom: 5px solid var(--panel); }
-.loop-slot.empty .loop-mark.circle, .loop-slot.empty .loop-mark.square { opacity: .45; }
-.loop-slot.armed .loop-mark { opacity: .7; animation: blink 1s steps(1) infinite; }
-.loop-r { font: 700 8px/1 var(--pixel); letter-spacing: 0; }
-.loop-transport-hud { margin-right: 2px; color: var(--scr-active); }
-.loop-transport-hud .tr-bars { display: flex; gap: 2px; align-items: center; justify-content: center; }
-.loop-transport-hud .tr-bars::before, .loop-transport-hud .tr-bars::after { content: ''; width: 2px; height: 8px; background: currentColor; }
-.loop-transport-hud .tr-play { width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 7px solid currentColor; margin-left: 1px; }
-.loop-transport-hud .tr-r { font: 700 9px/1 var(--pixel); }
-:root[data-screen="moss"] .loop-slot, :root[data-screen="moss"] .loop-transport-hud { color: var(--panel-ink); }
-:root[data-screen="phosphor"] .loop-slot, :root[data-screen="phosphor"] .loop-transport-hud { filter: drop-shadow(0 0 2px color-mix(in srgb, currentColor 65%, transparent)); }
-:root[data-screen="vector"] .loop-mark { border-width: 1px; }
+/* Looper state gets its own readable strip instead of tiny status glyphs in the title/footer.
+   The semantic model is still REV 3.0: two tracks per page; circles 1–2, squares 3–4, triangles 5–6. */
+.loop-panel {
+  flex: 0 0 34px; min-height: 34px; display: flex; align-items: stretch; gap: 5px;
+  margin: 1px 0 4px; color: var(--scr-active); font-family: var(--pixel); letter-spacing: .04em;
+}
+.loop-panel[hidden] { display: none !important; }
+.loop-track-tile, .loop-transport-tile {
+  position: relative; box-sizing: border-box; min-width: 0; border: 1px solid color-mix(in srgb, currentColor 48%, transparent);
+  border-radius: 3px; display: flex; align-items: center; justify-content: center; color: currentColor;
+}
+.loop-track-tile { flex: 1 1 0; gap: 7px; padding: 0 7px; }
+.loop-track-tile.sel, .loop-transport-tile.sel { background: var(--scr-active); color: var(--panel); border-color: var(--scr-active); box-shadow: var(--scr-glow); }
+.loop-track-no { font: 700 10px/1 var(--pixel); min-width: 8px; text-align: center; }
+.loop-track-mark { width: 13px; height: 13px; box-sizing: border-box; border: 1.6px solid currentColor; background: transparent; flex: 0 0 auto; }
+.loop-track-mark.circle { border-radius: 50%; }
+.loop-track-mark.square { border-radius: 0; }
+.loop-track-mark.triangle { border: 0; width: 14px; height: 13px; background: currentColor; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.loop-track-tile.filled .loop-track-mark.circle, .loop-track-tile.filled .loop-track-mark.square { background: currentColor; }
+.loop-track-tile.empty .loop-track-mark { opacity: .48; }
+.loop-track-tile.empty .loop-track-mark.triangle { position: relative; background: transparent; clip-path: none; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 13px solid currentColor; }
+.loop-track-tile.empty .loop-track-mark.triangle::after { content:''; position:absolute; left:-5px; top:3px; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:9px solid var(--panel); }
+.loop-track-tile.sel.empty .loop-track-mark.triangle::after { border-bottom-color: var(--scr-active); }
+.loop-track-tile.armed { animation: loopPulse 1s steps(1) infinite; }
+.loop-track-r { font: 800 13px/1 var(--pixel); }
+.loop-transport-tile { flex: 0 0 36px; width: 36px; }
+.loop-transport-tile .tr-bars { display:flex; gap:4px; align-items:center; }
+.loop-transport-tile .tr-bars::before, .loop-transport-tile .tr-bars::after { content:''; width:3px; height:13px; background:currentColor; }
+.loop-transport-tile .tr-play { width:0; height:0; border-top:7px solid transparent; border-bottom:7px solid transparent; border-left:11px solid currentColor; margin-left:2px; }
+.loop-transport-tile .tr-r { font:800 13px/1 var(--pixel); }
+@keyframes loopPulse { 0%,49%{opacity:1} 50%,100%{opacity:.42} }
+/* When looper state is present, it takes priority over the decorative live scope/baseline. */
+.screen.looper-visible:not(.tuner):not(.hiro):not(.ear) .scope { display:none !important; }
+:root[data-screen="moss"] .loop-panel { color: var(--panel-ink); }
+:root[data-screen="phosphor"] .loop-panel { filter: drop-shadow(0 0 2px color-mix(in srgb, currentColor 65%, transparent)); }
+@media (max-height: 700px) {
+  .loop-panel { flex-basis: 30px; min-height:30px; gap:4px; margin-bottom:3px; }
+  .loop-track-tile { gap:5px; padding:0 5px; }
+  .loop-track-mark { width:11px; height:11px; }
+  .loop-track-mark.triangle { width:12px; height:11px; }
+  .loop-transport-tile { flex-basis:32px; width:32px; }
+}
 @media (max-width: 360px) {
   .controls .menu-keys { width: 126px; grid-template-columns: repeat(3, 38px); gap: 5px; }
   .controls .menu-key { width: 38px; height: 40px; }
@@ -918,6 +938,21 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 /* Phase 48b: the case front is intentionally unbranded for now.
    The old topbar is retired so the display can sit at the top of the instrument surface. */
 .topbar { display: none !important; }
+
+/* Phase 52: app-only output recording no longer has an invisible performance button.
+   While active it is display-only status; start/stop lives in Settings -> Capture. */
+.wav-state {
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+  font: 600 10px/1 var(--pixel); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--scr-active); white-space: nowrap;
+}
+.wav-state[hidden] { display: none !important; }
+
+/* Installed iOS web app: keep the instrument below the opaque status-bar region.
+   The JS --app-vh measurement avoids standalone 100vh/dvh inconsistencies. */
+@media (display-mode: standalone) {
+  .app { height: calc(var(--app-vh, 100dvh) - env(safe-area-inset-top, 0px)); }
+}
 
 .hardware-row {
   flex: 0 0 auto;
@@ -1043,17 +1078,17 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
 <main class="app">
   <div class="display" id="display">
   <section class="screen" id="screen" aria-label="Screen">
-    <div class="screen-top"><span id="sKey"></span><span class="loop-hud" id="loopHud" hidden aria-label="Looper tracks"></span><span id="sSound"></span></div>
+    <div class="screen-top"><span id="sKey"></span><span id="sSound"></span></div>
     <button class="gear" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
     <div class="chord idle" id="chordName">—</div>
+    <div class="loop-panel" id="loopPanel" hidden aria-label="Looper status"></div>
     <canvas class="scope" id="scope" aria-hidden="true"></canvas>
     <canvas id="pxui" aria-hidden="true"></canvas>
     <span class="scope-read" id="scopeRead" aria-hidden="true"></span>
     <div class="screen-bottom">
       <span id="sMode"></span>
       <span style="display:flex;gap:10px;align-items:center">
-        <span class="loop-transport-hud" id="loopTransportHud" hidden aria-label="Looper transport"></span>
-        <button class="oscbtn" id="wavBtn" aria-label="Save audio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <span class="wav-state" id="wavState" hidden aria-live="polite"></span>
         <button class="oscbtn" id="oscBtn" aria-label="Wave"><svg viewBox="0 0 24 24"><path d="M2 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 12 4 12 2-6 4-6"/></svg></button>
         <svg class="compass" id="sDir" viewBox="0 0 20 20" aria-hidden="true"></svg>
       </span>
@@ -1109,7 +1144,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Chords</h4>
       <p>The seven buttons play the chords of the key: 1, 4 and 5 are major; 2, 3 and 6 are minor; 7 is diminished. Their physical map follows the HiChord deck: 2–4–6 on the upper row and 1–3–5–7 below, so the same degree keeps the same place when you change key. They never sound bad together. Try 1 → 5 → 6 → 4.</p>
       <p>Hold a button and move the joystick: each direction changes the colour of the chord. Let go and you are back to the normal chord. In Settings → Chords you can choose between five joystick maps.</p>
-      <p>The screen shows the name of the chord that is sounding; if you also want to see it on the keys, turn on "Notes and numbers on keys" in Settings → Look. In Settings → Chords, "Bass" adds the root an octave down (Root) or lets you hold one button for the bass and press another for the chord (Slash), and "V.Lead" (Voice Leading) chooses smooth inversions automatically.</p>
+      <p>The screen shows the name of the chord that is sounding; if you also want to see it on the keys, turn on "Notes and numbers on keys" in Settings → Look. In Sound → FX, Bass cycles OFF → ROOT → SLASH: Root adds the chord root two octaves down; Slash lets you hold one button for the bass and press another for the chord. ADSR presets set the complete envelope, including Attack and Release; Key + wheel and Sound + wheel can then fine-tune those two values. "V.Lead" (Voice Leading) chooses smooth inversions automatically.</p>
       <h4>Menu buttons</h4>
       <p>The three physical buttons follow the REV 3.0 hardware: gray Key, yellow Sound and red Mode. They sit in the control row directly above the chord deck, next to the wheel. Tap them to open their menus. Hold a chord and press Key for octave down, Sound for inversion (or Sound while holding a joystick modification to lock it), and Mode for octave up. Holding a menu button first turns the seven chord buttons into its quick-select choices.</p>
       <h4>Wheel</h4>
@@ -1156,7 +1191,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>There is no separate looper button strip on the instrument surface: the display shows the looper state and the clickable joystick is the canonical REV 3.0 control. On an empty track, click once for WAITING and click again to record. Click again while it is still WAITING to disarm/cancel before recording starts. Before the first loop, Left/Right while WAITING chooses 0–8 bars (0 = free); fixed bars get a four-beat count-in, while free recording stops on the next click. Once REC has actually started, REV 3.0 has no cancel/undo gesture: finish the take, then hold the joystick click for about 0.7 s on that playing track if you want to clear it. Later tracks start on the next Track-1 loop boundary and stop in sync. After a take, selection advances to the next empty track.</p>
       <p>With the looper active, the screen shows two tracks at a time across three pages: circles are tracks 1–2, squares 3–4 and triangles 5–6. Filled shapes contain a loop; outlines are empty; R means that track is recording; a frame marks the track the next click acts on. Left/Right selects tracks (Drum uses Up/Down). Joystick Down jumps to the transport and Up returns. The transport shows two bars while the loops are playing, a triangle while paused and R while recording; clicking it tape-stops/resumes all loops, while holding it for about 0.7 s clears everything. On a playing track, hold the joystick click for about 0.7 s to clear that track; a short click never erases it. In Drum Loop, Left/Right selects the target track, Down selects transport, and clicking a playing beat bounces it into the highlighted empty track. Leaving Drum Loop pauses the live beat unless it was bounced first.</p>
       <h4>Save audio</h4>
-      <p>The circle button, next to the wave, records what is sounding (chords, drums, loops and vocoder) for up to four minutes; the screen shows the time. Tapping it again stops it and opens the iPhone share menu, where you choose "Save to Files"; on a computer a 16-bit stereo WAV file is downloaded. If the app goes to the background during recording, it picks up where it was when you return, without a gap. It does not include the direct microphone.</p>
+      <p>Output recording is an app-only extra, not a HiChord control, so it stays out of the performance surface. Open Settings → Capture → Record output to start. A non-touchable REC timer appears on the display while the app records chords, drums, loops and vocoder for up to four minutes. Open the same setting again and choose Stop &amp; save: on iPhone the share menu opens so you can save the 16-bit stereo WAV to Files; on a computer the WAV downloads. It does not include the direct microphone.</p>
       <h4>Mic Sample (sampler)</h4>
       <p>Records a sound with the microphone and turns it into an instrument. Enter Mic Sample mode and grant permission. Hold button 1 while you sing, speak or make the sound; you can record up to three seconds. When you let go, the app detects the note, brings it to C and switches to Lead mode with the "Mic Sample" instrument: the buttons play your sound at different pitches. To record another one, enter Mic Sample mode again; the new take replaces the previous one, and the last one is kept when you close the app. In this mode only button 1 works; the rest are dimmed.</p>
       <h4>Tuner</h4>
@@ -1177,7 +1212,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <p>If you get stuck during a question, press the physical gray Key button to hear the root note again. Your streak and best streak are counted. On levels with modifications, a miss shows an arrow with the correct joystick direction. While you play, your settings are replaced by the trainer's and come back when it ends.</p>
       <h3 class="grp">Settings and maintenance</h3>
       <h4>Look</h4>
-      <p>notes is a single instrument built in six editions, which you choose in Settings → Look → Case: CARBON (black), LUNAR (ivory with black controls and orange touches), VERTEX (90s console-pad grey, with coloured buttons), POCKET (beige with an olive screen and aubergine buttons, like an 80s handheld), AMBER (warm charcoal with cream and mustard keys, like a boutique synth) and GHOST (smoked plastic that shows the circuit board). The screen is independent and represents another technology: VECTOR (warm, high-definition OLED), PIXEL (the small 1-bit OLED of the HiChord: the whole screen is a grid of about 120 × 63 real pixels with a bitmap font, inverted title bars, framed selectors with arrows at the sides, an icon for every mode (above its name, or beside it when the screen is shorter, for example in Safari with its bars showing) and the animated waveform of each sound), MOSS (green reflective LCD, like the first Game Boy: the grid only hints inside the dark parts and the frame casts its shadow at the top and left) and PHOSPHOR (analogue oscilloscope: black screen where the beam draws everything in green; the graticule is engraved in the glass with its centre cross and the signal is drawn relative to that cross, with the sweep triggered so the wave stays still and an automatic volts/div). On every screen, the sound selector draws the waveform of the sound, animated: it appears, is held and fades out the way that sound does. "By case" uses each edition's own, and you can combine them however you like.  "Automatic" picks CARBON or LUNAR depending on the device's dark or light mode. The line that crosses the screen is the wave: it runs from one edge to the other; at rest it is flat; with "Wave" on it shows the signal that is sounding. In PHOSPHOR that line does not exist: a simulated oscilloscope replaces it (an electron beam that moves, with the glow the phosphor leaves as it fades), always on. In "Time (Y-T)" the sweep triggers on a rising edge so the wave stays still, with automatic volts/div and time/div that you can read at the bottom; in "XY (figures)" the signal is drawn against itself shifted by 90° and Lissajous figures appear (Settings → Modes → "Oscilloscope", only available with the PHOSPHOR screen). The chord keys are clean, without notes or numbers; turn them on with "Notes and numbers on keys". "Test vibration" checks whether your device can vibrate from the app and, if not, why: on the iPhone you need iOS 18 or later and System Haptics turned on (iPhone Settings → Sounds &amp; Haptics).</p>
+      <p>The current Case choices are temporary visual shells and do not define the instrument geometry; they are kept only while the next case system is designed. Do not learn any function from a case skin: controls stay in the same places. The screen is independent and remains the meaningful visual technology choice: VECTOR (high-definition conceptual display), PIXEL (the HiChord-inspired 1-bit firmware display), MOSS (green reflective handheld LCD) and PHOSPHOR (analogue oscilloscope). "By case" still selects a temporary default screen for compatibility. The chord keys are clean by default; turn on "Notes and numbers on keys" if you want labels. "Wave" shows the live signal on non-PHOSPHOR screens; PHOSPHOR uses its simulated oscilloscope instead.</p>
       <h4>MIDI</h4>
       <p>PC only (Chrome or Edge) and Android; Safari on iPhone does not support it, which is why the setting does not appear there. Turn it on in Settings → Sound. The white keys of any octave play buttons 1 to 7 (C is 1). The chord that sounds goes out as MIDI notes on every connected output (if an output sends the notes back to the input, the app ignores that echo). In Arp and Repeat the held chord is sent, not every hit.</p>
       <h4>Backup</h4>
@@ -1221,7 +1256,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 50 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 52 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -2806,19 +2841,23 @@ function looperTransientLabel(m) {
   return '';
 }
 function renderLooperHud() {
-  const hud = $('loopHud'), tr = $('loopTransportHud'); if (!hud || !tr) return;
+  const panel = $('loopPanel'); if (!panel) return;
   const m = looperDisplayModel();
-  hud.hidden = !m.visible; tr.hidden = !m.transport.visible;
-  if (!m.visible) { hud.innerHTML = ''; } else {
-    hud.innerHTML = m.slots.map(sl => {
-      const stateClass = sl.recording ? 'rec' : sl.armed ? 'armed' : sl.filled ? 'filled' : 'empty';
-      const mark = sl.recording ? '<span class="loop-r">R</span>' : '<span class="loop-mark ' + m.shape + '"></span>';
-      return '<span class="loop-slot ' + stateClass + (sl.selected ? ' sel' : '') + '" aria-label="Track ' + (sl.index + 1) + '">' + mark + '</span>';
-    }).join('');
+  panel.hidden = !m.visible;
+  $('screen').classList.toggle('looper-visible', !!m.visible);
+  if (!m.visible) { panel.innerHTML = ''; return; }
+  const trackHtml = m.slots.map(sl => {
+    const stateClass = sl.recording ? 'rec' : sl.armed ? 'armed' : sl.filled ? 'filled' : 'empty';
+    const mark = sl.recording ? '<span class="loop-track-r">R</span>' : '<span class="loop-track-mark ' + m.shape + '"></span>';
+    return '<span class="loop-track-tile ' + stateClass + (sl.selected ? ' sel' : '') + '" aria-label="Track ' + (sl.index + 1) + '">' +
+      '<span class="loop-track-no">' + (sl.index + 1) + '</span>' + mark + '</span>';
+  }).join('');
+  let transport = '';
+  if (m.transport.visible) {
+    const icon = m.transport.recording ? '<span class="tr-r">R</span>' : (m.transport.paused ? '<span class="tr-play"></span>' : '<span class="tr-bars"></span>');
+    transport = '<span class="loop-transport-tile' + (m.transport.selected ? ' sel' : '') + '" aria-label="Looper transport">' + icon + '</span>';
   }
-  if (!m.transport.visible) { tr.innerHTML = ''; return; }
-  tr.classList.toggle('sel', m.transport.selected);
-  tr.innerHTML = m.transport.recording ? '<span class="tr-r">R</span>' : (m.transport.paused ? '<span class="tr-play"></span>' : '<span class="tr-bars"></span>');
+  panel.innerHTML = trackHtml + transport;
 }
 
 // Looper has no external hardware strip. Its state is rendered in the display and controlled by the joystick/pads.
@@ -3452,7 +3491,7 @@ function refresh() {
     clockStop(); midiSync(new Set());
     renderScreen(false); renderPads(); return;
   }
-  const bassFor = b => state.bass === 'off' ? null : b;
+  const bassFor = b => state.bass === 'root' ? b : null;
   if (mode === 'drone') {
     if (droneBtn != null) sounding.push({ btn:droneBtn, key:'drone' + droneBtn, bassBtn:bassFor(droneBtn) });
   } else if (mode === 'lead') {
@@ -3626,7 +3665,7 @@ function renderScreen(active) {
     const seqTxt = state.mode === 'seq' ? ' ' + seq.steps.map((st,i) => (i === seq.cursor && seq.editing ? '[' : '') + (seqChord(st)?.name || '—') + (i === seq.cursor && seq.editing ? ']' : '')).join(' ') + ' · ' + seq.steps.length + '/' + seq.capacity : state.mode === 'mic' ? (micTake ? ' recording' : '') : '';
     const modeLine = MODES.find(m => m.id === state.mode).name + (p ? ' ' + p.names[state[p.key]].toLowerCase() : '') + seqTxt;
     const transient = looperTransientLabel(lm);
-    $('sMode').textContent = modeLine + ' · ' + (transient || Math.round(state.bpm)) + (wavRec ? ' · audio ' + wavClock() : '');
+    $('sMode').textContent = modeLine + ' · ' + (transient || Math.round(state.bpm));
     if (lastDisplay && !OWN_TITLE.includes(state.mode)) cn.textContent = lastDisplay.name;
     if (!OWN_TITLE.includes(state.mode)) cn.classList.toggle('idle', !active);
   }
@@ -3970,7 +4009,7 @@ function setvValue(r) {
   if (r.kind === 'select') return el && el.selectedIndex >= 0 ? el.options[el.selectedIndex].text : '';
   if (r.kind === 'check') return el && el.checked ? 'On' : 'Off';
   if (r.kind === 'range') return el && el._out ? el._out.textContent : '';
-  if (r.kind === 'button') return (r.s.id === 'reset_app' && resetArmed) ? 'Sure?' : (r.s.text || '›');
+  if (r.kind === 'button') return r.s.id === 'audio_rec' ? (wavRec ? 'Stop & save' : 'Record') : (r.s.id === 'reset_app' && resetArmed) ? 'Sure?' : (r.s.text || '›');
   if (r.kind === 'tap') return 'tap';
   if (r.kind === 'load') return el && el._info ? el._info.textContent : '';
   if (r.kind === 'save') return '›';
@@ -4344,9 +4383,9 @@ function renderMenu() {
   puKick();
 }
 // Toques en la propia pantalla (para quien no use el joystick): vecinos = izquierda/derecha; pistas de abajo = arriba/abajo
-const menuTap = dir => () => { if (performance.now() - menuOpenedAt < 450) return; menuNav(dir); };   // ignora el toque que acaba de abrir el menú
-onChipTap($('menuPrev'), menuTap('l')); onChipTap($('menuNext'), menuTap('r'));
-onChipTap($('menuUp'), menuTap('u')); onChipTap($('menuDown'), menuTap('d'));
+const menuTap = dir => () => { if (performance.now() - menuOpenedAt < 90) return; menuNav(dir); };   // only blocks the opening gesture itself; immediate deliberate taps must work
+onTap($('menuPrev'), menuTap('l')); onTap($('menuNext'), menuTap('r'));
+onTap($('menuUp'), menuTap('u')); onTap($('menuDown'), menuTap('d'));
 
 // ===== SELECCIÓN RÁPIDA =====
 // Mantener el sonido, la tonalidad o el modo de la pantalla: los botones de acorde pasan a elegir y el joystick cambia de página.
@@ -4559,7 +4598,13 @@ if (state.midi) midiSetup();
 // ===== GUARDAR AUDIO (WAV) =====
 // Graba lo que sale por los altavoces (acordes, batería, loops, vocoder) en WAV estéreo de 16 bits.
 // Se codifica al instante al parar, dentro del toque, para que iOS permita compartirlo (Guardar en Archivos).
-function wavClock() { const t = Math.floor(wavRec.frames / wavRec.sr); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+function wavClock() { if (!wavRec) return '0:00'; const t = Math.floor(wavRec.frames / wavRec.sr); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+function wavRenderStatus() {
+  const el = $('wavState'); if (!el) return;
+  el.hidden = !wavRec;
+  el.textContent = wavRec ? 'REC ' + wavClock() : '';
+  puKick();
+}
 function wavAttach() {
   if (!wavRec || !ctx || !outGain || ctx.sampleRate !== wavRec.sr) return;
   try { wavRec.node = makeCapture(outGain, (f, L, R) => wavChunk(L, R)); } catch (e) { wavRec.node = null; }
@@ -4592,11 +4637,15 @@ async function wavToggle() {
     wavRec = { chunks:[], frames:0, sr:ctx.sampleRate, node:null, full:false };
     wavAttach();
     if (!wavRec.node) { wavRec = null; toast('Could not record the audio'); return; }
-    wavTimer = setInterval(() => renderScreen(held.length > 0), 500);
-    $('wavBtn').classList.add('on'); renderScreen(held.length > 0); return;
+    wavTimer = setInterval(wavRenderStatus, 500);
+    wavRenderStatus(); renderScreen(held.length > 0);
+    if (setv) setvClose();
+    toast('Recording');
+    return;
   }
   const w = wavRec; wavRec = null; clearInterval(wavTimer); wavTimer = null;
-  $('wavBtn').classList.remove('on');
+  wavRenderStatus();
+  if (setv) setvClose();
   try { if (w.node) { if (w.node.port) w.node.port.onmessage = null; else w.node.onaudioprocess = null; if (outGain) outGain.disconnect(w.node); w.node.disconnect(); } } catch (e) {}
   renderScreen(held.length > 0);
   if (!w.frames) return;
@@ -4610,7 +4659,6 @@ async function wavToggle() {
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
   toast('Audio saved');
 }
-$('wavBtn').addEventListener('click', wavToggle);
 
 // ===== AJUSTES =====
 const fmtMs = s => (s < 0.01 ? (s * 1000).toFixed(1) : Math.round(s * 1000)) + ' ms';
@@ -4719,7 +4767,7 @@ function puRect(x, y, w, h, v) { for (let j = 0; j < h; j++) for (let i = 0; i <
 function puFrame(x, y, w, h, v) { puRect(x, y, w, 1, v); puRect(x, y + h - 1, w, 1, v); puRect(x, y, 1, h, v); puRect(x + w - 1, y, 1, h, v); }
 function puLine(x0, y0, x1, y1, v) { x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1); const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1; let e = dx + dy; for (;;) { puPx(x0, y0, v); if (x0 === x1 && y0 === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx; } if (e2 <= dx) { e += dx; y0 += sy; } } }
 function puCircle(cx, cy, r, v, fill) { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) { const d = Math.sqrt(x * x + y * y); if (fill ? d <= r + 0.3 : (d <= r + 0.35 && d > r - 0.95)) puPx(cx + x, cy + y, v); } }
-function puTri(x, y, w, dir) { for (let i = 0; i < w; i++) { const h = w - i; for (let j = -h + 1; j < h; j++) puPx(dir === 'r' ? x + i : x - i, y + j); } }
+function puTri(x, y, w, dir, v = 1) { for (let i = 0; i < w; i++) { const h = w - i; for (let j = -h + 1; j < h; j++) puPx(dir === 'r' ? x + i : x - i, y + j, v); } }
 function puMap(s) { return String(s).replace(/▲/g, '^').replace(/▼/g, 'v').replace(/[–—−]/g, '-').replace(/‹/g, '<').replace(/›/g, '>').replace(/…/g, '...').replace(/[·•]/g, '-').replace(/×/g, 'x').replace(/°/g, 'o').replace(/[^\x20-\x7E]/g, '?'); }
 function puText(str, x, y, o) {
   o = o || {}; const f = pxFont()[o.font || 'f5'], sc = o.scale || 1, v = o.v === 0 ? 0 : 1, adv = (f.w + 1) * sc; str = puMap(str);
@@ -4795,66 +4843,63 @@ function puIcon(name, x, y, t) {
   else C(12, 12, 8, false);
 }
 function puT(id) { const e = $(id); return e ? e.textContent : ''; }
-function puLoopShape(cx, cy, shape, filled) {
-  if (shape === 'circle') puCircle(cx, cy, 3, 1, filled);
-  else if (shape === 'square') { if (filled) puRect(cx - 3, cy - 3, 7, 7, 1); else puFrame(cx - 3, cy - 3, 7, 7, 1); }
+function puLoopShape(cx, cy, shape, filled, v = 1) {
+  if (shape === 'circle') puCircle(cx, cy, 3, v, filled);
+  else if (shape === 'square') { if (filled) puRect(cx - 3, cy - 3, 7, 7, v); else puFrame(cx - 3, cy - 3, 7, 7, v); }
   else { // triangle
     const pts = [[0,-3],[-3,3],[3,3]];
-    if (filled) { for (let yy = -3; yy <= 3; yy++) { const half = Math.max(0, Math.floor((yy + 3) / 2)); puRect(cx - half, cy + yy, half * 2 + 1, 1); } }
-    else { puLine(cx, cy - 3, cx - 3, cy + 3); puLine(cx - 3, cy + 3, cx + 3, cy + 3); puLine(cx + 3, cy + 3, cx, cy - 3); }
+    if (filled) { for (let yy = -3; yy <= 3; yy++) { const half = Math.max(0, Math.floor((yy + 3) / 2)); puRect(cx - half, cy + yy, half * 2 + 1, v); } }
+    else { puLine(cx, cy - 3, cx - 3, cy + 3, v); puLine(cx - 3, cy + 3, cx + 3, cy + 3, v); puLine(cx + 3, cy + 3, cx, cy - 3, v); }
   }
 }
-function puLooperPair(m, w) {
+function puLooperBar(left, right, w) { puBar(left, right, w); }
+function puLooperPanel(m, w, h) {
   if (!m.visible) return;
-  const cx = Math.floor((w - 11) / 2), xs = [cx - 5, cx + 5], cy = 4;
-  m.slots.forEach((sl, j) => {
-    if (sl.selected) puFrame(xs[j] - 5, 0, 10, 9, 0); // selection cut out of the inverted title bar
-    if (sl.recording) puText('R', xs[j], 0, { v:0, align:'c' });
-    else puLoopShape(xs[j], cy, m.shape, sl.filled);
+  const y = h - 24, hh = 13, gap = 2, trw = m.transport.visible ? 14 : 0;
+  const avail = w - 6 - trw - (m.transport.visible ? gap : 0), tw = Math.floor((avail - gap) / 2);
+  let x = 3;
+  m.slots.forEach(sl => {
+    const inv = sl.selected, v = inv ? 0 : 1;
+    if (inv) puRect(x, y, tw, hh, 1); else puFrame(x, y, tw, hh, 1);
+    puText(String(sl.index + 1), x + 3, y + 2, { v });
+    if (sl.recording) puText('R', x + tw - 7, y + 2, { v, align:'c' });
+    else puLoopShape(x + tw - 7, y + 6, m.shape, sl.filled, v);
+    x += tw + gap;
   });
-}
-function puLooperBar(left, right, w, m) {
-  puRect(0, 0, w, 9, 1);
-  if (!m.visible) { puPair(String(left || '').replace(/ · /g, ' '), right, 0, 2, w - 13, 5, { rightShare:0.50, left:{v:0}, right:{v:0} }); puGear(w - 10, 1); return; }
-  const cx = Math.floor((w - 11) / 2), leftRoom = Math.max(12, cx - 16), rightStart = cx + 15, rightRoom = Math.max(10, (w - 13) - rightStart);
-  puText(puFit(puCompact(left), leftRoom), 2, 0, { v:0 });
-  puText(puFit(puCompact(right), rightRoom), w - 13, 0, { v:0, align:'r' });
-  puLooperPair(m, w); puGear(w - 10, 1);
-}
-function puLoopTransport(m, x, y) {
-  if (!m.transport.visible) return x;
-  const bx = x - 9;
-  if (m.transport.selected) puFrame(bx - 1, y - 1, 10, 9, 1);
-  if (m.transport.recording) puText('R', bx + 4, y, { align:'c' });
-  else if (m.transport.paused) puTri(bx + 6, y + 3, 3, 'r');
-  else { puRect(bx + 2, y + 1, 2, 6); puRect(bx + 6, y + 1, 2, 6); }
-  return bx - 3;
+  if (m.transport.visible) {
+    const tx = w - 3 - trw, inv = m.transport.selected, v = inv ? 0 : 1;
+    if (inv) puRect(tx, y, trw, hh, 1); else puFrame(tx, y, trw, hh, 1);
+    if (m.transport.recording) puText('R', tx + Math.floor(trw/2), y + 2, { v, align:'c' });
+    else if (m.transport.paused) puTri(tx + 8, y + 6, 4, 'r', v);
+    else { puRect(tx + 4, y + 3, 2, 7, v); puRect(tx + 8, y + 3, 2, 7, v); }
+  }
 }
 function puIndicators(w, h, t) {   // bottom right: joystick compass always; record ring only while recording; wave box only when «Wave» is on (mirrors the DOM state)
-  const rec = $('wavBtn') && ($('wavBtn').classList.contains('on') || $('wavBtn').classList.contains('rec')), osc = !!state.osc; let x0 = w - 12;
+  const rec = !!wavRec, osc = !!state.osc; let x0 = w - 12;
   document.querySelectorAll('#sDir circle').forEach(c => { const x = w - 9 + Math.round((+c.getAttribute('cx') - 10) / 7 * 3) + 3, y = h - 8 + Math.round((+c.getAttribute('cy') - 10) / 7 * 3) + 3; if (c.classList.contains('on')) puRect(x - 1, y - 1, 2, 2, 1); else puPx(x, y, 1); });
   if (osc) { puRect(x0 - 14, h - 9, 13, 8, 1); for (let i = 0; i < 11; i++) puPx(x0 - 13 + i, h - 5 + Math.round(Math.sin(i / 10 * 6.28 * 1.25) * 2), 0); x0 -= 16; }
   if (rec) { puCircle(x0 - 3, h - 5, 3, 1, true); x0 -= 8; }
-  x0 = puLoopTransport(looperDisplayModel(), x0, h - 8);
   return x0;
 }
 function puPlay(t, w, h) {
   const lm = looperDisplayModel();
   if (state.mode === 'beat') {
     const v = BEAT_VARS.find(x => x[0] === state.beatVar), bpm = Math.round(state.bpm) + ' BPM';
-    puLooperBar(v ? v[1] : state.beatVar, bpm, w, lm);
+    puLooperBar(v ? v[1] : state.beatVar, bpm, w);
     const live = beat.style ? (BEAT_STYLES.find(x => x[0] === beat.style) || [null,'Beat'])[1] : null;
     let remembered = null, inLoop = false;
     if (beat.lastLoopTrack != null) { const bt = tracks[beat.lastLoopTrack]; if (bt && bt.buffer && bt.origin === 'beat') { remembered = bt.label || 'Beat'; inLoop = true; } }
     puBig((live || remembered || 'NO BEAT').toUpperCase(), Math.floor(w / 2), 15, w - 10);
     const transient = looperTransientLabel(lm), bottom = beat.recArmed ? 'REC ARMED' : transient || (inLoop ? 'IN LOOP ' + (beat.lastLoopTrack + 1) : (KITS.find(k => k[0] === state.kit)?.[1] || 'DRUM LOOP'));
+    puLooperPanel(lm, w, h);
     const x0 = puIndicators(w, h, t); puText(puFit(puHint(bottom), Math.max(0, x0 - 5)), 2, h - 8); return;
   }
-  puLooperBar(puT('sKey'), puT('sSound'), w, lm);
+  puLooperBar(puT('sKey'), puT('sSound'), w);
   const name = puT('chordName'), el = $('chordName'), idle = !el || el.classList.contains('idle') || !name || name === '—';
   if (idle) { if (Math.floor(t * 2) % 2 === 0) puRect(4, 13, 7, 16, 1); } else puBig(name, Math.floor(w / 2) - 0, 10, w - 6);
   const cy = Math.round(h * 0.77);
-  if (state.osc && analyser && ctx && ctx.state === 'running') { analyser.getByteTimeDomainData(scopeData); let prev = null; for (let x = 0; x < w; x++) { const v = (scopeData[Math.min(699, Math.floor(x / w * 700))] - 128) / 128, y = Math.round(cy - v * 6), y0 = prev == null ? y : prev; puRect(x, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; } }
+  if (lm.visible) puLooperPanel(lm, w, h);
+  else if (state.osc && analyser && ctx && ctx.state === 'running') { analyser.getByteTimeDomainData(scopeData); let prev = null; for (let x = 0; x < w; x++) { const v = (scopeData[Math.min(699, Math.floor(x / w * 700))] - 128) / 128, y = Math.round(cy - v * 6), y0 = prev == null ? y : prev; puRect(x, Math.min(y, y0), 1, Math.abs(y - y0) + 1); prev = y; } }
   else for (let x = 0; x < w; x += 2) puPx(x, cy);
   const x0 = puIndicators(w, h, t), short = puHint(puT('sMode').replace(/ · /g, ' '));
   const modeTxt = puFit(short, Math.max(0, x0 - 5));
@@ -5161,6 +5206,17 @@ window.addEventListener('resize', () => drawBaseline());
 { const rs = renderScreen; renderScreen = function (a) { rs(a); drawBaseline(); scopeKick(); puKick(); }; const at = applyTheme; applyTheme = function () { at(); drawBaseline(); scopeKick(); puKick(); }; }
 document.addEventListener('visibilitychange', () => { scopeKick(); puKick(); });   // la traza en reposo sigue a la pantalla, la carcasa y el modo
 
+function syncStandaloneViewport() {
+  const installed = !!navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  if (!installed) { document.documentElement.style.removeProperty('--app-vh'); return; }
+  const h = Math.round((window.visualViewport && window.visualViewport.height) || window.innerHeight || 0);
+  if (h > 0) document.documentElement.style.setProperty('--app-vh', h + 'px');
+}
+syncStandaloneViewport();
+window.addEventListener('resize', syncStandaloneViewport, { passive:true });
+window.addEventListener('orientationchange', () => setTimeout(syncStandaloneViewport, 120), { passive:true });
+if (window.visualViewport) window.visualViewport.addEventListener('resize', syncStandaloneViewport, { passive:true });
+
 const SETTINGS = [
   { section:'Look' },
   { id:'theme', label:'Case', type:'select', options:opts(THEMES) },
@@ -5241,6 +5297,8 @@ const SETTINGS = [
   { id:'btn_reset', label:'Clear locks, octaves and inversions', type:'button', text:'Reset', run:() => {
     state.btnOct = [0,0,0,0,0,0,0]; state.inv = [0,0,0,0,0,0,0]; state.locks = [null,null,null,null,null,null,null];
     saveState(); renderPads(); toast('Buttons reset'); } },
+  { section:'Capture' },
+  { id:'audio_rec', label:'Record output', type:'button', text:'Record', run:() => onActivation(wavToggle) },
   { section:'Presets' },
   { id:'pre_1', label:'P1', type:'preset', slot:0 },
   { id:'pre_2', label:'P2', type:'preset', slot:1 },
@@ -5291,6 +5349,7 @@ function applyLibPreset(snd) {
 }
 
 function onSettingChanged(id) {
+  if (id === 'adsr') { const e = ADSR[state.adsr] || ADSR.TOUCH; state.attack = e.a; state.release = e.r; }
   if (id === 'mode') { const m = state.mode; state.mode = 'play'; setMode(m); }
   if (['strumSpeed','arpRate','arpPattern','arpLayer','repeatRate','kit','beatVar'].includes(id))
   if (id === 'drumVol' && ctx && drumBus) drumBus.gain.setTargetAtTime(state.drumVol, ctx.currentTime, 0.02);
@@ -5435,7 +5494,7 @@ function buildSettings() {
       });
       row.appendChild(input);
     } else if (s.type === 'button') {
-      input = document.createElement('button'); input.className = 'act'; input.textContent = s.text;
+      input = document.createElement('button'); input.className = 'act'; input.textContent = s.id === 'audio_rec' ? (wavRec ? 'Stop & save' : 'Record') : s.text;
       onTap(input, s.run); row.appendChild(input);
     } else if (s.type === 'code') {
       input = document.createElement('button'); input.className = 'tap'; input.textContent = 'Show';
