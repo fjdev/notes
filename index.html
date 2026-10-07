@@ -1244,7 +1244,7 @@ canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; -webkit-ma
       <h4>Offline</h4>
       <p>Open the page once with internet and add it to the home screen (Share → Add to Home Screen). From then on it works offline. New versions are downloaded when you open it with internet. On recent iOS versions the installed app can reserve or blur a system-controlled strip around the status bar; notes pins an opaque top edge and keeps the instrument inside the reported safe area, but that system strip itself is not part of the web page.</p>
       <h4>Audio and lock screen</h4>
-      <p>After 30 seconds of nothing being touched or sounding, the app suspends audio so it does not show as "playing"; the first tap wakes it up and the first note may take a moment. When you leave the app or lock the iPhone everything stops, including the loops.</p>
+      <p>After 30 seconds of nothing being touched or sounding, the app suspends audio so it does not show as "playing"; the first tap wakes it up and the first note may take a moment. Merely switching apps, tabs or windows does not intentionally pause or cancel loops. On iPhone, whether audio can keep sounding while the app is actually in the background is still controlled by iOS/WebKit; returning to notes must preserve the loop state. An explicit Pause/Stop from system media controls still stops playback.</p>
       <h4>If something fails</h4>
       <p>If nothing sounds when you press a button, a notice appears with the reason. Settings → Presets → Diagnostics runs a test (audio, a chord, microphone, MIDI, saved state, cache and the latest errors) and shows a report that you can copy or send to ask for help; the "audio parameters" line tells you whether a browser extension (privacy or anti-tracking) is blocking the audio: the app works around it by itself.</p>
       <p>If something is stuck in a strange state, "Reset the app", in the same place, erases the settings, the presets and the cache and starts over; it asks you to confirm with a second tap. Before that you can save a backup with Export (see "Backup").</p>
@@ -1280,7 +1280,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 55 · 7 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 56 · 8 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -1706,8 +1706,10 @@ const lastSlotMidi = [null, null, null, null, null, null];
 function ensureAudio() {
   // iOS puts the context in 'interrupted' while the microphone permission sheet is up and while capture starts: closing it then
   // (with the capture starting) froze the whole app. An interrupted context is only resumed; a rebuild first closes the microphone.
+  let restoreLoopOffset = null;
   if (ctx && ctx.state === 'closed') ctx = null;
   if (ctx && needsRebuild && !micPending) {
+    if (loopHasAudio() && !loop.paused && loop.len) restoreLoopOffset = ((ctx.currentTime - loop.start) % loop.len + loop.len) % loop.len;
     micTrace('rebuild audio');
     if (micStream) micRelease();
     try { ctx.close(); } catch (e) {}
@@ -1745,6 +1747,11 @@ function ensureAudio() {
     applyFilter(true); applyVolume(true);
     justBuilt = true;
     if (wavRec) wavAttach();   // si el contexto se reconstruyó durante una grabación de audio, se reengancha
+    if (restoreLoopOffset != null && loopHasAudio() && !loop.paused) {
+      const at = ctx.currentTime + 0.05; loop.start = at - restoreLoopOffset;
+      for (const t of tracks) if (t.buffer) startTrackSource(t, at, restoreLoopOffset);
+      midiLoopStartScheduler(); midiTransportRefresh();
+    }
   }
   lastBusy = Date.now();
   if (audioAsleep) { audioAsleep = false; applySession(); }
@@ -1923,7 +1930,7 @@ function scheduleStep(t, step, dur) {
   if (state.mode === 'repeat') {
     const i = step % 32, on = GATE32[i], nextOn = GATE32[(i + 1) % 32];
     for (const [, v] of voices) v.cv.gateStep(t, dur, on, nextOn);
-    if (on && liveMidiNotes.size) midiPulseNotes([...liveMidiNotes], t, dur * 0.88);
+    if (on && midiLiveNotes.size) midiPulseNotes([...midiLiveNotes], t, dur * 0.88);
     return;
   }
   if (!arpTones.length) return;
@@ -3499,9 +3506,9 @@ function hapticTest() {   // botón «Probar» de Ajustes → Aspecto (se ejecut
   const lines = [
     'System: ' + (ios ? 'iOS ' + (m ? m[1] : '?') : (/Android/.test(ua) ? 'Android' : 'ordenador')),
     'Installed app: ' + ((navigator.standalone || matchMedia('(display-mode: standalone)').matches) ? 'yes' : 'no'),
-    'Method: ' + (navigator.vibrate ? 'system vibration (Android)' : ios ? 'iOS switch (needs iOS 18 or later and "System Haptics" turned on)' : 'not available on this device'),
+    'Method: ' + (navigator.vibrate ? 'system vibration (Android)' : ios ? 'experimental iOS switch workaround (not reliable on every iPhone/WebKit build)' : 'not available on this device'),
   ];
-  if (ios && m && +m[1] < 18) lines.push('This iPhone has iOS ' + m[1] + ': vibration from a web page needs iOS 18 or later.');
+  if (ios) lines.push('iPhone web haptics are not considered verified in notes; use this only as a device test.');
   showDiag(lines.join('\n'), 'set-hapticTest');
 }
 function haptic(strong) {
@@ -4912,7 +4919,7 @@ function midiExternalStart() {
     ensureAudio();
     if (loopHasAudio() && loop.paused) togglePause();
     if (state.mode === 'seq' && seq.steps.length && !seq.playing) seqStart();
-    else if ((state.mode === 'arp' || state.mode === 'repeat') && liveMidiNotes.size && !clock.timer) clockStart();
+    else if ((state.mode === 'arp' || state.mode === 'repeat') && midiLiveNotes.size && !clock.timer) clockStart();
   } finally { midiRxTransport = false; }
 }
 function midiExternalStop() {
@@ -5198,7 +5205,7 @@ function puHint(str) {
   for (const [a,b] of Object.entries(PU_HINT)) s = s.replace(a,b);
   return puCompact(s);
 }
-function puBig(str, cx, y, maxW) { str = puCompact(str); const sc = puWidth(str, 'f8', 2) <= maxW ? 2 : 1; if (puWidth(str, 'f8', sc) > maxW) { puText(puFit(str, maxW), cx, y + 4, { align: 'c' }); return; } puText(str, cx, y + (sc === 1 ? 8 : 0), { font: 'f8', scale: sc, align: 'c' }); }
+function puBig(str, cx, y, maxW, maxScale = 2) { str = puCompact(str); const sc = maxScale > 1 && puWidth(str, 'f8', 2) <= maxW ? 2 : 1; if (puWidth(str, 'f8', sc) > maxW) { puText(puFit(str, maxW), cx, y + 4, { align: 'c' }); return; } puText(str, cx, y + (sc === 1 ? 8 : 0), { font: 'f8', scale: sc, align: 'c' }); }
 function puName(str, cx, y, maxW) { str = puFit(str, maxW); const sc = puWidth(str, 'f5', 2) <= maxW ? 2 : 1; puText(str, cx, y + (sc === 1 ? 4 : 0), { scale: sc, align: 'c' }); }   // selector names: 5×8 font, doubled when it fits
 function puGear(x, y) { puCircle(x + 3, y + 3, 2, 0); [[3, 0], [3, 6], [0, 3], [6, 3], [1, 1], [5, 1], [1, 5], [5, 5]].forEach(q => puPx(x + q[0], y + q[1], 0)); }
 function puIcon(name, x, y, t) {
@@ -5271,7 +5278,7 @@ function puPlay(t, w, h) {
     const live = beat.style ? (BEAT_STYLES.find(x => x[0] === beat.style) || [null,'Beat'])[1] : null;
     let remembered = null, inLoop = false;
     if (beat.lastLoopTrack != null) { const bt = tracks[beat.lastLoopTrack]; if (bt && bt.buffer && bt.origin === 'beat') { remembered = bt.label || 'Beat'; inLoop = true; } }
-    puBig((live || remembered || 'NO BEAT').toUpperCase(), Math.floor(w / 2), 15, w - 10);
+    puBig((live || remembered || 'NO BEAT').toUpperCase(), Math.floor(w / 2), lm.visible ? 10 : 15, w - 10, lm.visible ? 1 : 2);
     const transient = looperTransientLabel(lm), bottom = beat.recArmed ? 'REC ARMED' : transient || (inLoop ? 'IN LOOP ' + (beat.lastLoopTrack + 1) : (KITS.find(k => k[0] === state.kit)?.[1] || 'DRUM LOOP'));
     puLooperPanel(lm, w, h);
     const x0 = puIndicators(w, h, t); puText(puFit(puHint(bottom), Math.max(0, x0 - 5)), 2, h - 8); return;
@@ -6509,26 +6516,45 @@ let sheetDownOutside = false;
 $('sheet').addEventListener('pointerdown', e => { sheetDownOutside = e.target === $('sheet'); });
 $('sheet').addEventListener('click', e => { if (e.target === $('sheet') && sheetDownOutside) closeSettings(); sheetDownOutside = false; });
 $('gear').addEventListener('click', () => { if (setv) setvClose(); else setvOpen(); });   // los ajustes se abren DENTRO de la pantalla
-function goneToBackground() {
-  if (micPending) { micTrace('page hidden while asking for the mic (ignored)'); return; }   // the iOS permission sheet can hide the page: do not tear the audio down under it
+function goneToBackground() {   // explicit system/media Pause or Stop only; ordinary tab/app switching must preserve loops
+  if (micPending) { micTrace('system stop while asking for the mic (ignored)'); return; }
   held.length = 0; pointers.clear(); padDir = null; dirKeys.clear(); keyDir = null;
   if (ctx) refresh(); else renderPads();
   renderJoy(); $('knob').style.transform = '';
   for (const [, v] of voices) v.cv.releaseAll(0.01);
-  voices.clear(); droneBtn = null; arpTones = []; clockStop(); beatStop(); seqStop(); looperSuspend(); hiroEnd(false); earEnd();
+  voices.clear(); midiLiveNotes = new Set(); midiSync(new Set());
+  droneBtn = null; arpTones = []; clockStop(); beatStop(); seqStop(); looperSuspend(); hiroEnd(false); earEnd();
   if (micTake) { clearTimeout(micTake.timer); micTake = null; }
   if (tunerRaf) { cancelAnimationFrame(tunerRaf); tunerRaf = null; }
   micUsers.clear(); micStop('all');
-  // No se cierra el contexto (en iOS cerrarlo al ocultar la página puede dejar el audio atascado): se suspende y la
-  // sesión pasa a «ambient»; el siguiente toque lo reconstruye (needsRebuild)
   if (ctx) { try { ctx.suspend(); } catch (e) {} }
   audioAsleep = true; applySession();
   if (auto.timer) { clearInterval(auto.timer); auto.timer = null; }
   needsRebuild = true;
 }
-document.addEventListener('visibilitychange', () => { if (document.hidden) goneToBackground(); });
-window.addEventListener('pagehide', goneToBackground);
-window.addEventListener('pageshow', e => { if (e.persisted) needsRebuild = true; });
+function pageHidden() {
+  if (micPending) { micTrace('page hidden while asking for the mic (ignored)'); return; }
+  // A hidden page must not pause/cancel the looper. Only release transient finger/keyboard notes so they cannot stick.
+  held.length = 0; pointers.clear(); padDir = null; dirKeys.clear(); keyDir = null;
+  for (const [k, v] of voices) if (k !== 'seq') { try { v.cv.releaseAll(0.01); } catch (e) {} voices.delete(k); }
+  midiLiveNotes = new Set(); midiSync(new Set()); droneBtn = null; arpTones = [];
+  if (state.mode === 'arp' || state.mode === 'repeat') clockStop();
+  renderPads(); renderJoy(); $('knob').style.transform = '';
+  // This is the iPhone "phantom Now Playing" protection: an actually idle engine becomes ambient immediately.
+  // Active loops/beat/sequence are left alone; iOS itself may still suspend Web Audio in the background.
+  if (!audioBusy()) audioSleep();
+}
+function pageVisible() {
+  if (!ctx || audioAsleep) return;
+  const c = ctx;
+  if (c.state !== 'running') {
+    try { const p = c.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+    setTimeout(() => { if (!document.hidden && ctx === c && c.state !== 'running' && audioBusy()) needsRebuild = true; }, 450);
+  }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) pageHidden(); else pageVisible(); });
+window.addEventListener('pagehide', pageHidden);
+window.addEventListener('pageshow', pageVisible);
 renderPads(); renderScreen(false); renderJoy();
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 setInterval(audioIdleCheck, 2000); registerMediaSession();
