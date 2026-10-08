@@ -1280,7 +1280,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 59 · 8 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 60 · 8 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -2152,6 +2152,19 @@ class ChordVoice {
     const g = this.gate.gain;
     if (on) { g.setTargetAtTime(1, t, 0.004); if (!nextOn) g.setTargetAtTime(0, t + dur * 0.9, 0.006); }
     else g.setTargetAtTime(0, t, 0.004);
+  }
+  stopRepeatGate() {
+    // Phase 60: MIDI STOP must silence a held Repeat chord even when an already-scheduled
+    // gate step would otherwise leave it open. Cancel ONLY this chord's future gate automation.
+    const g = this.gate.gain, t = ctx.currentTime;
+    if (typeof g.cancelAndHoldAtTime === 'function') {
+      g.cancelAndHoldAtTime(t);
+      g.setTargetAtTime(0, t, 0.004);
+    } else {
+      // Older Web Audio engines: safety takes priority over a brief fade on external STOP.
+      g.cancelScheduledValues(t);
+      g.setValueAtTime(0, t);
+    }
   }
   pulse(t, dur) {
     const g = this.gate.gain;
@@ -4969,6 +4982,9 @@ function midiExternalStop() {
   try {
     if (loopHasAudio() && !loop.paused) togglePause();
     if (seq.playing) seqStop(); if (clock.timer) clockStop(); if (beat.timer) beatStop();
+    // REV 3.0 fidelity: when an external STOP interrupts Repeat, do not leave a sounding
+    // trance-gate step latched open. Ordinary Repeat, external START and all other modes are unchanged.
+    if (state.mode === 'repeat' && ctx) for (const [, v] of voices) v.cv.stopRepeatGate();
     midiInAllOff();
   } finally { midiRxTransport = false; }
 }
