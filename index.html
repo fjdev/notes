@@ -4956,15 +4956,28 @@ function midiInNoteOff(note) {
   x.down = false; if (!midiSustain) midiInRelease(note);
 }
 function midiClockInputTick(ts) {
+  // Phase 61: MIDI Clock (24 PPQN) tempo estimation. Never use a trimmed mean of
+  // inter-tick delays: scheduling jitter has an asymmetric long tail; trimming it
+  // biased 120 BPM input to ~120.8 BPM, making Repeat drift ahead of the master.
   midiClockIn.lastTick = ts; midiClockIn.ticks++;
-  const a = midiClockIn.times; a.push(ts); if (a.length > 49) a.shift();
-  if (a.length < 13) return;
-  const ds = []; for (let i = 1; i < a.length; i++) { const d = a[i] - a[i-1]; if (d > 2 && d < 100) ds.push(d); }
-  if (ds.length < 8) return;
-  ds.sort((x,y) => x-y); const core = ds.slice(Math.floor(ds.length * .15), Math.ceil(ds.length * .85));
-  const avg = core.reduce((x,y) => x+y, 0) / Math.max(1, core.length), bpm = Math.max(40, Math.min(300, 60000 / (avg * 24)));
-  if (Math.abs(state.bpm - bpm) >= 0.4) {
-    state.bpm = Math.round(bpm * 10) / 10; syncSettings(); renderScreen(held.length > 0);
+  const a = midiClockIn.times;
+  if (a.length && (ts <= a[a.length - 1] || ts - a[a.length - 1] > 250)) a.length = 0;
+  a.push(ts); if (a.length > 73) a.shift();
+  if (a.length < 49) return; // >= 1 second at 120 BPM; up to 1.5 s for stability.
+  // Fit tick timestamp vs. tick index (least-squares slope). This averages all
+  // arrivals, including late ones, without systematically overestimating speed.
+  const mid = (a.length - 1) / 2, base = a[0];
+  let numerator = 0, denominator = 0;
+  for (let i = 0; i < a.length; i++) {
+    const x = i - mid;
+    numerator += x * (a[i] - base); denominator += x * x;
+  }
+  const tickMs = numerator / denominator;
+  if (!Number.isFinite(tickMs) || tickMs <= 0) return;
+  const bpm = Math.max(40, Math.min(300, 60000 / (tickMs * 24)));
+  const rounded = Math.round(bpm * 10) / 10;
+  if (Math.abs(state.bpm - rounded) >= 0.2) {
+    state.bpm = rounded; syncSettings(); renderScreen(held.length > 0);
     if (ts - midiClockIn.lastSave > 1000) { midiClockIn.lastSave = ts; saveState(); }
   }
 }
