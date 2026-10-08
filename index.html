@@ -1280,7 +1280,7 @@ function pv(p, v) {   // asignar un parámetro de audio: equivale a .value = v (
 }
 // Registro de errores: lo que falle queda anotado y se ve en Ajustes → Presets → Diagnóstico
 const errLog = [];
-const APP_VERSION = 'phase 60 · 8 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
+const APP_VERSION = 'phase 61.1 · 8 Oct 2026';   /* bump on every delivery: Diagnostics shows it, so a stale cached copy is obvious */
 function logErr(src, e) {
   const msg = String((e && e.message) || e || '?');
   errLog.push({ t:new Date().toLocaleTimeString(), src, msg:msg.slice(0, 160), where:String((e && e.stack) || '').split('\n').slice(1, 3).map(x => x.trim().slice(0, 90)).join(' | ') });
@@ -4330,7 +4330,7 @@ function menuNav(dir) {
     else if (dir === 'u') menu.kind = 'bpm';
     else if (modeParam() && state.mode !== 'seq') menu.kind = 'param';
   } else if (k === 'bpm') {
-    if (h) quickSet('bpm', Math.max(40, Math.min(300, state.bpm + h)));
+    if (h) quickSet('bpm', Math.max(40, Math.min(300, Math.round(state.bpm) + h)));
     else if (dir === 'd') menu.kind = 'mode';
   } else if (k === 'param') {
     const p = modeParam();
@@ -4513,7 +4513,7 @@ function renderMenu() {
     [prev, val, next, pos] = around(menuModeList(), state.mode, name);
     up = '▲ BPM ' + state.bpm; const p = modeParam(); down = p && state.mode !== 'seq' ? '▼ ' + (p.names[state[p.key]] || '') : '';
   } else if (k === 'bpm') {
-    val = String(state.bpm); prev = String(Math.max(40, state.bpm - 1)); next = String(Math.min(300, state.bpm + 1)); pos = '40–300'; down = '▼ Mode';
+    val = String(state.bpm); prev = String(Math.max(40, Math.round(state.bpm) - 1)); next = String(Math.min(300, Math.round(state.bpm) + 1)); pos = '40–300'; down = '▼ Mode';
   } else if (k === 'param') {
     const p = modeParam(); title = (MODES.find(m => m.id === state.mode) || {}).name || 'Mode';
     if (p) { [prev, val, next, pos] = around(p.list, state[p.key], v => p.names[v] || String(v)); }
